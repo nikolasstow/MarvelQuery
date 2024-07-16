@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DataTypeKey } from './api-interface';
+import { EndpointType } from './api-interface';
 import {
   APISchema,
   CharactersSchema,
@@ -9,7 +9,7 @@ import {
   EventsSchema,
   SeriesSchema,
   StoriesSchema,
-} from './param-schemas';
+} from '../schemas/param-schemas';
 
 export type APIBase = z.infer<typeof APISchema>;
 export type Characters = z.infer<typeof CharactersSchema>;

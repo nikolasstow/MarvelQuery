@@ -1,12 +1,12 @@
-import * as CryptoJS from 'crypto-js';
-import axios from 'axios';
+import * as CryptoJS from "crypto-js";
+import axios from "axios";
 
 import {
   Endpoint,
   Parameters,
   ParamsType,
   ResultType,
-  DataTypeKey,
+  EndpointType,
   OnResultMap,
   OnResultFunction,
   ResultMap,
@@ -17,8 +17,9 @@ import {
   ExtendEndpointParams,
   Metadata,
   GlobalParams,
-} from './definitions/data-types';
-import { ValidateParams, ResultSchemaMap } from './definitions/data-schemas';
+} from "./definitions/types/data-types";
+import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
+import { ValidateParams } from "./definitions/schemas/param-schemas";
 
 class MarvelQuery<Type extends Endpoint> {
   // Initialize the public and private keys
@@ -40,24 +41,24 @@ class MarvelQuery<Type extends Endpoint> {
 
   endpoint: Type;
   params: Parameters<Type>;
-  onResult?: OnResultFunction<ResultMap[DataTypeKey]>;
+  onResult?: OnResultFunction<ResultMap[EndpointType]>;
 
-  type: DataTypeKey;
+  type: EndpointType;
 
   constructor(endpoint: Type, params: ParamsType<Type>) {
     // Determine whether the endpoint is an array or ResultType<Type>
-    if (typeof endpoint[0] === 'string') {
+    if (typeof endpoint[0] === "string") {
       this.endpoint = endpoint as Type;
     } else {
       // build the end point from the URI
     }
 
-    params = (MarvelQuery.omitUndefined ? this.omitUndefined(params) : params)
+    params = MarvelQuery.omitUndefined ? this.omitUndefined(params) : params;
 
     // TODO: add type validation
     this.type = (
       endpoint.length === 3 ? endpoint[2] : endpoint[0]
-    ) as DataTypeKey;
+    ) as EndpointType;
 
     this.params = {
       // Default parameters
@@ -74,8 +75,8 @@ class MarvelQuery<Type extends Endpoint> {
       this.onResult = MarvelQuery.onResult[this.type];
     }
 
-    if (MarvelQuery.omitThe && 'title' in this.params) {
-      this.params.title = this.omitThe(this.params.title as string)
+    if (MarvelQuery.omitThe && "title" in this.params) {
+      this.params.title = this.omitThe(this.params.title as string);
     }
   }
 
@@ -96,7 +97,7 @@ class MarvelQuery<Type extends Endpoint> {
     params: ParamsType<Type>
   ): MarvelQuery<Type> {
     if (!MarvelQuery.publicKey || !MarvelQuery.privateKey) {
-      throw new Error('Missing public or private keys');
+      throw new Error("Missing public or private keys");
     }
     return new MarvelQuery<Type>(endpoint, params);
   }
@@ -122,19 +123,19 @@ class MarvelQuery<Type extends Endpoint> {
 
       return new MarvelQueryResult<Type>(this, queryResults);
     } catch (error) {
-      console.error('Request error:', error);
-      throw new Error('Request error');
+      console.error("Request error:", error);
+      throw new Error("Request error");
     }
   }
 
   buildURL() {
-    const baseURL = 'https://gateway.marvel.com/v1/public';
-    const endpoint = this.endpoint.join('/');
+    const baseURL = "https://gateway.marvel.com/v1/public";
+    const endpoint = this.endpoint.join("/");
     const timestamp = Number(new Date());
     const { privateKey, publicKey } = MarvelQuery;
     const hash = privateKey
       ? CryptoJS.MD5(timestamp + privateKey + publicKey).toString()
-      : '';
+      : "";
 
     const queryParams = new URLSearchParams({
       apikey: publicKey,
@@ -169,8 +170,8 @@ class MarvelQuery<Type extends Endpoint> {
 
       return response.data as APIWrapper<ResultType<Type>>;
     } catch (error) {
-      console.error('Error fetching data from API:', error);
-      throw new Error('Failed to fetch data from Marvel API');
+      console.error("Error fetching data from API:", error);
+      throw new Error("Failed to fetch data from Marvel API");
     }
   }
 
@@ -178,14 +179,14 @@ class MarvelQuery<Type extends Endpoint> {
     try {
       ValidateParams[this.type].parse(this.params);
     } catch (error) {
-      console.error('Parameter validation error:', error);
-      throw new Error('Invalid parameters');
+      console.error("Parameter validation error:", error);
+      throw new Error("Invalid parameters");
     }
   }
 
   private omitThe(title: string): string {
     // Remove the 'the' from the beginning of the title
-    const prefix = 'the ';
+    const prefix = "the ";
     if (title.toLowerCase().startsWith(prefix)) {
       return title.slice(prefix.length);
     }
@@ -198,7 +199,7 @@ export function createQuery<Type extends Endpoint>(
   params: ParamsType<Type>
 ): MarvelQuery<Type> {
   if (!MarvelQuery.publicKey || !MarvelQuery.privateKey) {
-    throw new Error('Missing public or private keys');
+    throw new Error("Missing public or private keys");
   }
   return new MarvelQuery<Type>(endpoint, params);
 }
@@ -220,12 +221,14 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
 
     super(query.endpoint, params);
 
-    this.url = results.url;
-    this.metadata = results.metadata;
-    this.responseData = results.responseData;
-    this.result = results.results[0];
-    this.results = results.results;
-    this.resultHistory = results.results;
+    if (results && results.results[0]) {
+      this.url = results.url;
+      this.metadata = results.metadata;
+      this.responseData = results.responseData;
+      this.result = results.results[0];
+      this.results = results.results;
+      this.resultHistory = results.results;
+    }
   }
 
   async fetch(): Promise<MarvelQueryResult<Type>> {
@@ -233,36 +236,38 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
     const remaining = total - this.params.offset; // Double check this
 
     if (remaining <= 0) {
-      console.error('No more results to fetch');
+      console.error("No more results to fetch");
       return this;
     }
 
     const { data, ...metadata } = await this.request(this.url);
     const { results, ...responseData } = data;
 
-    this.metadata = metadata;
-    this.responseData = responseData;
-    this.results = results;
-    this.result = results[0];
-    this.resultHistory = [...this.resultHistory, ...results];
-
-    if (results.length === 1) {
+    if (results && results[0]) {
+      this.metadata = metadata;
+      this.responseData = responseData;
+      this.results = results;
       this.result = results[0];
+      this.resultHistory = [...this.resultHistory, ...results];
+
+      if (results.length === 1) {
+        this.result = results[0];
+      }
     }
 
     return this;
   }
 
   // Work in progress, functions for getting the content related to the result
-  private search<SearchType extends DataTypeKey>(
-    type: DataTypeKey,
+  private search<SearchType extends EndpointType>(
+    type: EndpointType,
     params: ExtendEndpointParams<SearchType> = {}
   ) {
     return this.searchFor(type, params, this.result);
   }
 
-  searchFor<SearchType extends DataTypeKey>(
-    type: DataTypeKey,
+  searchFor<SearchType extends EndpointType>(
+    type: EndpointType,
     params: ExtendEndpointParams<SearchType>,
     item: ResultType<Type>
   ) {
@@ -272,8 +277,8 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
 }
 
 export default MarvelQuery;
-export * from './definitions/data-types';
-export * from './definitions/param-types';
+export * from "./definitions/types/data-types";
+export * from "./definitions/types/param-types";
 
-import * as sample from './samples';
+import * as sample from "./samples";
 export { sample };

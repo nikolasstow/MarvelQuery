@@ -28,7 +28,9 @@ import {
  * For example if you are looking for events in which Spider-Man appeared, 
  * your query endpoint would be ['characters', '1009491', events']
  */
-export type Endpoint = [DataTypeKey, number?, DataTypeKey?];
+export type Endpoint = [EndpointType, number?, EndpointType?];
+export type EndpointType = keyof ParameterMap;
+export type EndpointMap<Value> = Record<EndpointType, Value>;
 
 // A map of parameters to their corresponding types providing type safety.
 export type ParameterMap = {
@@ -50,9 +52,6 @@ export type ResultMap = {
   series: MarvelSeries;
 };
 
-// Type keys, ie. 'comics', 'characters', 'creators', 'events', 'stories', 'series'
-export type DataTypeKey = keyof ResultMap;
-
 /** Utitility type that determines which type of data being queried.
  * It works by checking the endpoint and looking for the last data type in the endpoint.
  * If the last element is a type, use it. If it's a number, use the type in the first element.
@@ -70,12 +69,12 @@ type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
 
 // After the type is determined, get the corresponding type from the ParameterMap
 export type ParamsType<Type extends Endpoint> =
-  DataType<Type> extends DataTypeKey
+  DataType<Type> extends EndpointType
     ? ParameterMap[DataType<Type>]
     : params.APIBase;
 
 // Parameters for a specific type of data within the endpoint
-export type ExtendEndpointParams<Key extends DataTypeKey> = ParameterMap[Key];
+export type ExtendEndpointParams<Key extends EndpointType> = ParameterMap[Key];
 
 // Get the limit and offset from the parameters from APIBase
 type BaseParams = Required<Pick<params.APIBase, 'limit' | 'offset'>>;
@@ -91,7 +90,7 @@ export type Parameters<Type extends Endpoint> = CleanParams<Type> & BaseParams;
 
 // Just like ParamsType, get the corresponding type from the ResultMap
 export type ResultType<Type extends Endpoint> =
-  DataType<Type> extends DataTypeKey ? ResultMap[DataType<Type>] : never;
+  DataType<Type> extends EndpointType ? ResultMap[DataType<Type>] : never;
 
 // Type of function that will be called when the query is finished, arguments are the results
 export type OnResultFunction<Type extends MarvelResult> = (
@@ -100,7 +99,7 @@ export type OnResultFunction<Type extends MarvelResult> = (
 
 // A map of functions, one for each result type, to be called when the query is finished
 export type OnResultMap = {
-  [K in DataTypeKey]?: OnResultFunction<ResultMap[K]>;
+  [K in EndpointType]?: OnResultFunction<ResultMap[K]>;
 };
 
 // Global Parameters

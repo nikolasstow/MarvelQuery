@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DataTypeKey } from './api-interface';
+import { EndpointMap, EndpointType } from '../types/api-interface';
 
 const IDList = /^(\d+,)*\d+$/;
 const IDListSchema = z.string().regex(IDList);
@@ -208,11 +208,7 @@ export const ParameterSchema = z.union([
   StoriesSchema,
 ]);
 
-type ParameterMapSchema = {
-  [Key in DataTypeKey]: z.ZodType;
-};
-
-export const ValidateParams: ParameterMapSchema = {
+export const ValidateParams: EndpointMap<z.ZodType> = {
   characters: CharactersSchema,
   comics: ComicsSchema,
   creators: CreatorsSchema,
