@@ -1,20 +1,29 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "rootDir": ".",
+    "outDir": "./lib",
+    "rootDir": "./src",
     "sourceMap": true,
-    "declaration": false,
+    "declaration": true,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2020",
-    "module": "esnext",
-    "lib": ["es2020", "dom"],
+    "target": "esnext",
+    "module": "CommonJS",
+    "lib": [
+      "es2020",
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "strictNullChecks": true,
-    "baseUrl": ".",
+    "baseUrl": "."
   },
-  "exclude": ["node_modules", "tmp", "examples.ts", "samples.ts"]
+  "exclude": [
+    "node_modules",
+    "tests",
+    "**/tests/**/*.test.ts",
+    "src/examples.ts",
+    "src/samples.ts"
+  ]
 }

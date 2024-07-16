@@ -7,14 +7,10 @@ import MarvelQuery, {
   MarvelSeries,
 } from ".";
 
-// Setup dotenv
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 // First initialize the API with you public and private keys
 const createQuery = MarvelQuery.init({
-  publicKey: process.env.MARVEL_PUBLIC_KEY || '',
-  privateKey: process.env.MARVEL_PRIVATE_KEY || '',
+  publicKey: 'your-public-key',
+  privateKey: 'your-private-key',
   /** An optional function that will be called before the request is sent,
    * you can use it to log the request or do something else */
   onRequest: (url) => {
