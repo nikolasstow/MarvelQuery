@@ -307,23 +307,6 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
 
     return this;
   }
-
-  // Work in progress, functions for getting the content related to the result
-  private search<SearchType extends EndpointType>(
-    type: EndpointType,
-    params: ExtendEndpointParams<SearchType> = {}
-  ) {
-    return this.searchFor(type, params, this.result);
-  }
-
-  searchFor<SearchType extends EndpointType>(
-    type: EndpointType,
-    params: ExtendEndpointParams<SearchType>,
-    item: ResultType<Type>
-  ) {
-    const id = item.id;
-    return createQuery([this.endpoint[0], id, type], params);
-  }
 }
 
 export default MarvelQuery;
