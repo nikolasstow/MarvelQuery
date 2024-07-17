@@ -21,6 +21,8 @@ import {
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
 
+/** Base class for all queries, constructs the URL, sends the request, 
+ * and validates the query parameters and the response using zod. */
 class MarvelQuery<Type extends Endpoint> {
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   static publicKey: string;
@@ -59,7 +61,6 @@ class MarvelQuery<Type extends Endpoint> {
    * @param args.privateKey - Marvel API private key.
    * 
    ** Don't have keys? Get them at https://developer.marvel.com/ 
-   * @param args.omitThe - Omit the 'the' from the beginning of titles.
    * @param args.omitUndefined - Remove undefined parameters from the query
    * @param args.globalParams - Global parameters to be applied to all queries, or all queries of a specific type.
    * @param args.onRequest - An optional function that will be called before the request is sent.
@@ -114,17 +115,7 @@ class MarvelQuery<Type extends Endpoint> {
     if (MarvelQuery.onResult) {
       this.onResult = MarvelQuery.onResult[this.type];
     }
-
-    if (MarvelQuery.omitThe && "title" in this.params) {
-      this.params.title = this.omitThe(this.params.title as string);
-    }
   }
-
-  // async fetchSingle() {
-  //   this.params.limit = 1;
-  //   this.fetch();
-  //   return this.result;
-  // }
 
   /** Remove undefined parameters */
   private omitUndefined(params: ParamsType<Type>) {
@@ -133,16 +124,6 @@ class MarvelQuery<Type extends Endpoint> {
     );
   }
 
-  /** Create a new query with the MarvelQuery class */
-  private createQuery<Type extends Endpoint>(
-    endpoint: Type,
-    params: ParamsType<Type>
-  ): MarvelQuery<Type> {
-    if (!MarvelQuery.publicKey || !MarvelQuery.privateKey) {
-      throw new Error("Missing public or private keys");
-    }
-    return new MarvelQuery<Type>(endpoint, params);
-  }
 
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object, 
@@ -232,19 +213,10 @@ class MarvelQuery<Type extends Endpoint> {
       throw new Error("Invalid parameters");
     }
   }
-
-  /** Remove the 'the' from the beginning of the title. */
-  private omitThe(title: string): string {
-    // Remove the 'the' from the beginning of the title
-    const prefix = "the ";
-    if (title.toLowerCase().startsWith(prefix)) {
-      return title.slice(prefix.length);
-    }
-    return title;
-  }
 }
 
-export function createQuery<Type extends Endpoint>(
+/** Create a new query with the MarvelQuery class. */
+function createQuery<Type extends Endpoint>(
   endpoint: Type,
   params: ParamsType<Type>
 ): MarvelQuery<Type> {
@@ -254,7 +226,9 @@ export function createQuery<Type extends Endpoint>(
   return new MarvelQuery<Type>(endpoint, params);
 }
 
+/** Extension of the MarvelQuery class with query results and helper functions. */
 class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
+  /** The URL of the query */
   url: string;
   metadata: Metadata;
   responseData: APIResponseData;

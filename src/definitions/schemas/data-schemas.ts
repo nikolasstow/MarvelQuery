@@ -90,7 +90,7 @@ export const MarvelResultSchema = z.object({
   id: z.number(),
   modified: z.string().datetime({ offset: true }),
   resourceURI: z.string().url(),
-  urls: z.array(URLSchema),
+  urls: z.array(URLSchema).nullable().optional(),
   thumbnail: ImageSchema.nullable().optional(),
 });
 
@@ -124,8 +124,8 @@ export const MarvelComicSchema = MarvelResultSchema.extend({
 export const MarvelEventSchema = MarvelResultSchema.extend({
   title: z.string(),
   description: z.string().nullable().optional(),
-  start: z.string(),
-  end: z.string().nullable().optional(),
+  start: z.string().datetime({ offset: true }),
+  end: z.string().datetime({ offset: true }).nullable().optional(),
   comics: ComicListSchema,
   stories: StoryListSchema,
   series: SeriesListSchema,

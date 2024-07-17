@@ -125,8 +125,6 @@ export interface InitArgs {
    * }```
    */
   globalParams?: GlobalParams;
-  /** Omit the 'the' from the beginning of titles. */
-  omitThe?: boolean;
   /** Remove undefined parameters from the query */
   omitUndefined?: boolean; // set to true (by default) this will remove undefined values from the query
   // Functions
