@@ -22,27 +22,67 @@ import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
 
 class MarvelQuery<Type extends Endpoint> {
-  // Initialize the public and private keys
+  /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   static publicKey: string;
+  /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
   static privateKey: string;
   // Options
+  /** Global parameters to be applied to all queries, or all queries of a specific type.
+   * @example ```globalParams: { 
+   * all: { limit: 10 },
+   * comics: { noVariants: true }
+   * }```
+   */
   static globalParams?: GlobalParams;
+  /** Omit the 'the' from the beginning of titles. */
   static omitThe?: boolean = false;
+  /** Remove undefined parameters from the query */
   static omitUndefined?: boolean = true;
   // Functions
+  /** An optional function that will be called before the request is sent. 
+   * You can use it to log the request or track the number of requests to the API. */
   static onRequest?: (url: string) => void;
+  /** Add custom functions to be called when a request of a specific type is complete.
+   * @example ```onResult: {
+   * comics: (items) => {
+   *   items.map((comic) => {
+   *     console.log("Saving comic:", comic.title);
+   *   });
+   * }
+   * }```
+   */
   static onResult?: OnResultMap;
+  /** Replace the default fetch function (axios) with your own http client */
   static fetchFunction?: (url: string) => Promise<unknown>;
-
+  /** Initialize the API library with your public and private keys and other options.
+   * @param args.publicKey - Marvel API public key.
+   * @param args.privateKey - Marvel API private key.
+   * 
+   ** Don't have keys? Get them at https://developer.marvel.com/ 
+   * @param args.omitThe - Omit the 'the' from the beginning of titles.
+   * @param args.omitUndefined - Remove undefined parameters from the query
+   * @param args.globalParams - Global parameters to be applied to all queries, or all queries of a specific type.
+   * @param args.onRequest - An optional function that will be called before the request is sent.
+   * @param args.onResult - Add custom functions to be called when a request of a specific type is complete.
+   * @param args.fetchFunction - Replace the default fetch function (axios) with your own http client
+   ** For more information, visit https://github.com/nikolasstow/MarvelQuery
+   */
   static init(args: InitArgs) {
     Object.assign(MarvelQuery, { ...args });
     return createQuery;
   }
 
+  /** Endpoint of the query
+   * @example http://gateway.marvel.com/v1/public/characters/1009491/comics 
+   * becomes ["characters", 1009491, "comics"]
+   */
   endpoint: Type;
+  /** Parameters of the query */
   params: Parameters<Type>;
+  /** Function that will be called when the query is finished. */
   onResult?: OnResultFunction<ResultMap[EndpointType]>;
 
+  /** The data type of the results of the query */
   type: EndpointType;
 
   constructor(endpoint: Type, params: ParamsType<Type>) {
@@ -86,12 +126,14 @@ class MarvelQuery<Type extends Endpoint> {
   //   return this.result;
   // }
 
+  /** Remove undefined parameters */
   private omitUndefined(params: ParamsType<Type>) {
     return Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined)
     );
   }
 
+  /** Create a new query with the MarvelQuery class */
   private createQuery<Type extends Endpoint>(
     endpoint: Type,
     params: ParamsType<Type>
@@ -102,6 +144,10 @@ class MarvelQuery<Type extends Endpoint> {
     return new MarvelQuery<Type>(endpoint, params);
   }
 
+  /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
+   * Then create a MarvelQueryResult with all the properties of the MarvelQuery object, 
+   * now with the results of the query, and offset adjusted to request the next page of results.
+   */
   async fetch(): Promise<MarvelQueryResult<Type>> {
     this.validateParams();
     const url = this.buildURL();
@@ -128,6 +174,7 @@ class MarvelQuery<Type extends Endpoint> {
     }
   }
 
+  /** Build the URL of the query with the parameters, timestamp and hash. */
   buildURL() {
     const baseURL = "https://gateway.marvel.com/v1/public";
     const endpoint = this.endpoint.join("/");
@@ -147,6 +194,7 @@ class MarvelQuery<Type extends Endpoint> {
     return `${baseURL}/${endpoint}?${queryParams.toString()}`;
   }
 
+  /** Send the request to the API, and validate the response. */
   async request(url: string): Promise<APIWrapper<ResultType<Type>>> {
     try {
       if (MarvelQuery.onRequest) {
@@ -175,6 +223,7 @@ class MarvelQuery<Type extends Endpoint> {
     }
   }
 
+  /** Validate the parameters of the query. */
   private validateParams(): void {
     try {
       ValidateParams[this.type].parse(this.params);
@@ -184,6 +233,7 @@ class MarvelQuery<Type extends Endpoint> {
     }
   }
 
+  /** Remove the 'the' from the beginning of the title. */
   private omitThe(title: string): string {
     // Remove the 'the' from the beginning of the title
     const prefix = "the ";
