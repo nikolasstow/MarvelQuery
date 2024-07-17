@@ -41,12 +41,6 @@ export const DateDescriptorSchema = z.enum([
 ]);
 
 export const APISchema = z.object({
-  orderBy: z.enum([
-		'name', 
-		'modified', 
-		'-name', 
-		'-modified'])
-		.optional(),
   modifiedSince: ModifiedSince.optional(),
   limit: z.number()
 		.positive()
@@ -66,6 +60,12 @@ export const CharactersSchema = APISchema.extend({
   events: IDListSchema.optional(),
   stories: IDListSchema.optional(),
   creators: IDListSchema.optional(),
+  orderBy: z.enum([
+		'name', 
+		'modified', 
+		'-name', 
+		'-modified'])
+		.optional(),
 });
 
 export const ComicsSchema = APISchema.extend({
