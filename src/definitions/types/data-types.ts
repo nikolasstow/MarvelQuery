@@ -167,6 +167,7 @@ export type MarvelResult = z.infer<typeof MarvelResultSchema>;
  * @property id - The unique ID of the resource.
  * @property resourceURI - The canonical URL identifier for this resource.
  * @property modified - The date the resource was most recently modified.
+ * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this comic.
  * 
  * @property digitalId - The ID of the digital comic representation of this comic. Will be 0 if the comic is not available digitally.
@@ -188,6 +189,7 @@ export type MarvelResult = z.infer<typeof MarvelResultSchema>;
  * @property { ComicSummary[] } collectedIssues - A list of issues collected in this comic (will generally be empty for periodical formats such as "comic" or "magazine"
  * @property { ComicDate[] } dates - A list of key dates for this comic.
  * @property { ComicPrice[] } prices - A list of prices for this comic.
+
  * @property { Image[] } images - A list of promotional images associated with this comic.
  * @property { CreatorList } creators - A resource list containing the creators associated with this comic.
  * @property { CharacterList } characters - A resource list containing the characters in this comic.
@@ -262,7 +264,7 @@ export type MarvelCreator = z.infer<typeof MarvelCreatorSchema>;
  * @property { Image } thumbnail - The representative image for this character.
  * 
  * @property name - The name of the character.
- * @property description - The date the resource was most recently modified.
+ * @property description - A short bio or description of the character.
  * @property { ComicList } comics -  A resource list containing comics which feature this character.
  * @property { StoryList } stories - A resource list containing the stories in which this character appears.
  * @property { EventList } events - A resource list containing the events in which this character appears.
