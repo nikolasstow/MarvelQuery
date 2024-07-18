@@ -144,6 +144,7 @@ export interface InitArgs {
   fetchFunction?: (url: string) => Promise<unknown>;
 };
 
+/** Response data restructured from the API to create new instance of MarvelQueryResult, extending the MarvelQuery object with the new data and helper functions. */
 export type MarvelQueryResults<Type extends Endpoint> = {
   url: string;
   metadata: Metadata;

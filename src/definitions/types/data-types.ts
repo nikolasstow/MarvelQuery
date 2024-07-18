@@ -309,7 +309,7 @@ export interface Metadata {
  * @property offset: The requested offset (number of skipped results) of the call.
  * @property limit: The requested result limit.
  * @property total: The total number of resources available given the current filter set.
- * @property count: The total number of results returned by this call
+ * @property count: The total number of results returned by this call.
  */
 export interface APIResponseData {
   offset: number;
