@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { EndpointMap, EndpointType } from '../types/api-interface';
+import { z } from "zod";
+import { EndpointMap, EndpointType } from "../types/api-interface";
 
 const IDList = /^(\d+,)*\d+$/;
 const IDListSchema = z.string().regex(IDList);
@@ -22,34 +22,41 @@ const YearSchema = z
   .max(maxYear, { message: `Year must not be more than ${maxYear}` }) // Ensure the year is not more than 5 years from now
   .min(minYear, { message: `Year must be at least ${minYear}` }); // Ensure the year is positive
 
-const FormatSchema = z.enum([
-  'comic',
-  'magazine',
-  'trade paperback',
-  'hardcover',
-  'digest',
-  'graphic novel',
-  'digital comic',
-  'infinite comic',
+const selectMultiple = (validValues: string[]) => {
+  return z.string().refine(
+    (value) => {
+      const values = value.split(",").map((v) => v.trim());
+      return values.every((v) => validValues.includes(v));
+    },
+    {
+      message: "Invalid value(s) provided",
+    }
+  );
+};
+
+const FormatSchema = selectMultiple([
+  "comic",
+  "magazine",
+  "trade paperback",
+  "hardcover",
+  "digest",
+  "graphic novel",
+  "digital comic",
+  "infinite comic",
 ]);
-const FormatTypeSchema = z.enum(['comic', 'collection']);
+
+const FormatTypeSchema = z.enum(["comic", "collection"]);
 export const DateDescriptorSchema = z.enum([
-  'lastWeek',
-  'thisWeek',
-  'nextWeek',
-  'thisMonth',
+  "lastWeek",
+  "thisWeek",
+  "nextWeek",
+  "thisMonth",
 ]);
 
 export const APISchema = z.object({
   modifiedSince: ModifiedSince.optional(),
-  limit: z.number()
-		.positive()
-		.default(100)
-		.optional(),
-  offset: z.number()
-	.nonnegative()
-	.default(0)
-	.optional(),
+  limit: z.number().positive().default(100).optional(),
+  offset: z.number().nonnegative().default(0).optional(),
 });
 
 export const CharactersSchema = APISchema.extend({
@@ -60,12 +67,12 @@ export const CharactersSchema = APISchema.extend({
   events: IDListSchema.optional(),
   stories: IDListSchema.optional(),
   creators: IDListSchema.optional(),
-  orderBy: z.enum([
-		'name', 
-		'modified', 
-		'-name', 
-		'-modified'])
-		.optional(),
+  orderBy: selectMultiple([
+    "name",
+    "modified",
+    "-name",
+    "-modified",
+  ]).optional(),
 });
 
 export const ComicsSchema = APISchema.extend({
@@ -92,20 +99,18 @@ export const ComicsSchema = APISchema.extend({
   stories: IDListSchema.optional(),
   sharedAppearances: IDListSchema.optional(),
   collaborators: IDListSchema.optional(),
-  orderBy: z
-    .enum([
-      'focDate',
-      'onsaleDate',
-      'title',
-      'issueNumber',
-      'modified',
-      '-focDate',
-      '-onsaleDate',
-      '-title',
-      '-issueNumber',
-      '-modified',
-    ])
-    .optional(),
+  orderBy: selectMultiple([
+    "focDate",
+    "onsaleDate",
+    "title",
+    "issueNumber",
+    "modified",
+    "-focDate",
+    "-onsaleDate",
+    "-title",
+    "-issueNumber",
+    "-modified",
+  ]).optional(),
 });
 
 export const CreatorsSchema = APISchema.extend({
@@ -121,20 +126,18 @@ export const CreatorsSchema = APISchema.extend({
   series: IDListSchema.optional(),
   events: IDListSchema.optional(),
   stories: IDListSchema.optional(),
-  orderBy: z
-    .enum([
-      'lastName',
-      'firstName',
-      'middleName',
-      'suffix',
-      'modified',
-      '-lastName',
-      '-firstName',
-      '-middleName',
-      '-suffix',
-      '-modified',
-    ])
-    .optional(),
+  orderBy: selectMultiple([
+    "lastName",
+    "firstName",
+    "middleName",
+    "suffix",
+    "modified",
+    "-lastName",
+    "-firstName",
+    "-middleName",
+    "-suffix",
+    "-modified",
+  ]).optional(),
 });
 
 export const EventsSchema = APISchema.extend({
@@ -145,9 +148,14 @@ export const EventsSchema = APISchema.extend({
   series: IDListSchema.optional(),
   comics: IDListSchema.optional(),
   stories: IDListSchema.optional(),
-  orderBy: z
-    .enum(['name', 'startDate', 'modified', '-name', '-startDate', '-modified'])
-    .optional(),
+  orderBy: selectMultiple([
+    "name",
+    "startDate",
+    "modified",
+    "-name",
+    "-startDate",
+    "-modified",
+  ]).optional(),
 });
 
 export const SeriesSchema = APISchema.extend({
@@ -160,19 +168,17 @@ export const SeriesSchema = APISchema.extend({
   creators: IDListSchema.optional(),
   characters: IDListSchema.optional(),
   seriesType: z
-    .enum(['collection', 'one shot', 'limited', 'ongoing'])
+    .enum(["collection", "one shot", "limited", "ongoing"])
     .optional(),
   contains: FormatSchema.optional(),
-  orderBy: z
-    .enum([
-      'title',
-      'modified',
-      'startYear',
-      '-title',
-      '-modified',
-      '-startYear',
-    ])
-    .optional(),
+  orderBy: selectMultiple([
+    "title",
+    "modified",
+    "startYear",
+    "-title",
+    "-modified",
+    "-startYear",
+  ]).optional(),
 });
 
 export const StoriesSchema = APISchema.extend({
@@ -181,16 +187,16 @@ export const StoriesSchema = APISchema.extend({
   events: IDListSchema.optional(),
   creators: IDListSchema.optional(),
   characters: IDListSchema.optional(),
-  orderBy: z.enum(['id', 'modified', '-id', '-modified']).optional(),
+  orderBy: selectMultiple(["id", "modified", "-id", "-modified"]).optional(),
 });
 
 const dataTypes = z.enum([
-  'comics',
-  'characters',
-  'creators',
-  'events',
-  'stories',
-  'series',
+  "comics",
+  "characters",
+  "creators",
+  "events",
+  "stories",
+  "series",
 ]);
 
 export const EndpointSchema = z.tuple([
