@@ -164,10 +164,9 @@ export type CharacterList = z.infer<typeof CharacterListSchema>;
  */
 export type MarvelResult = z.infer<typeof MarvelResultSchema>;
 /**
- * @property id - The unique ID of the comic resource.
+ * @property id - The unique ID of the resource.
  * @property resourceURI - The canonical URL identifier for this resource.
  * @property modified - The date the resource was most recently modified.
- * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this comic.
  * 
  * @property digitalId - The ID of the digital comic representation of this comic. Will be 0 if the comic is not available digitally.
@@ -274,6 +273,7 @@ export type MarvelCharacter = z.infer<typeof MarvelCharacterSchema>;
  * @property id - The unique ID of the story resource.
  * @property resourceURI - The canonical URL identifier for this resource.
  * @property modified - The date the resource was most recently modified.
+ * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this story.
  * 
  * @property title - The story title.
