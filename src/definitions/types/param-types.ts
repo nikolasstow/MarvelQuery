@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EndpointType } from './api-interface';
+import { EndpointType } from './utility-types';
 import {
   APISchema,
   CharactersSchema,

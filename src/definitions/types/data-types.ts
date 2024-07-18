@@ -346,4 +346,4 @@ export interface APIWrapper<T extends MarvelResult> extends Metadata {
 }
 
 export { z };
-export * from "./api-interface";
+export * from "./utility-types";

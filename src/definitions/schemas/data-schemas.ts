@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EndpointMap } from "../types/api-interface";
+import { EndpointMap } from "../types/utility-types";
 
 // Use .nullable() to allow null values
 
