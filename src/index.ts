@@ -346,6 +346,3 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
 export default MarvelQuery;
 export * from "./definitions/types/data-types";
 export * from "./definitions/types/param-types";
-
-import * as sample from "./samples";
-export { sample };
