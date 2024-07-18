@@ -17,11 +17,12 @@ import {
   ExtendEndpointParams,
   Metadata,
   GlobalParams,
+  AnyResultFunction,
 } from "./definitions/types/data-types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
 
-/** Base class for all queries, constructs the URL, sends the request, 
+/** Base class for all queries, constructs the URL, sends the request,
  * and validates the query parameters and the response using zod. */
 class MarvelQuery<Type extends Endpoint> {
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
@@ -30,7 +31,7 @@ class MarvelQuery<Type extends Endpoint> {
   static privateKey: string;
   // Options
   /** Global parameters to be applied to all queries, or all queries of a specific type.
-   * @example ```globalParams: { 
+   * @example ```globalParams: {
    * all: { limit: 10 },
    * comics: { noVariants: true }
    * }```
@@ -39,7 +40,7 @@ class MarvelQuery<Type extends Endpoint> {
   /** Remove undefined parameters from the query */
   static omitUndefined?: boolean = true;
   // Functions
-  /** An optional function that will be called before the request is sent. 
+  /** An optional function that will be called before the request is sent.
    * You can use it to log the request or track the number of requests to the API. */
   static onRequest?: (url: string) => void;
   /** Add custom functions to be called when a request of a specific type is complete.
@@ -57,8 +58,8 @@ class MarvelQuery<Type extends Endpoint> {
   /** Initialize the API library with your public and private keys and other options.
    * @param args.publicKey - Marvel API public key.
    * @param args.privateKey - Marvel API private key.
-   * 
-   ** Don't have keys? Get them at https://developer.marvel.com/ 
+   *
+   ** Don't have keys? Get them at https://developer.marvel.com/
    * @param args.omitUndefined - Remove undefined parameters from the query
    * @param args.globalParams - Global parameters to be applied to all queries, or all queries of a specific type.
    * @param args.onRequest - An optional function that will be called before the request is sent.
@@ -74,14 +75,14 @@ class MarvelQuery<Type extends Endpoint> {
   }
 
   /** Endpoint of the query
-   * @example http://gateway.marvel.com/v1/public/characters/1009491/comics 
+   * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes ["characters", 1009491, "comics"]
    */
   endpoint: Type;
   /** Parameters of the query */
   params: Parameters<Type>;
   /** Function that will be called when the query is finished. */
-  onResult?: OnResultFunction<ResultMap[EndpointType]>;
+  onResult?: OnResultFunction<ResultMap[EndpointType]> | AnyResultFunction;
 
   /** The data type of the results of the query */
   type: EndpointType;
@@ -89,7 +90,14 @@ class MarvelQuery<Type extends Endpoint> {
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
   constructor(endpoint: Type, params: ParamsType<Type>) {
     /** Array of valid endpoint types. */
-    const endpoints = ["comics", "characters", "creators", "events", "series", "stories"];
+    const endpoints = [
+      "comics",
+      "characters",
+      "creators",
+      "events",
+      "series",
+      "stories",
+    ];
 
     /** Validate the first element of the endpoint is a valid endpoint type */
     if (!endpoints.includes(endpoint[0])) {
@@ -128,8 +136,12 @@ class MarvelQuery<Type extends Endpoint> {
       ...params,
     };
 
+    /** Set the onResult function for the specific type, or the 'any' type if not provided. */
     if (MarvelQuery.onResult) {
-      this.onResult = MarvelQuery.onResult[this.type];
+      const typeSpecificOnResult = MarvelQuery.onResult[this.type];
+      this.onResult = typeSpecificOnResult
+        ? typeSpecificOnResult
+        : MarvelQuery.onResult["any"];
     }
   }
 
@@ -141,7 +153,7 @@ class MarvelQuery<Type extends Endpoint> {
   }
 
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
-   * Then create a MarvelQueryResult with all the properties of the MarvelQuery object, 
+   * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
   async fetch(): Promise<MarvelQueryResult<Type>> {
@@ -187,7 +199,7 @@ class MarvelQuery<Type extends Endpoint> {
       ? CryptoJS.MD5(timestamp + privateKey + publicKey).toString()
       : "";
 
-    /** Build the URL of the query with the parameters, keys, timestamp and hash. */  
+    /** Build the URL of the query with the parameters, keys, timestamp and hash. */
     const queryParams = new URLSearchParams({
       apikey: publicKey,
       ts: timestamp.toString(),
@@ -264,20 +276,20 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
    */
   url: string;
   /** Metadata included in the API response.
- * @property code: The HTTP status code of the returned result.
- * @property status: A string description of the call status.
- * @property copyright: The copyright notice for the returned result.
- * @property attributionText: The attribution notice for this result. Please display either this notice or the contents of the attributionHTML field on all screens which contain data from the Marvel Comics API.
- * @property attributionHTML: An HTML representation of the attribution notice for this result. Please display either this notice or the contents of the attributionText field on all screens which contain data from the Marvel Comics API.
- * @property etag: A digest value of the content returned by the call.
- */
+   * @property code: The HTTP status code of the returned result.
+   * @property status: A string description of the call status.
+   * @property copyright: The copyright notice for the returned result.
+   * @property attributionText: The attribution notice for this result. Please display either this notice or the contents of the attributionHTML field on all screens which contain data from the Marvel Comics API.
+   * @property attributionHTML: An HTML representation of the attribution notice for this result. Please display either this notice or the contents of the attributionText field on all screens which contain data from the Marvel Comics API.
+   * @property etag: A digest value of the content returned by the call.
+   */
   metadata: Metadata;
   /** Data for the API response.
- * @property offset: The requested offset (number of skipped results) of the call.
- * @property limit: The requested result limit.
- * @property total: The total number of resources available given the current filter set.
- * @property count: The total number of results returned by this call.
- */
+   * @property offset: The requested offset (number of skipped results) of the call.
+   * @property limit: The requested result limit.
+   * @property total: The total number of resources available given the current filter set.
+   * @property count: The total number of results returned by this call.
+   */
   responseData: APIResponseData;
   /** The first result of the query. */
   result: ResultType<Type>;
@@ -286,7 +298,7 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
   /** The conjunction of all results from this query instance. */
   resultHistory: ResultType<Type>[];
 
-/** Creates a MarvelQueryResult with all the properties of the MarvelQuery object, now with the results of the query, and offset adjusted to request the next page of results. */
+  /** Creates a MarvelQueryResult with all the properties of the MarvelQuery object, now with the results of the query, and offset adjusted to request the next page of results. */
   constructor(query: MarvelQuery<Type>, results: MarvelQueryResults<Type>) {
     /** Increment the offset by the limit to get the next page */
     const offset = results.responseData.offset + query.params.limit;

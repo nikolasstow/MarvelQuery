@@ -99,9 +99,14 @@ export type OnResultFunction<Type extends MarvelResult> = (
   data: Type[]
 ) => void | Promise<unknown>;
 
-/** A map of functions, one for each result type, to be called when the query is finished */
+/** A function that will be called when a query of any type is finished, unless overridden with onResult function for a specific type. */
+export type AnyResultFunction = OnResultFunction<MarvelComic | MarvelCharacter | MarvelCreator | MarvelEvent | MarvelSeries | MarvelStory>;
+
+/** A map of functions, one for each result type, as well as 'any' to be called when the query is finished */
 export type OnResultMap = {
   [K in EndpointType]?: OnResultFunction<ResultMap[K]>;
+} & {
+  any?: AnyResultFunction;
 };
 
 /** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
