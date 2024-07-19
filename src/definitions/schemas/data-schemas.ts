@@ -3,6 +3,15 @@ import { EndpointMap } from "../types/utility-types";
 
 // Use .nullable() to allow null values
 
+/** For some unknown reason, the start and end dates of Events are in a different format than the rest of the data */
+const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+const DateTimeSchema = z
+  .string()
+  .regex(
+    dateTimeRegex,
+    "Invalid date-time format. Expected format: YYYY-MM-DD HH:MM:SS"
+  );
+
 export const TextObjectSchema = z.object({
   type: z
     .string()
@@ -264,15 +273,9 @@ export const MarvelEventSchema = MarvelResultSchema.extend({
     .nullable()
     .optional()
     .describe("A description of the event."),
-  start: z
-    .string()
-    .datetime({ offset: true })
+  start: DateTimeSchema // In "YYYY-MM-DD HH:MM:SS" format rather than the standard ISO 8601 format which separates date and time with a 'T' rather than a space.
     .describe("The date of publication of the first issue in this event."),
-  end: z
-    .string()
-    .datetime({ offset: true })
-    .nullable()
-    .optional()
+  end: DateTimeSchema // In "YYYY-MM-DD HH:MM:SS" format rather than the standard ISO 8601 format. WHY Marvel?
     .describe("The date of publication of the last issue in this event."),
   comics: ComicListSchema.describe(
     "A resource list containing the comics in this event."

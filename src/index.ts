@@ -102,7 +102,7 @@ class MarvelQuery<Type extends Endpoint> {
     this.params = {
       // Default parameters
       offset: 0,
-      limit: 100,
+      limit: 50,
       // Global parameters
       ...MarvelQuery.globalParams?.all,
       ...MarvelQuery.globalParams?.[this.type],
