@@ -1,5 +1,11 @@
 # marvelquery
 
+## 1.0.4
+
+### Patch Changes
+
+- e0c8a28: Updated publish config with github registry
+
 ## 1.0.3
 
 ### Patch Changes
