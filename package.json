@@ -9,7 +9,8 @@
     "clean": "rm -rf ./lib/*",
     "build": "tsup",
     "build:watch": "tsup --watch",
-    "lint": "tsc"
+    "lint": "tsc",
+    "release": "changeset publish"
   },
   "repository": {
     "type": "git",
