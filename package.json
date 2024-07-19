@@ -6,6 +6,9 @@
     "type": "git",
     "url": "git+https://github.com/nikolasstow/MarvelQuery.git"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "main": "lib/index.js",
   "module": "lib/index.mjs",
   "types": "lib/index.d.ts",
