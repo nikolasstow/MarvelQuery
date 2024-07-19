@@ -1,5 +1,12 @@
 # marvelquery
 
+## 1.0.3
+
+### Patch Changes
+
+- 0890e62: Access changed from restricted to public
+- f100232: Linking repo to npm package
+
 ## 1.0.1
 
 ### Patch Changes
