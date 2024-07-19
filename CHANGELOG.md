@@ -1,5 +1,11 @@
 # marvelquery
 
+## 1.0.1
+
+### Patch Changes
+
+- ca72518: added .npmrc and release script
+
 ## 1.0.0
 
 ### Major Changes
