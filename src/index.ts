@@ -89,34 +89,8 @@ class MarvelQuery<Type extends Endpoint> {
 
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
   constructor(endpoint: Type, params: ParamsType<Type>) {
-    /** Array of valid endpoint types. */
-    const endpoints = [
-      "comics",
-      "characters",
-      "creators",
-      "events",
-      "series",
-      "stories",
-    ];
-
-    /** Validate the first element of the endpoint is a valid endpoint type */
-    if (!endpoints.includes(endpoint[0])) {
-      throw new Error(`Invalid endpoint: ${endpoint[0]}`);
-    }
-    /** Validate the second element of the endpoint is a number. */
-    if (typeof endpoint[1] !== "number") {
-      throw new Error(`Invalid endpoint: ${endpoint[1]}`);
-    }
-    /** Validate the third element of the endpoint is a valid endpoint type */
-    if (endpoint[2] && !endpoints.includes(endpoint[2])) {
-      throw new Error(`Invalid endpoint: ${endpoint[2]}`);
-    }
-    /** Validate that the first and third elements of the endpoint are not the same. */
-    if (endpoint[0] == endpoint[2]) {
-      throw new Error(`Invalid endpoint: ${endpoint[0]} and ${endpoint[2]}
-      cannot be the same endpoint`);
-    }
-
+    /** Validate the endpoint. */
+    this.endpoint = this.validateEndpoint(endpoint);
     /** Remove undefined parameters unless 'omitUndefined' is false. */
     params = MarvelQuery.omitUndefined ? this.omitUndefined(params) : params;
 
@@ -143,6 +117,42 @@ class MarvelQuery<Type extends Endpoint> {
         ? typeSpecificOnResult
         : MarvelQuery.onResult["any"];
     }
+  }
+
+  private validateEndpoint(endpoint: Type): Type {
+    /** Validate the endpoint. */
+    if (!endpoint) {
+      throw new Error("Endpoint is required");
+    }
+    /** Array of valid endpoint types. */
+    const endpoints = [
+      "comics",
+      "characters",
+      "creators",
+      "events",
+      "series",
+      "stories",
+    ];
+
+    /** Validate the first element of the endpoint is a valid endpoint type */
+    if (!endpoints.includes(endpoint[0])) {
+      throw new Error(`Invalid endpoint[0]: ${endpoint[0]}`);
+    }
+    /** Validate the second element of the endpoint is a number. */
+    if (endpoint[1] &&  typeof endpoint[1] !== "number") {
+      throw new Error(`Invalid endpoint[1]: ${endpoint[1]}`);
+    }
+    /** Validate the third element of the endpoint is a valid endpoint type */
+    if (endpoint[2] && !endpoints.includes(endpoint[2])) {
+      throw new Error(`Invalid endpoint[2]: ${endpoint[2]}`);
+    }
+    /** Validate that the first and third elements of the endpoint are not the same. */
+    if (endpoint[0] == endpoint[2]) {
+      throw new Error(`Invalid endpoint: ${endpoint[0]} and ${endpoint[2]}
+  cannot be the same endpoint`);
+    }
+
+    return endpoint;
   }
 
   /** Remove undefined parameters. */
@@ -261,6 +271,10 @@ function createQuery<Type extends Endpoint>(
   endpoint: Type,
   params: ParamsType<Type>
 ): MarvelQuery<Type> {
+  /** Validate the endpoint. */
+  if (!endpoint) {
+    throw new Error("Missing endpoint");
+  }
   /** Validate the public and private keys. */
   if (!MarvelQuery.publicKey || !MarvelQuery.privateKey) {
     throw new Error("Missing public or private keys");
