@@ -22,17 +22,19 @@ import {
  * The same goes for characters, creators, events, series and stories.
  ** The second element is the ID of the subject of your query.
  * With an id you can query a specific item from the API. 
- ** The element is the type of results you want back for the subject of your query.
+ ** The third element is the type of results you want back for the subject of your query.
  * If you are querying for events that feature the subject of your query, the third element is 'events'. 
  * The same applies for stories or characters featured in a comic.
  * For example if you are looking for events in which Spider-Man appeared, 
  * your query endpoint would be ['characters', '1009491', events']
  */
 export type Endpoint = [EndpointType, number?, EndpointType?];
+/** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
 export type EndpointType = keyof ParameterMap;
+/** Create a map of any data type with the endpoint as the key. */
 export type EndpointMap<Value> = Record<EndpointType, Value>;
 
-// A map of parameters to their corresponding types providing type safety.
+/** A map of parameters to their corresponding types providing type safety. */
 export type ParameterMap = {
   comics: params.Comics;
   characters: params.Characters;
@@ -42,7 +44,7 @@ export type ParameterMap = {
   series: params.Series;
 };
 
-// A map of results to their corresponding types providing type safety.
+/** A map of results to their corresponding types providing type safety. */
 export type ResultMap = {
   comics: MarvelComic;
   characters: MarvelCharacter;
@@ -67,60 +69,87 @@ type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
     : LastElement
   : never;
 
-// After the type is determined, get the corresponding type from the ParameterMap
+/** Utility type that gets the parameters from the endpoint. */
 export type ParamsType<Type extends Endpoint> =
   DataType<Type> extends EndpointType
     ? ParameterMap[DataType<Type>]
     : params.APIBase;
 
-// Parameters for a specific type of data within the endpoint
+/** Parameters for a specific endpoint */
 export type ExtendEndpointParams<Key extends EndpointType> = ParameterMap[Key];
 
-// Get the limit and offset from the parameters from APIBase
+/** Required parameters for any query, if not specified the default will be used. */
 type BaseParams = Required<Pick<params.APIBase, 'limit' | 'offset'>>;
 
-// Remove the BaseParams so we can add them back as required
+/** Utility type for parameters with limit and offset removed. */
 type CleanParams<Type extends Endpoint> = Omit<
   ParamsType<Type>,
   keyof BaseParams
 >;
 
-// Makes BaseParams' properties (limit, offset, orderBy, modifiedSince) all required
+/** Utility type that forces limnit and offset to be required. */
 export type Parameters<Type extends Endpoint> = CleanParams<Type> & BaseParams;
 
-// Just like ParamsType, get the corresponding type from the ResultMap
+/** Utility type that gets the result type from the endpoint. */
 export type ResultType<Type extends Endpoint> =
   DataType<Type> extends EndpointType ? ResultMap[DataType<Type>] : never;
 
-// Type of function that will be called when the query is finished, arguments are the results
+/** Type of function that will be called when the query is finished, arguments are the results */
 export type OnResultFunction<Type extends MarvelResult> = (
   data: Type[]
 ) => void | Promise<unknown>;
 
-// A map of functions, one for each result type, to be called when the query is finished
+/** A function that will be called when a query of any type is finished, unless overridden with onResult function for a specific type. */
+export type AnyResultFunction = OnResultFunction<MarvelComic | MarvelCharacter | MarvelCreator | MarvelEvent | MarvelSeries | MarvelStory>;
+
+/** A map of functions, one for each result type, as well as 'any' to be called when the query is finished */
 export type OnResultMap = {
   [K in EndpointType]?: OnResultFunction<ResultMap[K]>;
+} & {
+  any?: AnyResultFunction;
 };
 
-// Global Parameters
+/** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
+ * You can also apply global parameters to specific data types (comics, characters, events, etc.)
+ */
 export interface GlobalParams extends Partial<ParameterMap> {
   all?: params.APIBase;
 }
 
-// Arguments for the init function
-export type InitArgs = {
+/** Arguments for initialization of the API */
+export interface InitArgs {
+  /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   publicKey: string;
+  /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
   privateKey: string;
   // Options
+    /** Global parameters to be applied to all queries, or all queries of a specific type.
+   * @example ```globalParams: { 
+   * all: { limit: 10 },
+   * comics: { noVariants: true }
+   * }```
+   */
   globalParams?: GlobalParams;
-  omitThe?: boolean; // set to true this will remove the "the" from the beginning of the title
+  /** Remove undefined parameters from the query */
   omitUndefined?: boolean; // set to true (by default) this will remove undefined values from the query
   // Functions
+  /** Add custom functions to be called when a request of a specific type is complete.
+   * @example ```onResult: {
+   * comics: (items) => {
+   *   items.map((comic) => {
+   *     console.log("Saving comic:", comic.title);
+   *   });
+   * }
+   * }```
+   */
   onResult?: OnResultMap;
+  /** An optional function that will be called before the request is sent. 
+   * You can use it to log the request or track the number of requests to the API. */
   onRequest?: (url: string) => void;
   fetchFunction?: (url: string) => Promise<unknown>;
 };
 
+/** Response data restructured from the API to create new instance of MarvelQueryResult, extending the MarvelQuery object with the new data and helper functions. */
 export type MarvelQueryResults<Type extends Endpoint> = {
   url: string;
   metadata: Metadata;
