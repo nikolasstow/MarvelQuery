@@ -1,5 +1,11 @@
 # marvelquery
 
+## 1.0.3
+
+### Patch Changes
+
+- 0890e62: Access changed from restricted to public
+
 ## 1.0.1
 
 ### Patch Changes
