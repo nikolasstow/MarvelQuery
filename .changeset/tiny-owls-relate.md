@@ -1,5 +1,0 @@
----
-"marvelquery": patch
----
-
-bada bing

@@ -1,5 +1,21 @@
 # marvelquery
 
+## 1.0.9
+
+### Patch Changes
+
+- 76f00ba: I should have given up already
+- 64f205b: again and again and again
+- ba31a7c: I'm a dumb dumb
+- f8037d6: move along
+- 7172403: I'm just going to keep trying til I figure it out
+- d2b0e68: I guess I'll give it another go.
+- b2fa04a: Okay, this is my final attempt to publish the package to GitHub package. I hope it works.
+- 9998124: minor changes to readme
+- 10ad4d8: keep on keepin' on
+- 577946e: Okay so not gonna use github packages because it complicates things too much.
+- 8646195: bada bing
+
 ## 1.0.8
 
 ### Patch Changes
