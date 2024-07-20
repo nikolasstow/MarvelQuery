@@ -1,5 +1,11 @@
 # marvelquery
 
+## 1.0.8
+
+### Patch Changes
+
+- ce4aaf3: 8th times the charm
+
 ## 1.0.7
 
 ### Patch Changes
