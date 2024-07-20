@@ -1,5 +1,11 @@
 # marvelquery
 
+## 1.0.6
+
+### Patch Changes
+
+- 3db90f7: Please dont read this, I goofed up.
+
 ## 1.0.5
 
 ### Patch Changes
