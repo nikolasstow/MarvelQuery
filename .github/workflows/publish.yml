@@ -1,5 +1,4 @@
 name: Publish
-
 on:
   workflow_run:
     workflows: [CI]
@@ -26,34 +25,27 @@ jobs:
           node-version: 20.x
           cache: "pnpm"
 
-      - uses: actions/cache@v3  # Cache dependencies
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+      - run: pnpm install --frozen-lockfile
 
-      - name: Publish to npm (if necessary)
+      - name: Publish to npm
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [[ $(git diff --cached --name-only package-lock.json) ]]; then
-            echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc_npm
-            pnpm publish --userconfig .npmrc_npm
-          fi
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          pnpm publish
 
       - name: Publish to GitHub Packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc_github
-          pnpm publish --registry https://npm.pkg.github.com --userconfig .npmrc_github
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+          pnpm publish --registry https://npm.pkg.github.com
 
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm run release  # Replace with your actual release script
+          publish: pnpm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

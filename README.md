@@ -14,8 +14,8 @@ This TypeScript library provides a robust and developer-friendly way to interact
    * **Customizable Behavior:** Define callbacks for request and response handling to tailor the library's behavior to your specific needs.
    * **Swappable HTTP Client:** Integrate seamlessly with your preferred HTTP client (e.g., Fetch, SuperAgent) by replacing the default implementation.
  
-## How it Works:
-1. Initialization:
+<!-- ## How it Works: -->
+<!-- 1. Initialization:
    * Set your Marvel API public and private keys using MarvelQuery.init.
    * Optionally configure global parameters, callbacks, and other settings.
 2. Building a Query:
@@ -32,4 +32,4 @@ This TypeScript library provides a robust and developer-friendly way to interact
       * Response data from the API
    * You can access individual results or the entire set.
 5. Pagination:
-   * The MarvelQueryResult object allows for effortless pagination. Simply call fetch again to retrieve subsequent pages of results.
+   * The MarvelQueryResult object allows for effortless pagination. Simply call fetch again to retrieve subsequent pages of results. -->
