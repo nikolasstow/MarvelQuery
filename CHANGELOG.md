@@ -1,5 +1,11 @@
 # marvelquery
 
+## 1.0.5
+
+### Patch Changes
+
+- cf4d70d: Change registry to github
+
 ## 1.0.4
 
 ### Patch Changes
