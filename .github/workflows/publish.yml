@@ -26,7 +26,7 @@ jobs:
           node-version: 20.x
           cache: "pnpm"
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v3  # Cache dependencies
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/package-lock.json') }}
@@ -39,7 +39,7 @@ jobs:
         run: |
           if [[ $(git diff --cached --name-only package-lock.json) ]]; then
             echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc_npm
-            pnpm publish --config .npmrc_npm
+            pnpm publish --userconfig .npmrc_npm
           fi
 
       - name: Publish to GitHub Packages
@@ -47,13 +47,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc_github
-          pnpm publish --registry https://npm.pkg.github.com --config .npmrc_github
+          pnpm publish --registry https://npm.pkg.github.com --userconfig .npmrc_github
 
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm run release
+          publish: pnpm run release  # Replace with your actual release script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
