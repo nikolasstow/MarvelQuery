@@ -10,7 +10,8 @@ import {
   OnResultMap,
   OnResultFunction,
   ResultMap,
-  InitArgs,
+  APIKeys,
+  Config,
   APIWrapper,
   MarvelQueryResults,
   APIResponseData,
@@ -67,9 +68,9 @@ class MarvelQuery<Type extends Endpoint> {
    * @param args.fetchFunction - Replace the default fetch function (axios) with your own http client.
    ** For more information, visit https://github.com/nikolasstow/MarvelQuery
    */
-  static init(args: InitArgs) {
+  static init(keys: APIKeys, config: Config = {}) {
     /** Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. */
-    Object.assign(MarvelQuery, { ...args });
+    Object.assign(MarvelQuery, { ...keys, ...config }); // You're probably wonder why keys and config are separate arguments when the get combined anyway... it's because it looks cleaner. Don't judge me.
     /** Pass the createQuery function once the library is initialized. */
     return createQuery;
   }
@@ -195,6 +196,13 @@ class MarvelQuery<Type extends Endpoint> {
       console.error("Request error:", error);
       throw new Error("Request error");
     }
+  }
+
+  /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
+  async fetchSingle(): Promise<MarvelQueryResult<Type>> {
+    this.params.offset = 0;
+    this.params.limit = 1;
+    return this.fetch();
   }
 
   /** Build the URL of the query with the parameters, timestamp and hash. */

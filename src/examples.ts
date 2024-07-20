@@ -7,49 +7,53 @@ import MarvelQuery, {
   MarvelSeries,
 } from ".";
 
-/** 
+/**
  * Initialize the Marvel API with your public and private keys.
  * Optionally, you can add functions for logging requests and saving results.
  */
-const createQuery = MarvelQuery.init({
-  publicKey: 'your-public-key',
-  privateKey: 'your-private-key',
-  /** 
-   * An optional function that will be called before the request is sent,
-   * you can use it to log the request or do something else.
-   */
-  onRequest: (url) => {
-    checkAndUpdateCounters();
+const createQuery = MarvelQuery.init(
+  {
+    publicKey: "your-public-key",
+    privateKey: "your-private-key",
   },
-  /** 
-   * You can pass in a map of functions (all of them are optional) for saving results to your database.
-   * This way, you don't have to implement it yourself.
-   */
-  onResult: {
-    comics: (items) => {
-      items.map((comic) => {
-        // Type safety means you know what properties are available during development
-        console.log("Saving comic:", comic.title);
-
-        return {
-          issn: comic.issn,
-          isbn: comic.isbn,
-          upc: comic.upc,
-          ean: comic.ean,
-        };
-      });
+  {
+    /**
+     * An optional function that will be called before the request is sent,
+     * you can use it to log the request or do something else.
+     */
+    onRequest: (url) => {
+      checkAndUpdateCounters();
     },
-    characters: (items) => {
-      items.forEach((character) =>
-        console.log("Saving character:", character.name)
-      );
-    },
-    // ...and so on
-  },
-  // fetchFunction: (url) => fetch(url),
-});
+    /**
+     * You can pass in a map of functions (all of them are optional) for saving results to your database.
+     * This way, you don't have to implement it yourself.
+     */
+    onResult: {
+      comics: (items) => {
+        items.map((comic) => {
+          // Type safety means you know what properties are available during development
+          console.log("Saving comic:", comic.title);
 
-/** 
+          return {
+            issn: comic.issn,
+            isbn: comic.isbn,
+            upc: comic.upc,
+            ean: comic.ean,
+          };
+        });
+      },
+      characters: (items) => {
+        items.forEach((character) =>
+          console.log("Saving character:", character.name)
+        );
+      },
+      // ...and so on
+    },
+    // fetchFunction: (url) => fetch(url),
+  }
+);
+
+/**
  * Fetches information about Spider-Man.
  * Calls the API to get data about the character "Peter Parker" and handles pagination automatically.
  */
@@ -63,9 +67,22 @@ async function spiderMan() {
   // You can continue to do this until there are no more results.
 }
 
+// First we need to find his id using his name.
+const peterParker = await createQuery(["characters"], {
+  name: "Peter Parker",
+})
+  .fetchSingle()
+  .then((query) => query.result.id); // Returns '1009491'
+// The we can use that id to create a new query to get the latest comics he appears in.
+const spiderComics = await createQuery(["characters", peterParker, "comics"],{
+  format: "comic", // We only want the latest comic issues, so lets exclude everything else.
+  noVariants: true, // Exclude variants, because we only want unique issues.
+  dateDescriptor: "nextWeek", // Get the next week's issues.
+}).fetch().then((query) => query.results);
+
 /**
  * Fetches series information based on the title and start year.
- * 
+ *
  * @param title - The title of the series.
  * @param startYear - The start year of the series.
  * @returns A promise that resolves to an array of MarvelSeries objects.
@@ -84,7 +101,7 @@ export async function series(
 
 /**
  * Fetches comics based on the title and optional release date.
- * 
+ *
  * @param title - The title of the comic.
  * @param releaseDate - The release date of the comic (optional).
  * @returns A promise that resolves to an array of MarvelComic objects.
@@ -120,7 +137,7 @@ export async function comics(
 
 /**
  * Fetches events based on the name.
- * 
+ *
  * @param name - The name of the event.
  * @returns A promise that resolves to an array of MarvelEvent objects.
  */
@@ -134,7 +151,7 @@ export async function events(name: string): Promise<MarvelEvent[]> {
 
 /**
  * Fetches creators based on last name and optional first name, middle name, and suffix.
- * 
+ *
  * @param lastName - The last name of the creator.
  * @param firstName - The first name of the creator (optional).
  * @param middleName - The middle name of the creator (optional).
@@ -159,7 +176,7 @@ export async function creators(
 
 /**
  * Fetches characters based on the name.
- * 
+ *
  * @param name - The name of the character.
  * @returns A promise that resolves to an array of MarvelCharacter objects.
  */
@@ -173,7 +190,7 @@ export async function characters(name: string): Promise<MarvelCharacter[]> {
 
 /**
  * Fetches comics based on a date descriptor and optional additional parameters.
- * 
+ *
  * @param dateDescriptor - The date descriptor (e.g., "lastWeek", "thisWeek", "nextWeek", "thisMonth").
  * @param params - Additional query parameters (optional).
  * @returns A promise that resolves to an array of MarvelComic objects.
@@ -194,7 +211,7 @@ export async function catalog(
 
 /**
  * Fetches the latest comics.
- * 
+ *
  * @returns A promise that resolves to an array of MarvelComic objects or false if there are no results.
  */
 export async function latest(): Promise<MarvelComic[] | false> {

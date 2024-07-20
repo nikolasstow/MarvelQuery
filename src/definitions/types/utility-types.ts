@@ -116,12 +116,15 @@ export interface GlobalParams extends Partial<ParameterMap> {
   all?: params.APIBase;
 }
 
-/** Arguments for initialization of the API */
-export interface InitArgs {
+export interface APIKeys {
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   publicKey: string;
   /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
   privateKey: string;
+}
+
+/** Arguments for initialization of the API */
+export interface Config {
   // Options
     /** Global parameters to be applied to all queries, or all queries of a specific type.
    * @example ```globalParams: { 
