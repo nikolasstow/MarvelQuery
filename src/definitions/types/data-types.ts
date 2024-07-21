@@ -344,6 +344,3 @@ export interface APIResponseResults<MarvelType extends MarvelResult>
 export interface APIWrapper<T extends MarvelResult> extends Metadata {
   data: APIResponseResults<T>;
 }
-
-export { z };
-export * from "./utility-types";

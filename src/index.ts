@@ -15,11 +15,10 @@ import {
   APIWrapper,
   MarvelQueryResults,
   APIResponseData,
-  ExtendEndpointParams,
   Metadata,
   GlobalParams,
   AnyResultFunction,
-} from "./definitions/types/data-types";
+} from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
 
