@@ -1,49 +1,13 @@
 import { z } from "zod";
-import { EndpointMap, EndpointType } from "../types/utility-types";
-
-const IDList = /^(\d+,)*\d+$/;
-const IDListSchema = z
-  .string()
-  .regex(IDList)
-  .describe("Comma separated list of IDs");
-const ModifiedSince = z
-  .string()
-  .date()
-  .describe("Date in ISO 8601 format (YYYY-MM-DD)");
-const DateRange = /^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$/;
-const DateRangeSchema = z
-  .string()
-  .regex(DateRange)
-  .describe(
-    "Start and end date in ISO 8601 format (YYYY-MM-DD) separated by a comma, e.g. 2010-01-01,2010-01-02"
-  );
-
-/** Create a date range to validate a year. Not likely you'll find any comics released in the future or before the year 1939 */
-const currentYear = new Date().getFullYear(); // Get the current year (it's 2024 currently, but that may no longer be the case when you read this.)
-const minYear = 1939; // The oldest comic in the database is ' Marvel Comics (1939) #1 ' which released in 1939 and featured the Sub-Mariner and the Human Torch (not to be confused with Johnny Storm, the Human Torch of the Fantastic Four).
-const maxYear = currentYear + 5; // Comics in the future do appear in the database, but only a few months at most.
-
-// Create a Zod schema for the year
-const YearSchema = z
-  .number()
-  .int() // Ensure the number is an integer
-  .positive() // Ensure the number is positive
-  .max(maxYear, { message: `Year must not be more than ${maxYear}` }) // Ensure the year is no more than 5 years from now...
-  .min(minYear, { message: `Year must be at least ${minYear}` }) // ... and no earlier than 1939
-  .describe(`Year must be between ${minYear} and ${maxYear}`);
-
-/** Select multiple values, separated by commas */
-const selectMultiple = (validValues: string[]) => {
-  return z.string().refine(
-    (value) => {
-      const values = value.split(",").map((v) => v.trim());
-      return values.every((v) => validValues.includes(v));
-    },
-    {
-      message: "Invalid value(s) provided",
-    }
-  );
-};
+import {
+  DateRangeSchema,
+  IDListSchema,
+  ModifiedSince,
+  SelectMultiple,
+  OrderBy,
+  YearSchema,
+} from "./schema-utilities";
+import { EndpointMap } from "lib";
 
 export const APISchema = z.object({
   modifiedSince: ModifiedSince.optional().describe(
@@ -88,14 +52,14 @@ export const CharactersSchema = APISchema.extend({
   stories: IDListSchema.optional().describe(
     "Return only characters which appear in the specified stories (accepts a comma-separated list of ids)."
   ),
-  orderBy: selectMultiple(["name", "modified", "-name", "-modified"])
+  orderBy: OrderBy("characters")
     .optional()
     .describe(
       `Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.`
     ),
 });
 
-const FormatSchema = selectMultiple([
+const FormatSchema = SelectMultiple([
   "comic",
   "magazine",
   "trade paperback",
@@ -104,7 +68,7 @@ const FormatSchema = selectMultiple([
   "graphic novel",
   "digital comic",
   "infinite comic",
-]).describe("");
+]);
 
 const FormatTypeSchema = z.enum(["comic", "collection"]);
 export const DateDescriptorSchema = z.enum([
@@ -184,18 +148,7 @@ export const ComicsSchema = APISchema.extend({
   collaborators: IDListSchema.optional().describe(
     "Return only issues in which the specified creators worked together (for example in which both Brian Bendis and Stan Lee did work). Accepts a comma-separated list of ids."
   ),
-  orderBy: selectMultiple([
-    "focDate",
-    "onsaleDate",
-    "title",
-    "issueNumber",
-    "modified",
-    "-focDate",
-    "-onsaleDate",
-    "-title",
-    "-issueNumber",
-    "-modified",
-  ])
+  orderBy: OrderBy("comics")
     .optional()
     .describe(
       `Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.`
@@ -249,18 +202,7 @@ export const CreatorsSchema = APISchema.extend({
   stories: IDListSchema.optional().describe(
     "Return only creators who worked on the specified stories (accepts a comma-separated list of ids)."
   ),
-  orderBy: selectMultiple([
-    "lastName",
-    "firstName",
-    "middleName",
-    "suffix",
-    "modified",
-    "-lastName",
-    "-firstName",
-    "-middleName",
-    "-suffix",
-    "-modified",
-  ])
+  orderBy: OrderBy("creators")
     .optional()
     .describe(
       `Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.`
@@ -291,14 +233,7 @@ export const EventsSchema = APISchema.extend({
   stories: IDListSchema.optional().describe(
     "Return only events which take place in the specified stories (accepts a comma-separated list of ids)."
   ),
-  orderBy: selectMultiple([
-    "name",
-    "startDate",
-    "modified",
-    "-name",
-    "-startDate",
-    "-modified",
-  ])
+  orderBy: OrderBy("events")
     .optional()
     .describe(
       `Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.`
@@ -343,14 +278,7 @@ export const SeriesSchema = APISchema.extend({
   contains: FormatSchema.optional().describe(
     "Return only series containing one or more comics with the specified format."
   ),
-  orderBy: selectMultiple([
-    "title",
-    "modified",
-    "startYear",
-    "-title",
-    "-modified",
-    "-startYear",
-  ])
+  orderBy: OrderBy("series")
     .optional()
     .describe(
       `Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.`
@@ -373,24 +301,21 @@ export const StoriesSchema = APISchema.extend({
   characters: IDListSchema.optional().describe(
     "Return only stories which feature the specified characters (accepts a comma-separated list of ids)."
   ),
-  orderBy: selectMultiple(["id", "modified", "-id", "-modified"])
+  orderBy: OrderBy("stories")
     .optional()
     .describe(
       `Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.`
     ),
 });
 
-const dataTypes = z.enum([
-  "comics",
-  "characters",
-  "creators",
-  "events",
-  "stories",
-  "series",
-]).describe("A data type used in the endpoint.");
+const dataTypes = z
+  .enum(["comics", "characters", "creators", "events", "stories", "series"])
+  .describe("A data type used in the endpoint.");
 
 export const EndpointSchema = z.tuple([
-  dataTypes.describe("The data type of the subject of the query, e.g. 'comics'."),
+  dataTypes.describe(
+    "The data type of the subject of the query, e.g. 'comics'."
+  ),
   z.number().optional().describe("The ID of the subject of the query."),
   dataTypes.optional().describe("The data type returned by the query."),
 ]);

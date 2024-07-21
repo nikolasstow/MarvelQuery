@@ -78,7 +78,7 @@ const spiderComics = await createQuery(["characters", peterParker, "comics"],{
   format: "comic", // We only want the latest comic issues, so lets exclude everything else.
   noVariants: true, // Exclude variants, because we only want unique issues.
   dateDescriptor: "nextWeek", // Get the next week's issues.
-}).fetch().then((query) => query.results);
+}).fetch().then;
 
 /**
  * Fetches series information based on the title and start year.
@@ -113,7 +113,7 @@ export async function comics(
   // Create Date Range
   const createRange = (date: Date) => {
     const formattedDate = date.toISOString().slice(0, 10);
-    return `${formattedDate},${formattedDate}`;
+    return [formattedDate, formattedDate];
   };
 
   // Helper function to parse the releaseDate
@@ -226,7 +226,7 @@ export async function latest(): Promise<MarvelComic[] | false> {
   futureDate.setMonth(currentDate.getMonth() + 5);
 
   return createQuery(["comics"], {
-    dateRange: `${formattedDate(pastDate)},${formattedDate(futureDate)}`,
+    dateRange: [formattedDate(pastDate), formattedDate(futureDate)],
     orderBy: "-modified",
     format: "comic",
     formatType: "comic",

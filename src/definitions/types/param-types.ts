@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { EndpointType } from './utility-types';
+import { z } from "zod";
+import { EndpointType } from "./utility-types";
 import {
   APISchema,
   CharactersSchema,
@@ -9,31 +9,55 @@ import {
   EventsSchema,
   SeriesSchema,
   StoriesSchema,
-} from '../schemas/param-schemas';
+} from "../schemas/param-schemas";
+import { OrderByValues } from "../schemas/schema-utilities";
+
+type Types = keyof typeof OrderByValues;
+
+type OrderByType<T extends Types> = typeof OrderByValues[T][number];
+
+// Generic type to prepend "-" to each string in the union
+type PrefixWithDash<T extends string> = `-${T}`;
+
+// Generic type to combine the original union type with the prefixed union type
+type AddDescending<T extends string> = T | PrefixWithDash<T>;
+
+type OrderByOptions<T extends Types> = AddDescending<OrderByType<T>>;
+
+type Restrict<T, K extends keyof T, V> = Omit<T, K> & V;
+
+type OrderByProperty<T extends Types> = {
+  orderBy?: OrderByOptions<T> | OrderByOptions<T>[];
+};
+
+type OrderBy<
+  Schema extends { orderBy?: string | string[] | undefined },
+  T extends Types
+> = Restrict<Schema, "orderBy", OrderByProperty<T>>;
+
+// type SelectMultiple<V extends string[]> = {};
 
 /** Base parameters for all queries
- * @property modifiedSince - Only return objects created or changed since the specified date. (format: YYYY-MM-DD)
- * @property limit - Limit the result set to the specified number of resources.
- * @property offset - Skip the specified number of resources in the result set.
+ * @property { string } modifiedSince - Only return objects created or changed since the specified date. (format: YYYY-MM-DD)
+ * @property { number } limit - Limit the result set to the specified number of resources.
+ * @property { number } offset - Skip the specified number of resources in the result set.
  */
-export type APIBase = z.infer<typeof APISchema>;
+export type APIBase = z.input<typeof APISchema>;
 /** Parameters for the 'characters' endpoint
- * @property name - Return only characters matching the specified full character name (e.g. Spider-Man).
- * @property nameStartsWith - Return characters with names that begin with the specified string (e.g. Sp).
- * @property modifiedSince - Only return characters created or changed since the specified date. (format: YYYY-MM-DD)
- * @property comics - Return only characters which appear in the specified comics (accepts a comma-separated list of ids).
- * @property series - Return only characters which appear the specified series (accepts a comma-separated list of ids).
- * @property events - Return only characters which appear the specified events (accepts a comma-separated list of ids).
- * @property stories - Return only characters which appear the specified stories (accepts a comma-separated list of ids).
- * @property orderBy - Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.
- * @example ```'name'``` or ```'-name, -modified'```
+ * @property { string } name - Return only characters matching the specified full character name (e.g. Spider-Man).
+ * @property { string } nameStartsWith - Return characters with names that begin with the specified string (e.g. Sp).
+ * @property { number | number[] } comics - Return only characters which appear in the specified comics (accepts id or array of ids).
+ * @property { number | number[] } series - Return only characters which appear the specified series (accepts id or array of ids).
+ * @property { number | number[] } events - Return only characters which appear the specified events (accepts id or array of ids).
+ * @property { number | number[] } stories - Return only characters which appear the specified stories (accepts id or array of ids).
+ * @property { string | string[] } orderBy - Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.
+ * @example ```'name'``` or ```['name', '-modified']```
  * @options ```name, modified, -name, -modified```
- * 
- * @property modifiedSince - Only return characters created or changed since the specified date. (format: YYYY-MM-DD)
- * @property limit - Limit the result set to the specified number of resources.
- * @property offset - Skip the specified number of resources in the result set.
+ * @property { string } modifiedSince - Only return characters created or changed since the specified date. (format: YYYY-MM-DD)
+ * @property { number } limit - Limit the result set to the specified number of resources.
+ * @property { number } offset - Skip the specified number of resources in the result set.
  */
-export type Characters = z.infer<typeof CharactersSchema>;
+export type Characters = OrderBy<z.input<typeof CharactersSchema>, "characters">;
 /** Parameters for the 'comics' endpoint
  * @property format - Filter by the issue format.
  * @options ```comic, magazine, trade paperback, hardcover, digest, graphic novel, digital comic, infinite comic```
@@ -54,10 +78,10 @@ export type Characters = z.infer<typeof CharactersSchema>;
  * @property ean - Filter by EAN.
  * @property issn - Filter by ISSN.
  * @property { boolean } hasDigitalIssue - Filter by having digital rights.
- * @property creators - Return only issues containing the specified creators (accepts a comma-separated list of ids).
- * @property series - Return only issues in the specified series (accepts a comma-separated list of ids).
- * @property events - Return only issues in the specified events (accepts a comma-separated list of ids).
- * @property stories - Return only issues in the specified stories (accepts a comma-separated list of ids).
+ * @property creators - Return only issues containing the specified creators (accepts id or array of ids).
+ * @property series - Return only issues in the specified series (accepts id or array of ids).
+ * @property events - Return only issues in the specified events (accepts id or array of ids).
+ * @property stories - Return only issues in the specified stories (accepts id or array of ids).
  * @property sharedAppearances - Return only issues in which the specified characters appear together (for example in which both Spider-Man and Gamora appear). Accepts a comma-separated list of ids.
  * @property collaborators - Return only issues in which the specified creators worked together (for example in which both Brian Bendis and Stan Lee did work). Accepts a comma-separated list of ids.
  * @property orderBy - Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.
@@ -66,7 +90,7 @@ export type Characters = z.infer<typeof CharactersSchema>;
  * @property limit - Limit the result set to the specified number of resources.
  * @property offset - Skip the specified number of resources in the result set.
  */
-export type Comics = z.infer<typeof ComicsSchema>;
+export type Comics = z.input<typeof ComicsSchema>;
 /**
  * @property firstName - Filter by creator first name (e.g. Brian).
  * @property middleName - Filter by creator middle name (e.g. Michael).
@@ -77,43 +101,43 @@ export type Comics = z.infer<typeof ComicsSchema>;
  * @property middleNameStartsWith - Filter by creator middle names that match critera (e.g. Mi).
  * @property lastNameStartsWith - Filter by creator last names that match critera (e.g. Ben).
  * @property modifiedSince - Return only creators which have been modified since the specified date.
- * @property comics - Return only creators who worked on in the specified comics (accepts a comma-separated list of ids).
- * @property series - Return only creators who worked on the specified series (accepts a comma-separated list of ids).
- * @property events - Return only creators who worked on comics that took place in the specified events (accepts a comma-separated list of ids).
- * @property stories - Return only creators who worked on the specified stories (accepts a comma-separated list of ids).
+ * @property comics - Return only creators who worked on in the specified comics (accepts id or array of ids).
+ * @property series - Return only creators who worked on the specified series (accepts id or array of ids).
+ * @property events - Return only creators who worked on comics that took place in the specified events (accepts id or array of ids).
+ * @property stories - Return only creators who worked on the specified stories (accepts id or array of ids).
  * @property orderBy - Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.
  * @example ```'lastName'``` or ```'-lastName, -firstName'```
  * @options ```lastName, firstName, middleName, suffix, modified, -lastName, -firstName, -middleName, -suffix, -modified```
  * @property limit - Limit the result set to the specified number of resources.
  * @property offset - Skip the specified number of resources in the result set.
  */
-export type Creators = z.infer<typeof CreatorsSchema>;
+export type Creators = z.input<typeof CreatorsSchema>;
 /**
  * @property name - Return only events which match the specified name.
  * @property nameStartsWith - Return only events which match the specified name.
  * @property modifiedSince - Return only events which have been modified since the specified date.
- * @property creators - Return only events which feature work by the specified creators (accepts a comma-separated list of ids).
- * @property characters - Return only events which feature the specified characters (accepts a comma-separated list of ids).
- * @property series - Return only events which are part of the specified series (accepts a comma-separated list of ids).
- * @property comics - Return only events which take place in the specified comics (accepts a comma-separated list of ids).
- * @property stories - Return only events which take place in the specified stories (accepts a comma-separated list of ids).
+ * @property creators - Return only events which feature work by the specified creators (accepts id or array of ids).
+ * @property characters - Return only events which feature the specified characters (accepts id or array of ids).
+ * @property series - Return only events which are part of the specified series (accepts id or array of ids).
+ * @property comics - Return only events which take place in the specified comics (accepts id or array of ids).
+ * @property stories - Return only events which take place in the specified stories (accepts id or array of ids).
  * @property orderBy - Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.
  * @example ```'name'``` or ```'-name, -startDate'```
  * @options ```name, startDate, modified, -name, -startDate, -modified```
- * @property limit - Limit the result set to the specified number of resources.   
+ * @property limit - Limit the result set to the specified number of resources.
  * @property offset - Skip the specified number of resources in the result set.
  */
-export type Events = z.infer<typeof EventsSchema>;
+export type Events = z.input<typeof EventsSchema>;
 /**
  * @property title - Return only series which match the specified title.
  * @property titleStartsWith - Return series with titles that begin with the specified string (e.g. Sp).
  * @property startYear - Return only series matching the specified start year.
  * @property modifiedSince - Return only series which have been modified since the specified date.
- * @property comics - Return only series which contain the specified comics (accepts a comma-separated list of ids).
- * @property stories - Return only series which contain the specified stories (accepts a comma-separated list of ids). 
- * @property events - Return only series which have comics that take place during the specified events (accepts a comma-separated list of ids).
- * @property creators - Return only series which feature work by the specified creators (accepts a comma-separated list of ids).
- * @property characters - Return only series which feature the specified characters (accepts a comma-separated list of ids).
+ * @property comics - Return only series which contain the specified comics (accepts id or array of ids).
+ * @property stories - Return only series which contain the specified stories (accepts id or array of ids).
+ * @property events - Return only series which have comics that take place during the specified events (accepts id or array of ids).
+ * @property creators - Return only series which feature work by the specified creators (accepts id or array of ids).
+ * @property characters - Return only series which feature the specified characters (accepts id or array of ids).
  * @property seriesType - Filter the series by publication frequency type.
  * @options ```collection, one shot, limited, ongoing```
  * @property contains - Return only series containing one or more comics with the specified format.
@@ -125,22 +149,22 @@ export type Events = z.infer<typeof EventsSchema>;
  * @property limit - Limit the result set to the specified number of resources.
  * @property offset - Skip the specified number of resources in the result set.
  */
-export type Series = z.infer<typeof SeriesSchema>;
+export type Series = z.input<typeof SeriesSchema>;
 /**
  * @property modifiedSince - Return only stories which have been modified since the specified date.
- * @property comics - Return only stories contained in the specified (accepts a comma-separated list of ids).
- * @property series - Return only stories contained the specified series (accepts a comma-separated list of ids).
- * @property events - Return only stories which take place during the specified events (accepts a comma-separated list of ids).
- * @property creators - Return only stories which feature work by the specified creators (accepts a comma-separated list of ids).	
- * @property characters - Return only stories which feature the specified characters (accepts a comma-separated list of ids).
+ * @property comics - Return only stories contained in the specified (accepts id or array of ids).
+ * @property series - Return only stories contained the specified series (accepts id or array of ids).
+ * @property events - Return only stories which take place during the specified events (accepts id or array of ids).
+ * @property creators - Return only stories which feature work by the specified creators (accepts id or array of ids).
+ * @property characters - Return only stories which feature the specified characters (accepts id or array of ids).
  * @property orderBy - Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.
  * @example ```'modified'``` or ```'-modified, title'```
  * @options ```id, modified, -id, -modified```
  * @property limit - Limit the result set to the specified number of resources.
  * @property offset - Skip the specified number of resources in the result set.
  */
-export type Stories = z.infer<typeof StoriesSchema>;
+export type Stories = z.input<typeof StoriesSchema>;
 /** Return comics within a predefined date range.
  * @options ```lastWeek, thisWeek, nextWeek, thisMonth```
  */
-export type DateDescriptor = z.infer<typeof DateDescriptorSchema>;
+export type DateDescriptor = z.input<typeof DateDescriptorSchema>;
