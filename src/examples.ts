@@ -122,12 +122,11 @@ export async function comics(
   };
 
   // Conditionally create params
-  const params: { title: string; dateRange?: string } = { title };
+  const params: { title: string; dateRange?: string[] } = { title };
 
   if (releaseDate) {
     const parsedDate = parseReleaseDate(releaseDate);
-    const dateRange = createRange(parsedDate);
-    params.dateRange = dateRange;
+    params.dateRange = createRange(parsedDate);;
   }
 
   return await createQuery(["comics"], params)

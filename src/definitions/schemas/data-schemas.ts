@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { EndpointMap } from "../types/utility-types";
-import { YearSchema } from "./schema-utilities";
+import { FormatSchema, YearSchema } from "./schema-utilities";
 
 // Use .nullable() to allow null values
 
@@ -206,11 +206,7 @@ export const MarvelComicSchema = MarvelResultSchema.extend({
     .nullable()
     .optional()
     .describe("The ISSN barcode for the comic."),
-  format: z
-    .string()
-    .nullable()
-    .optional()
-    .default("Unknown")
+  format: FormatSchema.nullable()
     .describe(
       "The format of the comic e.g. comic, digital comic, hardcover, trade paperback."
     ),

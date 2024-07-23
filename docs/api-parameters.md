@@ -1,4 +1,4 @@
-# Query Parameters
+# API Parameters
 
 ## Base Parameters
 | Property         | Type                  | Description                                                                                         
@@ -120,6 +120,8 @@
 | `modifiedSince` | [`Date`](#dates)    | Only return resources created or changed since the specified date. (Accepts various date formats; e.g. 'YYYY-MM-DD', JavaScript Date object).
 | `limit`         | `number`            | Limit the result set to the specified number of resources.
 | `offset`        | `number`            | Skip the specified number of resources in the result set.
+
+## Types
 
 ### Formats
 

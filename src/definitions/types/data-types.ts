@@ -30,20 +30,23 @@ import {
   MarvelStorySchema,
 } from "../schemas/data-schemas";
 
-/** 
- * @property type - The canonical type of the text object (e.g. solicit text, preview text, etc.).
- * @property language - The IETF language tag denoting the language the text object is written in.
- * @property text - The text.
+/**| Property   | Type     | Description                                                 
+ * | ---------- | -------- | ------------------------------------------------------------
+ * | `type`     | `string` | Only return resources created or changed since the specified date.
+ * | `language` | `string` | The IETF language tag denoting the language the text object is written in. 
+ * | `text`     | `string` | The text.                                                    
  */
 export type TextObject = z.infer<typeof TextObjectSchema>;
-/**
- * @property type - A text identifier for the URL.
- * @property url - A full URL (including scheme, domain, and path).
+/**| Property | Type     | Description                                      |
+ * | -------- | -------- | ------------------------------------------------ |
+ * | `type`   | `string` | A text identifier for the URL.                   |
+ * | `url`    | `string` | A full URL (including scheme, domain, and path). |
  */
 export type URL = z.infer<typeof URLSchema>;
-/**
- * @property path - The directory path of the image.
- * @property extension - The file extension for the image.
+/**| Property    | Type     | Description                                      |
+ * | ----------- | -------- | ------------------------------------------------ |
+ * | `path`      | `string` | The directory path of the image.                 |
+ * | `extension` | `string` | A full URL (including scheme, domain, and path). |
  */
 export type Image = z.infer<typeof ImageSchema>;
 /**
@@ -107,7 +110,7 @@ export type CharacterSummary = z.infer<typeof CharacterSummarySchema>;
  */
 export type EventSummary = z.infer<typeof EventSummarySchema>;
 /**
- * @property available - The number of total available resources in this list. Will always be greater than or equal to the "returned" value.,
+ * @property available - The number of total available resources in this list. Will always be greater than or equal to the "returned" value.
  * @property returned - The number of resources returned in this collection (up to 20).,
  * @property collectionURI - The path to the full list of items in this collection.,
  * @property items - The list of returned resources in this collection.
@@ -189,7 +192,6 @@ export type MarvelResult = z.infer<typeof MarvelResultSchema>;
  * @property { ComicSummary[] } collectedIssues - A list of issues collected in this comic (will generally be empty for periodical formats such as "comic" or "magazine"
  * @property { ComicDate[] } dates - A list of key dates for this comic.
  * @property { ComicPrice[] } prices - A list of prices for this comic.
-
  * @property { Image[] } images - A list of promotional images associated with this comic.
  * @property { CreatorList } creators - A resource list containing the creators associated with this comic.
  * @property { CharacterList } characters - A resource list containing the characters in this comic.
