@@ -17,10 +17,33 @@ export const IDListSchema = z
   })
   .describe("Comma separated list of IDs or a single ID");
 
+// Utility function to transform date strings or Date objects to ISO 8601 format
+const transformToISO8601 = (value: unknown): string | undefined => {
+  if (value instanceof Date) {
+    // If it's already a Date object, convert to ISO string
+    return value.toISOString();
+  }
+  if (typeof value === 'string') {
+    // Regular expression to match the allowed date formats
+    const iso8601Regex =
+      /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?([+-]\d{2}:\d{2})?)?$/;
+
+    // If the string matches one of the allowed formats
+    if (iso8601Regex.test(value)) {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString();
+      }
+    }
+  }
+  return undefined;
+};
+
+// ModifiedSince schema
 export const ModifiedSince = z
-  .string()
-  .date()
-  .describe("Date in ISO 8601 format (YYYY-MM-DD)");
+  .preprocess(transformToISO8601, z.string().refine((val) => val !== undefined, {
+    message: 'Invalid date format.',
+  })).describe("Date in ISO 8601 format, YYYY-MM-DD, or a Date object");
 
 const DateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -50,7 +73,7 @@ export const YearSchema = z
 /** Select one or multiple values from a list of valid values.
  * Values can be a single string or an array of strings.
  */
-export const SelectMultiple = (validValues: string[]) => {
+export const SelectMultiple = (validValues: readonly string[]) => {
   // Schema for a single string with valid values
   const SingleValueSchema = z
     .string()
@@ -82,6 +105,21 @@ export const SelectMultiple = (validValues: string[]) => {
       `Comma-separated list of allowed values: ${validValues.join(", ")}`
     );
 };
+
+// Array of valid format values
+export const Formats = [
+  "comic",
+  "magazine",
+  "trade paperback",
+  "hardcover",
+  "digest",
+  "graphic novel",
+  "digital comic",
+  "infinite comic",
+] as const;
+
+export const FormatSchema = z.enum(Formats); // Schema for a single format
+export const FormatsSchema = SelectMultiple(Formats); // Schema for an array of formats
 
 export const OrderByValues = {
   comics: ["focDate", "onsaleDate", "title", "issueNumber", "modified"],

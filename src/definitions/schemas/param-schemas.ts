@@ -3,9 +3,10 @@ import {
   DateRangeSchema,
   IDListSchema,
   ModifiedSince,
-  SelectMultiple,
   OrderBy,
   YearSchema,
+  FormatSchema,
+  FormatsSchema,
 } from "./schema-utilities";
 import { EndpointMap } from "lib";
 
@@ -58,17 +59,6 @@ export const CharactersSchema = APISchema.extend({
       `Order the result set by a field or fields. Add a "-" to the value sort in descending order. Multiple values are given priority in the order in which they are passed.`
     ),
 });
-
-const FormatSchema = SelectMultiple([
-  "comic",
-  "magazine",
-  "trade paperback",
-  "hardcover",
-  "digest",
-  "graphic novel",
-  "digital comic",
-  "infinite comic",
-]);
 
 const FormatTypeSchema = z.enum(["comic", "collection"]);
 export const DateDescriptorSchema = z.enum([
@@ -275,7 +265,7 @@ export const SeriesSchema = APISchema.extend({
     .describe(
       "Filter the series by publication frequency type (e.g. collection, one shot, limited, ongoing)."
     ),
-  contains: FormatSchema.optional().describe(
+  contains: FormatsSchema.optional().describe(
     "Return only series containing one or more comics with the specified format."
   ),
   orderBy: OrderBy("series")

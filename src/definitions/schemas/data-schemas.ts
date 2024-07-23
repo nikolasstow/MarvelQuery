@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { EndpointMap } from "../types/utility-types";
+import { YearSchema } from "./schema-utilities";
 
 // Use .nullable() to allow null values
 
@@ -273,10 +274,12 @@ export const MarvelEventSchema = MarvelResultSchema.extend({
     .nullable()
     .optional()
     .describe("A description of the event."),
-  start: DateTimeSchema // In "YYYY-MM-DD HH:MM:SS" format rather than the standard ISO 8601 format which separates date and time with a 'T' rather than a space.
-    .describe("The date of publication of the first issue in this event."),
-  end: DateTimeSchema // In "YYYY-MM-DD HH:MM:SS" format rather than the standard ISO 8601 format. WHY Marvel?
-    .describe("The date of publication of the last issue in this event."),
+  start: DateTimeSchema.describe( // In "YYYY-MM-DD HH:MM:SS" format rather than the standard ISO 8601 format which separates date and time with a 'T' rather than a space.
+    "The date of publication of the first issue in this event."
+  ),
+  end: DateTimeSchema.describe( // In "YYYY-MM-DD HH:MM:SS" format rather than the standard ISO 8601 format. WHY Marvel?
+    "The date of publication of the last issue in this event."
+  ),
   comics: ComicListSchema.describe(
     "A resource list containing the comics in this event."
   ),
@@ -316,13 +319,11 @@ export const MarvelSeriesSchema = MarvelResultSchema.extend({
     .nullable()
     .optional()
     .describe("A description of the series."),
-  startYear: z
-    .string()
-    .or(z.number())
-    .describe("The first year in which the series has been published."),
+  startYear: YearSchema.describe(
+    "The first year in which the series has been published."
+  ),
   endYear: z
-    .number()
-    .or(z.number())
+    .union([YearSchema, z.literal(2099)])
     .describe(
       "The last year of publication for the series (conventionally, 2099 for ongoing series)."
     ),
