@@ -55,7 +55,7 @@ type Formats = SelectMultiple<typeof Formats>;
  * | `limit`          | `number`                                                                                             | Limit the result set to the specified number of resources.
  * | `offset`         | `number`                                                                                             | Skip the specified number of resources in the result set.
  */
-export type APIBase = z.input<typeof APISchema>;
+export type APIBaseParams = z.input<typeof APISchema>;
 
 // Character parameters
 /**| Property         | Type                                                                                                    | Description
@@ -71,7 +71,7 @@ export type APIBase = z.input<typeof APISchema>;
  * | `limit`          | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`         | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type Characters = OrderBy<
+export type CharacterParams = OrderBy<
   z.input<typeof CharactersSchema>,
   "characters"
 >;
@@ -105,7 +105,7 @@ export type Characters = OrderBy<
  * | `limit`             | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`            | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type Comics = OrderBy<z.input<typeof ComicsSchema>, "comics">;
+export type ComicParams = OrderBy<z.input<typeof ComicsSchema>, "comics">;
 
 /**| Property               | Type                                                                                                    | Description
  * |------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ export type Comics = OrderBy<z.input<typeof ComicsSchema>, "comics">;
  * | `limit`                | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`               | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type Creators = OrderBy<z.input<typeof CreatorsSchema>, "creators">;
+export type CreatorParams = OrderBy<z.input<typeof CreatorsSchema>, "creators">;
 /**| Property         | Type                                                                                                    | Description
  * |------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------
  * | `name`           | `string`                                                                                                | Return only events which match the specified name.
@@ -141,7 +141,7 @@ export type Creators = OrderBy<z.input<typeof CreatorsSchema>, "creators">;
  * | `limit`          | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`         | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type Events = OrderBy<z.input<typeof EventsSchema>, "events">;
+export type EventParams = OrderBy<z.input<typeof EventsSchema>, "events">;
 /**| Property          | Type                                                                                                    | Description
  * |-------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------
  * | `title`           | `string`                                                                                                | Return only series which match the specified title.
@@ -158,7 +158,7 @@ export type Events = OrderBy<z.input<typeof EventsSchema>, "events">;
  * | `limit`           | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`          | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type Series = z.input<typeof SeriesSchema>;
+export type SeriesParams = z.input<typeof SeriesSchema>;
 /**| Property        | Type                                                                                                    | Description
  * |-----------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------
  * | `comics`        | [`IDList`](https://github.com/nikolasstow/MarvelQuery/blob/init-and-docs/docs/api-parameters.md#idlist) | Return only stories contained in the specified (accepts id or array of ids).
@@ -171,7 +171,7 @@ export type Series = z.input<typeof SeriesSchema>;
  * | `limit`         | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`        | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type Stories = z.input<typeof StoriesSchema>;
+export type StoryParams = z.input<typeof StoriesSchema>;
 /** Return comics within a predefined date range.
  * `lastWeek` `thisWeek` `nextWeek` `thisMonth`
  */

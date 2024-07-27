@@ -1,13 +1,13 @@
 # API Parameters
 
-## Base Parameters
+## Base Parameters {#apibaseparams}
 | Property         | Type                  | Description                                                                                         
 |------------------|-----------------------|-------------------------------------------------------------------------------------
 | `modifiedSince`  | [`Date`](#dates)      | Only return resources created or changed since the specified date.
 | `limit`          | `number`              | Limit the result set to the specified number of resources.
 | `offset`         | `number`              | Skip the specified number of resources in the result set.
 
-## Characters
+## CharacterParams
 
 | Property         | Type                | Description                                                                                         
 |------------------|---------------------|-----------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@
 | `limit`          | `number`            | Limit the result set to the specified number of resources.
 | `offset`         | `number`            | Skip the specified number of resources in the result set.
 
-## Comics
+## ComicParams
 | Property            | Type                                                    | Description                                                                                         
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------
 | `format`            | [`Format`](#formats)                                    | Filter by format (e.g. comic, digital comic, trade paperback).
@@ -52,7 +52,7 @@
 | `limit`             | `number`                                                | Limit the result set to the specified number of resources.
 | `offset`            | `number`                                                | Skip the specified number of resources in the result set.
 
-## Creators
+## CreatorParams
 
 | Property               | Type                                                    | Description                                                                                         
 |------------------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@
 | `limit`                | `number`                                                | Limit the result set to the specified number of resources.
 | `offset`               | `number`                                                | Skip the specified number of resources in the result set.
 
-## Events
+## EventParams
 
 | Property         | Type                          | Description                                                                                         
 |------------------|-------------------------------|-----------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@
 | `limit`          | `number`                      | Limit the result set to the specified number of resources.
 | `offset`         | `number`                      | Skip the specified number of resources in the result set.
 
-## Series
+## SeriesParams
 
 | Property          | Type                                        | Description                                                                                         
 |-------------------|---------------------------------------------|-----------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@
 | `limit`           | `number`                                    | Limit the result set to the specified number of resources.
 | `offset`          | `number`                                    | Skip the specified number of resources in the result set.
 
-## Stories
+## StoryParams
 
 | Property        | Type                | Description                                                                                         
 |-----------------|---------------------|-----------------------------------------------------------------------------------------------------

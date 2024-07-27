@@ -55,23 +55,39 @@ class MarvelQuery<Type extends Endpoint> {
   static onResult?: OnResultMap;
   /** Replace the default fetch function (axios) with your own http client */
   static fetchFunction?: (url: string) => Promise<unknown>;
+  /** Function to create an instance of the MarvelQuery class */
+  private static createQuery = <Type extends Endpoint>(
+    endpoint: Type,
+    params: ParamsType<Type>
+  ): MarvelQuery<Type> => {
+    /** Validate the endpoint. */
+    if (!endpoint) {
+      throw new Error("Missing endpoint");
+    }
+    /** Validate the public and private keys. */
+    if (!MarvelQuery.publicKey || !MarvelQuery.privateKey) {
+      throw new Error("Missing public or private keys");
+    }
+    /** Create a new query with the MarvelQuery class. */
+    return new MarvelQuery<Type>(endpoint, params);
+  };
   /** Initialize the API library with your public and private keys and other options.
-   * @param args.publicKey - Marvel API public key.
-   * @param args.privateKey - Marvel API private key.
+   * @param keys.publicKey - Marvel API public key.
+   * @param keys.privateKey - Marvel API private key.
    *
    ** Don't have keys? Get them at https://developer.marvel.com/
-   * @param args.omitUndefined - Remove undefined parameters from the query
-   * @param args.globalParams - Global parameters to be applied to all queries, or all queries of a specific type.
-   * @param args.onRequest - An optional function that will be called before the request is sent.
-   * @param args.onResult - Add custom functions to be called when a request of a specific type is complete.
-   * @param args.fetchFunction - Replace the default fetch function (axios) with your own http client.
+   * @param config.omitUndefined - Remove undefined parameters from the query
+   * @param config.globalParams - Global parameters to be applied to all queries, or all queries of a specific type.
+   * @param config.onRequest - An optional function that will be called before the request is sent.
+   * @param config.onResult - Add custom functions to be called when a request of a specific type is complete.
+   * @param config.fetchFunction - Replace the default fetch function (axios) with your own http client.
    ** For more information, visit https://github.com/nikolasstow/MarvelQuery
    */
   static init(keys: APIKeys, config: Config = {}) {
     /** Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. */
     Object.assign(MarvelQuery, { ...keys, ...config }); // You're probably wonder why keys and config are separate arguments when the get combined anyway... it's because it looks cleaner. Don't judge me.
     /** Pass the createQuery function once the library is initialized. */
-    return createQuery;
+    return MarvelQuery.createQuery;
   }
 
   /** Endpoint of the query
@@ -139,7 +155,7 @@ class MarvelQuery<Type extends Endpoint> {
       throw new Error(`Invalid endpoint[0]: ${endpoint[0]}`);
     }
     /** Validate the second element of the endpoint is a number. */
-    if (endpoint[1] &&  typeof endpoint[1] !== "number") {
+    if (endpoint[1] && typeof endpoint[1] !== "number") {
       throw new Error(`Invalid endpoint[1]: ${endpoint[1]}`);
     }
     /** Validate the third element of the endpoint is a valid endpoint type */
@@ -205,7 +221,7 @@ class MarvelQuery<Type extends Endpoint> {
   }
 
   /** Build the URL of the query with the parameters, timestamp and hash. */
-  buildURL() {
+  buildURL(): string {
     const baseURL = "https://gateway.marvel.com/v1/public";
     const endpoint = this.endpoint.join("/");
     const timestamp = Number(new Date());
@@ -271,23 +287,6 @@ class MarvelQuery<Type extends Endpoint> {
       throw new Error("Invalid parameters");
     }
   }
-}
-
-/** Create a new query with the MarvelQuery class. */
-function createQuery<Type extends Endpoint>(
-  endpoint: Type,
-  params: ParamsType<Type>
-): MarvelQuery<Type> {
-  /** Validate the endpoint. */
-  if (!endpoint) {
-    throw new Error("Missing endpoint");
-  }
-  /** Validate the public and private keys. */
-  if (!MarvelQuery.publicKey || !MarvelQuery.privateKey) {
-    throw new Error("Missing public or private keys");
-  }
-  /** Create a new query with the MarvelQuery class. */
-  return new MarvelQuery<Type>(endpoint, params);
 }
 
 /** Extension of the MarvelQuery class with query results and helper functions. */

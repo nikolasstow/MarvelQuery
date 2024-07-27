@@ -49,92 +49,107 @@ export type URL = z.infer<typeof URLSchema>;
  * | `extension` | `string` | A full URL (including scheme, domain, and path). |
  */
 export type Image = z.infer<typeof ImageSchema>;
-/**
- * @property type - A description of the date (e.g. onsale date, FOC date).
- * @property date - The date.
+/**| Property | Type     | Description                                                 
+ * | -------- | -------- | ------------------------------------------------------------ |
+ * | `type`   | `string` | A description of the price (e.g. print price, digital price). 
+ * | `price`  | `number` | The price (all prices in USD).    
  */
 export type ComicDate = z.infer<typeof ComicDateSchema>;
-/**
- * @property type - A description of the price (e.g. print price, digital price).
- * @property price - The price (all prices in USD).
+/**| Property | Type     | Description                                                 
+ * | -------- | -------- | ------------------------------------------------------------
+ * | `type`   | `string` | A description of the price (e.g. print price, digital price).
+ * | `price`  | `number` | The price (all prices in USD).   
  */
 export type ComicPrice = z.infer<typeof ComicPriceSchema>;
-/**
- * @property resourceURI - The path to the individual resource.
- * @property name - The canonical name of the resource.
+/**| Property      | Type     | Description                          |
+ * | ------------- | -------- | ------------------------------------ |
+ * | `resourceURI` | `string` | The path to the individual resource. |
+ * | `name`        | `string` | The canonical name of the resource.  |
  */
 export type Summary = z.infer<typeof SummarySchema>;
-/**
- * @property resourceURI - The path to the individual resource.
- * @property name - The canonical name of the resource.
- * @property role - The role of the person in the parent entity.
+/**| Property      | Type     | Description                                  |
+ * | ------------- | -------- | -------------------------------------------- |
+ * | `resourceURI` | `string` | The path to the individual resource.         |
+ * | `name`        | `string` | The canonical name of the resource.          |
+ * | `role`        | `string` | The role of the person in the parent entity. |
  */
 export type RoleSummary = z.infer<typeof RoleSummarySchema>;
-/**
- * @property resourceURI - The path to the individual resource.
- * @property name - The canonical name of the resource.
- * @property type - The type of the entity.
+/**| Property      | Type     | Description                          |
+ * | ------------- | -------- | ------------------------------------ |
+ * | `resourceURI` | `string` | The path to the individual resource. |
+ * | `name`        | `string` | The canonical name of the resource.  |
+ * | `type`        | `string` | The type of the entity.              |
  */
 export type TypeSummary = z.infer<typeof TypeSummarySchema>;
-/**
- * @property resourceURI - The path to the individual comic resource.
- * @property name - The canonical name of the comic.
+/**| Property      | Type     | Description                                |
+ * | ------------- | -------- | ------------------------------------------ |
+ * | `resourceURI` | `string` | The path to the individual comic resource. |
+ * | `name`        | `string` | The canonical name of the comic.           |
  */
 export type ComicSummary = z.infer<typeof ComicSummarySchema>;
-/**
- * @property resourceURI - The path to the individual resource.
- * @property name - The canonical name of the story.
- * @property type - The type of the story (interior or cover).
+/**| Property      | Type     | Description                                |
+ * | ------------- | -------- | ------------------------------------------ |
+ * | `resourceURI` | `string` | The path to the individual resource.       |
+ * | `name`        | `string` | The canonical name of the story.           |
+ * | `role`        | `string` | The type of the story (interior or cover). |
  */
 export type StorySummary = z.infer<typeof StorySummarySchema>;
-/**
- * @property resourceURI - The path to the individual series resource.
- * @property name - The canonical name of the series.
+/**| Property      | Type     | Description                                 |
+ * | ------------- | -------- | ------------------------------------------- |
+ * | `resourceURI` | `string` | The path to the individual series resource. |
+ * | `name`        | `string` | The canonical name of the series.           |
  */
 export type SeriesSummary = z.infer<typeof SeriesSummarySchema>;
-/**
- * @property resourceURI - The path to the individual resource.
- * @property name - The full name of the creator.
- * @property role - The role of the creator in the parent entity.
+/**| Property      | Type     | Description                                   |
+ * | ------------- | -------- | --------------------------------------------- |
+ * | `resourceURI` | `string` | The path to the individual resource.          |
+ * | `name`        | `string` | The full name of the creator.                 |
+ * | `role`        | `string` | The role of the creator in the parent entity. |
  */
 export type CreatorSummary = z.infer<typeof CreatorSummarySchema>;
-/**
- * @property resourceURI - The path to the individual resource.
- * @property name - The full name of the character.
- * @property role - The role of the character in the parent entity.
+/**| Property      | Type     | Description                                     |
+ * | ------------- | -------- | ----------------------------------------------- |
+ * | `resourceURI` | `string` | The path to the individual resource.            |
+ * | `name`        | `string` | The full name of the character.                 |
+ * | `role`        | `string` | The role of the character in the parent entity. |
  */
 export type CharacterSummary = z.infer<typeof CharacterSummarySchema>;
-/**
- * @property resourceURI - The path to the individual event resource.
- * @property name - The name of the event.
+/**| Property      | Type     | Description                                |
+ * | ------------- | -------- | ------------------------------------------ |
+ * | `resourceURI` | `string` | The path to the individual event resource. |
+ * | `name`        | `string` | The name of the event.                     |
  */
 export type EventSummary = z.infer<typeof EventSummarySchema>;
-/**
- * @property available - The number of total available resources in this list. Will always be greater than or equal to the "returned" value.
- * @property returned - The number of resources returned in this collection (up to 20).,
- * @property collectionURI - The path to the full list of items in this collection.,
- * @property items - The list of returned resources in this collection.
+/**| Property        | Type                  | Description                                                  
+ * | --------------- | --------------------- | ------------------------------------------------------------ 
+ * | `available`     | `number`              | The number of total available resources in this list. Will always be greater than or equal to the "returned" value. 
+ * | `returned`      | `number`              | The number of resources returned in this collection (up to 20). 
+ * | `collectionURI` | `string`              | The path to the full list of items in this collection.       
+ * | `items`         | [`Summary`](#summary) | The list of returned issues in this collection.              
  */
 export type List = z.infer<typeof ListSchema>;
-/**
- * @property available - The number of total available issues in this list. Will always be greater than or equal to the "returned" value.,
- * @property returned - The number of issues returned in this collection (up to 20).,
- * @property collectionURI - The path to the full list of issues in this collection.,
- * @property items - The list of returned issues in this collection.
+/**| Property        | Type                            | Description                                                  |
+ * | --------------- | ------------------------------- | ------------------------------------------------------------ |
+ * | `available`     | `number`                        | The number of total available issues in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                        | The number of issues returned in this collection (up to 20). |
+ * | `collectionURI` | `string`                        | The path to the full list of issues in this collection.      |
+ * | `items`         | [`ComicSummary`](#comicsummary) | The list of returned issues in this collection.              |
  */
 export type ComicList = z.infer<typeof ComicListSchema>;
-/**
- * @property available - The number of total available stories in this list. Will always be greater than or equal to the "returned" value.,
- * @property returned - The number of stories returned in this collection (up to 20).,
- * @property collectionURI - The path to the full list of stories in this collection.,
- * @property items - The list of returned stories in this collection.
+/**| Property        | Type                            | Description                                                  
+ * | --------------- | ------------------------------- | ------------------------------------------------------------ 
+ * | `available`     | `number`                        | The number of total available stories in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                        | The number of stories returned in this collection (up to 20).
+ * | `collectionURI` | `string`                        | The path to the full list of stories in this collection.     
+ * | `items`         | [`StorySummary`](#storysummary) | The list of returned stories in this collection.             
  */
 export type StoryList = z.infer<typeof StoryListSchema>;
-/**
- * @property available - The number of total available series in this list. Will always be greater than or equal to the "returned" value.,
- * @property returned - The number of series returned in this collection (up to 20).,
- * @property collectionURI - The path to the full list of series in this collection.,
- * @property items - The list of returned series in this collection.
+/**| Property        | Type                              | Description                                                  |
+ * | --------------- | --------------------------------- | ------------------------------------------------------------ |
+ * | `available`     | `number`                          | The number of total available series in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                          | The number of series returned in this collection (up to 20). |
+ * | `collectionURI` | `string`                          | The path to the full list of series in this collection.      |
+ * | `items`         | [`SeriesSummary`](#seriessummary) | The list of returned series in this collection.              |
  */
 export type SeriesList = z.infer<typeof SeriesListSchema>;
 /**
