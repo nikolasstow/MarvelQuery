@@ -20,7 +20,7 @@ const createQuery = MarvelQuery.init({
 | `publicKey`  | `string` | Marvel API public key as set during initialization.  |
 | `privateKey` | `string` | Marvel API private key as set during initialization. |
 
-## Config
+## Configuration Options
 
 | Property        | Type                                | Description                                                  |
 | --------------- | ----------------------------------- | ------------------------------------------------------------ |
@@ -40,7 +40,7 @@ const character = await createQuery(["characters"], {
 }).fetch();
 ```
 
-## MarvelQuery\<Type extends Endpoint>
+## MarvelQuery
 
 Don't have API Keys? Visit https://developer.marvel.com/ to create an account for free.
 
@@ -62,7 +62,7 @@ Don't have API Keys? Visit https://developer.marvel.com/ to create an account fo
 | `buildURL`                              | `void`                                                   | `string`                                                 | Builds the URL of the query with the parameters, timestamp and hash. |
 | `request`                               | `url: string`                                            | [`Promise<APIWrapper<ResultType<Type>>>`](#apiwrapper)   | Sends the request to the API, and validate the response.     |
 
-## MarvelQueryResult\<Type extends Endpoint>
+## MarvelQueryResult
 
 MarvelQueryResult extends the [`MarvelQuery`](#marvelquery) class and inherits all of it's properties and functions. It adds additional properties and functions specific to the handling of API results.
 
@@ -113,7 +113,7 @@ For detailed descriptions of the inherited properties and methods, please refer 
 
 ​	•	request
 
-## Endpoint
+## Endpoints
 
 In the MarvelQuery library, the endpoint is split into an array by slashes. These three parts determine what you are looking for, and what data you will receive. 
 
@@ -186,15 +186,6 @@ The globalParams feature in your library allows you to set default parameters fo
 | `stories`    | [`OnResultFunction<MarvelStory>`](#onresultfunction)     | Upon the return of story results from the API, this function will run and pass an array of marvel stories. |
 | `series`     | [`OnResultFunction<MarvelSeries>`](#onresultfunction)    | Upon the return of series results from the API, this function will run and pass an array of marvel series. |
 
-### OnResultFunction
-
-```ts
-// Type of function that will be called when the query is finished, and passes the results as an array
-type OnResultFunction<Type extends MarvelResult> = (
-  data: Type[]
-) => void | Promise<unknown>;
-```
-
 ### AnyResultFunction
 
 ```ts
@@ -209,17 +200,68 @@ type AnyResultFunction = OnResultFunction<AnyType>;
 type AnyType = MarvelComic | MarvelCharacter | MarvelCreator | MarvelEvent | MarvelSeries | MarvelStory;
 ```
 
-### ResultType<Type **extends** Endpoint> {#resulttype}
+### DataType
 
 ```ts
-// ResultType is a utility type designed to determine the expected data type returned from a given API endpoint. It uses conditional types to map an endpoint to its corresponding type of results.
-type ResultType<Type extends Endpoint> =
-  DataType<Type> extends EndpointType ? ResultMap[DataType<Type>] : never;
+/** Utitility type that determines which type of data being queried.
+ * It works by checking the endpoint and looking for the last data type in the endpoint.
+ * If the last element is a type, use it. If it's a number, use the type in the first element.
+ */
+type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
+  ...infer _,
+  infer LastElement
+]
+  ? LastElement extends number
+    ? ArrayType extends [infer FirstElement, ...unknown[]]
+      ? FirstElement
+      : never
+    : LastElement
+  : never;
 ```
 
-*Reference [`ResultMap`](#resultmap) where each type is assigned to an endpoint*
+### EndpointType, EndpointResultType, DistinctEndpointType, and Endpoint
 
-### ParamsType<Type **extends** Endpoint> {#resulttype}
+```ts
+// Data types of the Marvel API are the core of the endpoint
+type EndpointType = "comics" | "characters" | "creators" | "events" | "series" | "stories";
+// Utility type to remove one of the types from the union
+type EndpointResultType<Type extends EndpointType> = Exclude<EndpointType, Type>;
+// Utility type that infers the type of the first element of the endpoint, so it can be passed to the EndpointResultType.
+// This removes the type of the first element from the available endpoint types for the last element, ensuring they do not match.
+type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> = 
+  E extends [infer First, number?, EndpointType?]
+  ? First extends EndpointType
+    ? [First, number?, EndpointResultType<First>?]
+    : ["Error: First type must be a valid EndpointType", First]
+  : never;
+// With the three types above, the type will not allow duplicate types
+type Endpoint = DistinctEndpointType<[EndpointType, number?, EndpointType?]>;
+```
+
+### OnResultFunction
+
+```ts
+// Type of function that will be called when the query is finished, and passes the results as an array
+type OnResultFunction<Type extends MarvelResult> = (
+  data: Type[]
+) => void | Promise<unknown>;
+```
+
+### ParameterMap
+
+```ts
+// A map of parameter types by endpoint.
+type ParameterMap = {
+  comics: ComicParams;
+  characters: CharacterParams;
+  creators: CreatorParams;
+  events: EventParams;
+  stories: StoryParams;
+  series: SeriesParams;
+};
+```
+
+### ParamsType{#resulttype}
 
 ```ts
 // ParamsType is a utility type designed to determine the expected parameters for a given API endpoint. It uses conditional types to map an endpoint to its corresponding parameters, providing type safety and clarity when constructing API requests.
@@ -245,54 +287,12 @@ type ResultMap = {
 };
 ```
 
-### ParameterMap
-
-```ts
-// A map of parameter types by endpoint.
-type ParameterMap = {
-  comics: ComicParams;
-  characters: CharacterParams;
-  creators: CreatorParams;
-  events: EventParams;
-  stories: StoryParams;
-  series: SeriesParams;
-};
-```
-
-### DataType
-
-```ts
-/** Utitility type that determines which type of data being queried.
- * It works by checking the endpoint and looking for the last data type in the endpoint.
- * If the last element is a type, use it. If it's a number, use the type in the first element.
- */
-type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
-  ...infer _,
-  infer LastElement
-]
-  ? LastElement extends number
-    ? ArrayType extends [infer FirstElement, ...unknown[]]
-      ? FirstElement
-      : never
-    : LastElement
-  : never;
-```
-
-### ParamsType
-
-```ts
-// Utility type built upon DataType to map the correct parameter type for the endpoint.
-type ParamsType<Type extends Endpoint> =
-  DataType<Type> extends EndpointType
-    ? ParameterMap[DataType<Type>]
-    : APIBaseParams;
-```
-
 ### ResultType
 
 ```ts
-// Utility type built upon DataType to map the correct result type for the endpoint.
-export type ResultType<Type extends Endpoint> =
+// ResultType is a utility type designed to determine the expected data type returned from a given API endpoint. It uses conditional types to map an endpoint to its corresponding type of results.
+type ResultType<Type extends Endpoint> =
   DataType<Type> extends EndpointType ? ResultMap[DataType<Type>] : never;
 ```
 
+*Reference [`ResultMap`](#resultmap) where each type is assigned to an endpoint*

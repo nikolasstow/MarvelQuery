@@ -8,7 +8,7 @@ import {
   FormatSchema,
   FormatsSchema,
 } from "./schema-utilities";
-import { EndpointMap } from "lib";
+import { EndpointMap } from "../types";
 
 export const APISchema = z.object({
   modifiedSince: ModifiedSince.optional().describe(

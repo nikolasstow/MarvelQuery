@@ -74,17 +74,20 @@ export const YearSchema = z
  * Values can be a single string or an array of strings.
  */
 export const SelectMultiple = (validValues: readonly string[]) => {
-  // Schema for a single string with valid values
+  // Schema for a single string with valid values, transformed to lowercase
   const SingleValueSchema = z
     .string()
+    .transform((value) => value.toLowerCase())
     .refine((value) => validValues.includes(value), {
       message: "Invalid value provided",
     });
 
-  // Schema for an array of strings with valid values
+  // Schema for an array of strings with valid values, each transformed to lowercase
   const ArrayValueSchema = z
     .array(
-      z.string().refine((value) => validValues.includes(value), {
+      z.string()
+      .transform((value) => value.toLowerCase())
+      .refine((value) => validValues.includes(value), {
         message: "Invalid value(s) provided",
       })
     )
@@ -118,7 +121,13 @@ export const Formats = [
   "infinite comic",
 ] as const;
 
-export const FormatSchema = z.enum(Formats); // Schema for a single format
+// Schema for a single format, transformed to lowercase and validated
+export const FormatSchema = z.string()
+  .transform(value => value.toLowerCase())
+  .refine(value => Formats.map(format => format.toLowerCase()).includes(value), {
+    message: "Invalid format",
+  });
+  
 export const FormatsSchema = SelectMultiple(Formats); // Schema for an array of formats
 
 export const OrderByValues = {

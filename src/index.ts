@@ -3,7 +3,6 @@ import axios from "axios";
 
 import {
   Endpoint,
-  Parameters,
   ParamsType,
   ResultType,
   EndpointType,
@@ -54,7 +53,7 @@ class MarvelQuery<Type extends Endpoint> {
    */
   static onResult?: OnResultMap;
   /** Replace the default fetch function (axios) with your own http client */
-  static fetchFunction?: (url: string) => Promise<unknown>;
+  static fetchFunction?: <Type = unknown>(url: string) => Promise<Type>;
   /** Function to create an instance of the MarvelQuery class */
   private static createQuery = <Type extends Endpoint>(
     endpoint: Type,
@@ -96,7 +95,7 @@ class MarvelQuery<Type extends Endpoint> {
    */
   endpoint: Type;
   /** Parameters of the query */
-  params: Parameters<Type>;
+  params: ParamsType<Type>;
   /** Function that will be called when the query is finished. */
   onResult?: OnResultFunction<ResultMap[EndpointType]> | AnyResultFunction;
 
@@ -172,10 +171,10 @@ class MarvelQuery<Type extends Endpoint> {
   }
 
   /** Remove undefined parameters. */
-  private omitUndefined(params: ParamsType<Type>) {
+  private omitUndefined(params: ParamsType<Type>): ParamsType<Type> {
     return Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined)
-    );
+    ) as ParamsType<Type>;
   }
 
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
@@ -237,7 +236,7 @@ class MarvelQuery<Type extends Endpoint> {
       apikey: publicKey,
       ts: timestamp.toString(),
       hash,
-      ...(this.params as Record<string, string>),
+      ...(this.params as Record<string, unknown>),
     });
 
     return `${baseURL}/${endpoint}?${queryParams.toString()}`;
@@ -321,7 +320,7 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
   /** Creates a MarvelQueryResult with all the properties of the MarvelQuery object, now with the results of the query, and offset adjusted to request the next page of results. */
   constructor(query: MarvelQuery<Type>, results: MarvelQueryResults<Type>) {
     /** Increment the offset by the limit to get the next page */
-    const offset = results.responseData.offset + query.params.limit;
+    const offset = results.responseData.offset + (query.params.limit ?? 0);
     /** Update the params with the new offset */
     const params = {
       ...query.params,
@@ -344,7 +343,7 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
   /** Calling fetch again will fetch the next page of results. */
   async fetch(): Promise<MarvelQueryResult<Type>> {
     const total = this.responseData.total;
-    const remaining = total - this.params.offset;
+    const remaining = total - (this.params.offset ?? 0);
     /** If there are no more results to fetch, stop and return the current instance. */
     if (remaining <= 0) {
       console.error("No more results to fetch");
@@ -376,5 +375,4 @@ class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
 }
 
 export default MarvelQuery;
-export * from "./definitions/types/data-types";
-export * from "./definitions/types/param-types";
+export * from "./definitions/types";

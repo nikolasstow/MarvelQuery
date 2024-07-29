@@ -53,6 +53,17 @@ const createQuery = MarvelQuery.init(
   }
 );
 
+const jedMacKay = await createQuery(["creators"], {
+  firstName: "Jed",
+  lastName: "MacKay",
+});
+
+
+// const jedMacKsay = await createQuery(["creators", 123], {
+//   firstName: "Jed",
+//   lastName: "MacKay",
+// });
+
 /**
  * Fetches information about Spider-Man.
  * Calls the API to get data about the character "Peter Parker" and handles pagination automatically.
@@ -213,7 +224,7 @@ export async function catalog(
  *
  * @returns A promise that resolves to an array of MarvelComic objects or false if there are no results.
  */
-export async function latest(): Promise<MarvelComic[] | false> {
+export async function latest(): Promise<MarvelComic[]> {
   console.log("Fetching latest comics");
 
   const formattedDate = (date: Date) => date.toISOString().slice(0, 10);

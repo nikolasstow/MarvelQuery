@@ -80,7 +80,7 @@ export type ResultMap = {
  */
 type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
   ...infer _,
-  infer LastElement
+  infer LastElement extends EndpointType
 ]
   ? LastElement extends number
     ? ArrayType extends [infer FirstElement, ...unknown[]]
@@ -90,25 +90,42 @@ type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
   : never;
 
 /** Utility type that gets the parameters from the endpoint. */
-export type ParamsType<Type extends Endpoint> =
-  DataType<Type> extends EndpointType
-    ? ParameterMap[DataType<Type>]
-    : APIBaseParams;
+// The ParamsType definition
+export type ParamsType<E extends readonly unknown[]> =
+E extends [infer First, infer Second, infer Third] // Three elements
+  ? Third extends EndpointType
+    ? ParameterMap[Third]
+    : APIBaseParams
+  : E extends [infer First, infer Second] // Two elements
+  ? Second extends number
+    ? APIBaseParams
+    : First extends EndpointType
+    ? ParameterMap[First]
+    : APIBaseParams
+  : E extends [infer First] // One element
+  ? First extends EndpointType
+    ? ParameterMap[First]
+    : APIBaseParams
+  : APIBaseParams
+// export type ParamsType<Type extends Endpoint> =
+//   DataType<Type> extends EndpointType
+//     ? ParameterMap[ParamType<Type>]
+//     : APIBaseParams;
 
 /** Parameters for a specific endpoint */
 export type ExtendEndpointParams<Key extends EndpointType> = ParameterMap[Key];
 
 /** Required parameters for any query, if not specified the default will be used. */
-type BaseParams = Required<Pick<APIBaseParams, "limit" | "offset">>;
+// type BaseParams = Required<Pick<APIBaseParams, "limit" | "offset">>;
 
 /** Utility type for parameters with limit and offset removed. */
-type CleanParams<Type extends Endpoint> = Omit<
-  ParamsType<Type>,
-  keyof BaseParams
->;
+// type CleanParams<Type extends Endpoint> = Omit<
+//   ParamsType<Type>,
+//   keyof BaseParams
+// >;
 
-/** Utility type that forces limit and offset to be required. */
-export type Parameters<Type extends Endpoint> = CleanParams<Type> & BaseParams;
+// /** Utility type that forces limit and offset to be required. */
+// export type Parameters<Type extends Endpoint> = CleanParams<Type> & BaseParams;
 
 /** Utility type that gets the result type from the endpoint. */
 export type ResultType<Type extends Endpoint> =

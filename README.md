@@ -24,10 +24,6 @@ npm i marvelquery
 
 ## Example
 
-<!--
-   - Set your Marvel API public and private keys using MarvelQuery.init.
-   - Optionally configure global parameters, callbacks, and other settings. -->
-
 ```ts
 import MarvelQuery from "marvelquery";
 
