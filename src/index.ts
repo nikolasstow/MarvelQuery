@@ -57,7 +57,7 @@ class MarvelQuery<Type extends Endpoint> {
   /** Function to create an instance of the MarvelQuery class */
   private static createQuery = <Type extends Endpoint>(
     endpoint: Type,
-    params: ParamsType<Type>
+    params: ParamsType<Type> = {} as ParamsType<Type>
   ): MarvelQuery<Type> => {
     /** Validate the endpoint. */
     if (!endpoint) {
@@ -98,9 +98,38 @@ class MarvelQuery<Type extends Endpoint> {
   params: ParamsType<Type>;
   /** Function that will be called when the query is finished. */
   onResult?: OnResultFunction<ResultMap[EndpointType]> | AnyResultFunction;
-
   /** The data type of the results of the query */
   type: EndpointType;
+  /** The query is complete when all results have been fetched. */
+  isComplete: boolean = false;
+  /** The query has been fetched at least once. */
+  hasFetched: boolean = false;
+  /** The URL of the query
+   * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
+   */
+  url: string;
+  /** Metadata included in the API response.
+   * @property code: The HTTP status code of the returned result.
+   * @property status: A string description of the call status.
+   * @property copyright: The copyright notice for the returned result.
+   * @property attributionText: The attribution notice for this result. Please display either this notice or the contents of the attributionHTML field on all screens which contain data from the Marvel Comics API.
+   * @property attributionHTML: An HTML representation of the attribution notice for this result. Please display either this notice or the contents of the attributionText field on all screens which contain data from the Marvel Comics API.
+   * @property etag: A digest value of the content returned by the call.
+   */
+  metadata: Metadata;
+  /** Data for the API response.
+   * @property offset: The requested offset (number of skipped results) of the call.
+   * @property limit: The requested result limit.
+   * @property total: The total number of resources available given the current filter set.
+   * @property count: The total number of results returned by this call.
+   */
+  responseData: APIResponseData;
+  /** The first result of the query. */
+  result: ResultType<Type>;
+  /** The results of the query. */
+  results: ResultType<Type>[];
+  /** The conjunction of all results from this query instance. */
+  resultHistory: ResultType<Type>[] = [];
 
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
   constructor(endpoint: Type, params: ParamsType<Type>) {
@@ -181,9 +210,31 @@ class MarvelQuery<Type extends Endpoint> {
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
-  async fetch(): Promise<MarvelQueryResult<Type>> {
-    /** Validate the parameters of the query. */
-    this.validateParams();
+  async fetch(): Promise<MarvelQuery<Type>> {
+    if (this.hasFetched) {
+      /** Get the total number of results and calculate the remaining results to fetch. */
+      const total = this.responseData.total;
+      const fetched = this.responseData.offset + this.responseData.count;
+      const remaining = total - fetched;
+      /** If there are no more results to fetch, stop and return the current instance. */
+      if (remaining <= 0) {
+        this.isComplete = true;
+        console.error("No more results to fetch");
+        return this;
+      }
+
+      /** Increment the offset by the limit to get the next page. */
+      const offset = this.responseData.offset + this.responseData.count;
+      this.params = {
+        ...this.params,
+        offset,
+      }
+    } else {
+      this.validateParams();
+    }
+
+    console.log(this.params);
+
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
     const url = this.buildURL();
 
@@ -192,20 +243,25 @@ class MarvelQuery<Type extends Endpoint> {
       const { data, ...metadata } = await this.request(url);
       const { results, ...responseData } = data;
 
-      const queryResults: MarvelQueryResults<Type> = {
-        url,
-        metadata,
-        responseData,
-        results,
-      };
+      if (results && results[0]) {
+        /** Update properties with the response from the API */
+        this.metadata = metadata;
+        this.responseData = responseData;
+        this.results = results;
+        this.result = results[0];
+        this.resultHistory = [...this.resultHistory, ...results];
+      } else {
+        console.warn("No results found");
+      }
+
+      this.hasFetched = true;
 
       /** Call the onResult function with the results of the request. */
       if (this.onResult) {
         this.onResult(results);
       }
 
-      /** Create a MarvelQueryResult with all the properties of the MarvelQuery object, now with the results of the query, and offset adjusted to request the next page of results. */
-      return new MarvelQueryResult<Type>(this, queryResults);
+      return this;
     } catch (error) {
       console.error("Request error:", error);
       throw new Error("Request error");
@@ -213,7 +269,7 @@ class MarvelQuery<Type extends Endpoint> {
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  async fetchSingle(): Promise<MarvelQueryResult<Type>> {
+  async fetchSingle(): Promise<MarvelQuery<Type>> {
     this.params.offset = 0;
     this.params.limit = 1;
     return this.fetch();
@@ -285,92 +341,6 @@ class MarvelQuery<Type extends Endpoint> {
       console.error("Parameter validation error:", error);
       throw new Error("Invalid parameters");
     }
-  }
-}
-
-/** Extension of the MarvelQuery class with query results and helper functions. */
-class MarvelQueryResult<Type extends Endpoint> extends MarvelQuery<Type> {
-  /** The URL of the query
-   * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
-   */
-  url: string;
-  /** Metadata included in the API response.
-   * @property code: The HTTP status code of the returned result.
-   * @property status: A string description of the call status.
-   * @property copyright: The copyright notice for the returned result.
-   * @property attributionText: The attribution notice for this result. Please display either this notice or the contents of the attributionHTML field on all screens which contain data from the Marvel Comics API.
-   * @property attributionHTML: An HTML representation of the attribution notice for this result. Please display either this notice or the contents of the attributionText field on all screens which contain data from the Marvel Comics API.
-   * @property etag: A digest value of the content returned by the call.
-   */
-  metadata: Metadata;
-  /** Data for the API response.
-   * @property offset: The requested offset (number of skipped results) of the call.
-   * @property limit: The requested result limit.
-   * @property total: The total number of resources available given the current filter set.
-   * @property count: The total number of results returned by this call.
-   */
-  responseData: APIResponseData;
-  /** The first result of the query. */
-  result: ResultType<Type>;
-  /** The results of the query. */
-  results: ResultType<Type>[];
-  /** The conjunction of all results from this query instance. */
-  resultHistory: ResultType<Type>[];
-
-  /** Creates a MarvelQueryResult with all the properties of the MarvelQuery object, now with the results of the query, and offset adjusted to request the next page of results. */
-  constructor(query: MarvelQuery<Type>, results: MarvelQueryResults<Type>) {
-    /** Increment the offset by the limit to get the next page */
-    const offset = results.responseData.offset + (query.params.limit ?? 0);
-    /** Update the params with the new offset */
-    const params = {
-      ...query.params,
-      offset,
-    };
-
-    /** Call the parent constructor with the updated params */
-    super(query.endpoint, params);
-
-    /** Update properties with the response from the API */
-    if (results && results.results[0]) {
-      this.url = results.url;
-      this.metadata = results.metadata;
-      this.responseData = results.responseData;
-      this.result = results.results[0];
-      this.results = results.results;
-      this.resultHistory = results.results;
-    }
-  }
-  /** Calling fetch again will fetch the next page of results. */
-  async fetch(): Promise<MarvelQueryResult<Type>> {
-    const total = this.responseData.total;
-    const remaining = total - (this.params.offset ?? 0);
-    /** If there are no more results to fetch, stop and return the current instance. */
-    if (remaining <= 0) {
-      console.error("No more results to fetch");
-      return this;
-    }
-
-    /** Fetch the next page of results. */
-    const { data, ...metadata } = await this.request(this.url);
-    const { results, ...responseData } = data;
-
-    if (results && results[0]) {
-      /** Update properties with the response from the API */
-      this.metadata = metadata;
-      this.responseData = responseData;
-      this.results = results;
-      this.result = results[0];
-      this.resultHistory = [...this.resultHistory, ...results];
-    }
-    /** Increment the offset by the limit to get the next page. */
-    const offset = this.responseData.offset + this.responseData.limit;
-    this.params = {
-      ...this.params,
-      offset,
-    };
-
-    /** Return the current instance. */
-    return this;
   }
 }
 

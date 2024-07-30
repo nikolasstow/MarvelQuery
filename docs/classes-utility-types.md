@@ -265,10 +265,23 @@ type ParameterMap = {
 
 ```ts
 // ParamsType is a utility type designed to determine the expected parameters for a given API endpoint. It uses conditional types to map an endpoint to its corresponding parameters, providing type safety and clarity when constructing API requests.
-type ParamsType<Type extends Endpoint> =
-  DataType<Type> extends EndpointType
-    ? ParameterMap[DataType<Type>]
-    : APIBaseParams;
+type ParamsType<Endpoint extends readonly unknown[]> = Endpoint extends [
+  infer First,
+  infer Second,
+  infer Third
+] // Does the Endpoint have three elements?
+  ? Third extends EndpointType // Is the third element a data type?
+    ? ParameterMap[Third] // The third element is the data type
+    : never
+  : Endpoint extends [infer First, infer Second] // Does the Endpoint have two elements?
+  ? Second extends number // Is the second element a number?
+    ? never // No parameters when the endpoint is for an individual item
+    : never
+  : Endpoint extends [infer First] // Is the endpoint only one element?
+  ? First extends EndpointType // Is the element a data type?
+    ? ParameterMap[First] // The element is the data type
+    : never
+  : APIBaseParams;
 ```
 
 *Reference [`ParameterMap`](#parametermap) where each type is assigned to an endpoint*

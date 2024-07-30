@@ -36,20 +36,25 @@ import {
  * For example if you are looking for events in which Spider-Man appeared,
  * your query endpoint would be ['characters', '1009491', events']
  */
-export type Endpoint = DistinctEndpointType<[EndpointType, number?, EndpointType?]>;
+export type Endpoint = DistinctEndpointType<
+  [EndpointType, number?, EndpointType?]
+>;
 /** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
 export type EndpointType = keyof ParameterMap;
 /** Utility type that removes the passed type from the available endpoint types */
-type EndpointResultType<Type extends EndpointType> = Exclude<EndpointType, Type>;
+type EndpointResultType<Type extends EndpointType> = Exclude<
+  EndpointType,
+  Type
+>;
 /** Utility type that infers the type of the first element of the endpoint, so it can be passed to the EndpointResultType.
  * This removes the type of the first element from the available endpoint types for the last element, ensuring they do not match.
-  */
-type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> = 
+ */
+type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> =
   E extends [infer First, number?, EndpointType?]
-  ? First extends EndpointType
-    ? [First, number?, EndpointResultType<First>?]
-    : ["Error: First type must be a valid EndpointType", First]
-  : never;
+    ? First extends EndpointType
+      ? [First, number?, EndpointResultType<First>?]
+      : ["Error: First type must be a valid EndpointType", First]
+    : never;
 
 /** Create a map of any data type with the endpoint as the key. */
 export type EndpointMap<Value> = Record<EndpointType, Value>;
@@ -90,42 +95,23 @@ type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
   : never;
 
 /** Utility type that gets the parameters from the endpoint. */
-// The ParamsType definition
-export type ParamsType<E extends readonly unknown[]> =
-E extends [infer First, infer Second, infer Third] // Three elements
-  ? Third extends EndpointType
-    ? ParameterMap[Third]
-    : APIBaseParams
-  : E extends [infer First, infer Second] // Two elements
-  ? Second extends number
-    ? APIBaseParams
-    : First extends EndpointType
-    ? ParameterMap[First]
-    : APIBaseParams
-  : E extends [infer First] // One element
-  ? First extends EndpointType
-    ? ParameterMap[First]
-    : APIBaseParams
-  : APIBaseParams
-// export type ParamsType<Type extends Endpoint> =
-//   DataType<Type> extends EndpointType
-//     ? ParameterMap[ParamType<Type>]
-//     : APIBaseParams;
-
-/** Parameters for a specific endpoint */
-export type ExtendEndpointParams<Key extends EndpointType> = ParameterMap[Key];
-
-/** Required parameters for any query, if not specified the default will be used. */
-// type BaseParams = Required<Pick<APIBaseParams, "limit" | "offset">>;
-
-/** Utility type for parameters with limit and offset removed. */
-// type CleanParams<Type extends Endpoint> = Omit<
-//   ParamsType<Type>,
-//   keyof BaseParams
-// >;
-
-// /** Utility type that forces limit and offset to be required. */
-// export type Parameters<Type extends Endpoint> = CleanParams<Type> & BaseParams;
+export type ParamsType<Endpoint extends readonly unknown[]> = Endpoint extends [
+  infer First,
+  infer Second,
+  infer Third
+] // Does the Endpoint have three elements?
+  ? Third extends EndpointType // Is the third element a data type?
+    ? ParameterMap[Third] // The third element is the data type
+    : never
+  : Endpoint extends [infer First, infer Second] // Does the Endpoint have two elements?
+  ? Second extends number // Is the second element a number?
+    ? never // No parameters when the endpoint is for an individual item
+    : never
+  : Endpoint extends [infer First] // Is the endpoint only one element?
+  ? First extends EndpointType // Is the element a data type?
+    ? ParameterMap[First] // The element is the data type
+    : never
+  : APIBaseParams;
 
 /** Utility type that gets the result type from the endpoint. */
 export type ResultType<Type extends Endpoint> =

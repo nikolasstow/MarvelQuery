@@ -10,7 +10,7 @@ import {
   SeriesSchema,
   StoriesSchema,
 } from "../schemas/param-schemas";
-import { Formats, OrderByValues } from "../schemas/schema-utilities";
+import { Formats, FormatsSchema, OrderByValues } from "../schemas/schema-utilities";
 
 /** Remove a property, and replace it with a stricter type. */
 type Restrict<
@@ -45,7 +45,8 @@ type SelectMultiple<Options extends readonly string[]> =
   | Options[number][];
 
 /** Select one or multiple formats. */
-type Formats = SelectMultiple<typeof Formats>;
+type SelectMultipleFormats = SelectMultiple<typeof Formats>;
+type Format = typeof Formats[number];
 
 // Base parameters for all queries
 /** ### Base Parameters
@@ -76,6 +77,7 @@ export type CharacterParams = OrderBy<
   "characters"
 >;
 
+type StrictComic = Restrict<z.input<typeof ComicsSchema>, "format", { format?: Format }>;
 /**| Property            | Type                                                                                                    | Description
  * |---------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------
  * | `format`            | `Format`                                                                                                | Filter by format (e.g. comic, digital comic, trade paperback).
@@ -105,7 +107,7 @@ export type CharacterParams = OrderBy<
  * | `limit`             | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`            | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type ComicParams = OrderBy<z.input<typeof ComicsSchema>, "comics">;
+export type ComicParams = OrderBy<StrictComic, "comics">;
 
 /**| Property               | Type                                                                                                    | Description
  * |------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------

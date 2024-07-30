@@ -69,7 +69,7 @@ export const DateDescriptorSchema = z.enum([
 ]);
 
 export const ComicsSchema = APISchema.extend({
-  format: FormatSchema.optional().describe(
+  format: z.string().optional().describe(
     "Filter by format (e.g. comic, digital comic, trade paperback)."
   ),
   formatType: FormatTypeSchema.optional().describe(

@@ -52,18 +52,6 @@ const createQuery = MarvelQuery.init(
     // fetchFunction: (url) => fetch(url),
   }
 );
-
-const jedMacKay = await createQuery(["creators"], {
-  firstName: "Jed",
-  lastName: "MacKay",
-});
-
-
-// const jedMacKsay = await createQuery(["creators", 123], {
-//   firstName: "Jed",
-//   lastName: "MacKay",
-// });
-
 /**
  * Fetches information about Spider-Man.
  * Calls the API to get data about the character "Peter Parker" and handles pagination automatically.
@@ -85,7 +73,7 @@ const peterParker = await createQuery(["characters"], {
   .fetchSingle()
   .then((query) => query.result.id); // Returns '1009491'
 // The we can use that id to create a new query to get the latest comics he appears in.
-const spiderComics = await createQuery(["characters", peterParker, "comics"],{
+const spiderComics = await createQuery(["characters", peterParker, "comics"], {
   format: "comic", // We only want the latest comic issues, so lets exclude everything else.
   noVariants: true, // Exclude variants, because we only want unique issues.
   dateDescriptor: "nextWeek", // Get the next week's issues.
@@ -137,7 +125,7 @@ export async function comics(
 
   if (releaseDate) {
     const parsedDate = parseReleaseDate(releaseDate);
-    params.dateRange = createRange(parsedDate);;
+    params.dateRange = createRange(parsedDate);
   }
 
   return await createQuery(["comics"], params)
