@@ -21,9 +21,17 @@ import {
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
 
-/** Base class for all queries, constructs the URL, sends the request,
- * and validates the query parameters and the response using zod. */
 class MarvelQuery<Type extends Endpoint> {
+  /** Endpoint types that can be queried */
+  private static validEndpoints = new Set([
+    "comics",
+    "characters",
+    "creators",
+    "events",
+    "series",
+    "stories",
+  ]);
+
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   private static publicKey: string;
   /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
@@ -83,10 +91,34 @@ class MarvelQuery<Type extends Endpoint> {
    ** For more information, visit https://github.com/nikolasstow/MarvelQuery
    */
   static init(keys: APIKeys, config: Config = {}) {
+    /** Validate the global parameters. */
+    if (config.globalParams) {
+      this.validateGlobalParams(config.globalParams);
+    }
     /** Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. */
     Object.assign(MarvelQuery, { ...keys, ...config }); // You're probably wonder why keys and config are separate arguments when the get combined anyway... it's because it looks cleaner. Don't judge me.
     /** Pass the createQuery function once the library is initialized. */
     return MarvelQuery.createQuery;
+  }
+
+  private static validateGlobalParams(globalParams: GlobalParams): void {
+    const types = Object.keys(globalParams);
+    for (const type of types) {
+      if (this.validEndpoints.has(type)) {
+        this.validateParams(type, globalParams[type]);
+      }
+    }
+  }
+
+  /** Validate the parameters of the query. */
+  private static validateParams(type, params): void {
+    try {
+      /** Validate the parameters of the query using the schema determined by the endpoint type. */
+      ValidateParams[type].parse(params);
+    } catch (error) {
+      console.error("Parameter validation error:", error);
+      throw new Error("Invalid parameters");
+    }
   }
 
   /** Endpoint of the query
@@ -100,12 +132,7 @@ class MarvelQuery<Type extends Endpoint> {
   onResult?: OnResultFunction<ResultMap[EndpointType]> | AnyResultFunction;
   /** The data type of the results of the query */
   type: EndpointType;
-  /** The query is complete when all results have been fetched. */
-  isComplete: boolean = false;
-  /** The query has been fetched at least once. */
-  hasFetched: boolean = false;
-  /** The query has failed twice in a row. */
-  failsafe: boolean = false;
+
   /** The URL of the query
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
    */
@@ -133,17 +160,72 @@ class MarvelQuery<Type extends Endpoint> {
   /** The conjunction of all results from this query instance. */
   resultHistory: ResultType<Type>[] = [];
 
+  /** The query is complete when all results have been fetched. */
+  isComplete: boolean = false;
+  /** The query has been fetched at least once. */
+  hasFetched: boolean = false;
+  /** The query has failed twice in a row. */
+  failsafe: boolean = false;
+
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
   constructor(endpoint: Type, params: ParamsType<Type>) {
+    this.initializeEndpoint(endpoint);
+    this.initializeParams(params);
+    this.initializeResultHandler();
+  }
+
+  private initializeEndpoint(endpoint: Type): void {
     /** Validate the endpoint. */
     this.endpoint = this.validateEndpoint(endpoint);
-    /** Remove undefined parameters unless 'omitUndefined' is false. */
-    params = MarvelQuery.omitUndefined ? this.omitUndefined(params) : params;
-
     /** Determine the data type of the query from the endpoint. */
     this.type = (
       endpoint.length === 3 ? endpoint[2] : endpoint[0]
     ) as EndpointType;
+  }
+
+  private validateEndpoint(endpoint: Type): Type {
+    /** Validate the endpoint. */
+    if (!endpoint) {
+      throw new Error("Endpoint is required");
+    }
+
+    const validate = {
+      type: (element?: string) => {
+        if (element && !MarvelQuery.validEndpoints.has(element)) {
+          throw new Error(`Unknown endpoint type: ${element}`);
+        }
+      },
+      id: (element?: number) => {
+        if (element && typeof element !== "number") {
+          throw new Error(`Invalid endpoint id: ${element}`);
+        }
+      },
+    };
+
+    const [first, second, third] = endpoint;
+
+    validate.type(first);
+    validate.id(second);
+    validate.type(third);
+
+    /** Validate that the first and third elements of the endpoint are not the same. */
+    if (first && third && first === third) {
+      throw new Error(
+        `Invalid endpoint: ${endpoint[0]} and ${endpoint[2]} cannot be the same type`
+      );
+    }
+
+    return endpoint;
+  }
+
+  private initializeParams(params: ParamsType<Type>): void {
+    /** Remove undefined parameters unless 'omitUndefined' is false. */
+    const cleanParams = MarvelQuery.omitUndefined
+      ? this.omitUndefined(params)
+      : params;
+
+    /** Validate the parameters. */
+    MarvelQuery.validateParams(cleanParams, this.type);
 
     this.params = {
       // Default parameters
@@ -155,50 +237,6 @@ class MarvelQuery<Type extends Endpoint> {
       // Specific parameters
       ...params,
     };
-
-    /** Set the onResult function for the specific type, or the 'any' type if not provided. */
-    if (MarvelQuery.onResult) {
-      const typeSpecificOnResult = MarvelQuery.onResult[this.type];
-      this.onResult = typeSpecificOnResult
-        ? typeSpecificOnResult
-        : MarvelQuery.onResult["any"];
-    }
-  }
-
-  private validateEndpoint(endpoint: Type): Type {
-    /** Validate the endpoint. */
-    if (!endpoint) {
-      throw new Error("Endpoint is required");
-    }
-    /** Array of valid endpoint types. */
-    const endpoints = [
-      "comics",
-      "characters",
-      "creators",
-      "events",
-      "series",
-      "stories",
-    ];
-
-    /** Validate the first element of the endpoint is a valid endpoint type */
-    if (!endpoints.includes(endpoint[0])) {
-      throw new Error(`Invalid endpoint[0]: ${endpoint[0]}`);
-    }
-    /** Validate the second element of the endpoint is a number. */
-    if (endpoint[1] && typeof endpoint[1] !== "number") {
-      throw new Error(`Invalid endpoint[1]: ${endpoint[1]}`);
-    }
-    /** Validate the third element of the endpoint is a valid endpoint type */
-    if (endpoint[2] && !endpoints.includes(endpoint[2])) {
-      throw new Error(`Invalid endpoint[2]: ${endpoint[2]}`);
-    }
-    /** Validate that the first and third elements of the endpoint are not the same. */
-    if (endpoint[0] == endpoint[2]) {
-      throw new Error(`Invalid endpoint: ${endpoint[0]} and ${endpoint[2]}
-  cannot be the same endpoint`);
-    }
-
-    return endpoint;
   }
 
   /** Remove undefined parameters. */
@@ -208,6 +246,16 @@ class MarvelQuery<Type extends Endpoint> {
     ) as ParamsType<Type>;
   }
 
+  private initializeResultHandler(): void {
+    /** Set the onResult function for the specific type, or the 'any' type if not provided. */
+    if (MarvelQuery.onResult) {
+      const typeSpecificOnResult = MarvelQuery.onResult[this.type];
+      this.onResult = typeSpecificOnResult
+        ? typeSpecificOnResult
+        : MarvelQuery.onResult.any;
+    }
+  }
+
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
@@ -215,14 +263,7 @@ class MarvelQuery<Type extends Endpoint> {
   async fetch(): Promise<MarvelQuery<Type>> {
     /** If the query has already been fetched, increment the offset by the count. */
     if (this.hasFetched) {
-      /** Increment the offset by the count to get the next page. */
-      const offset = this.responseData.offset + this.responseData.count;
-      this.params = {
-        ...this.params,
-        offset,
-      };
-    } else {
-      this.validateParams();
+      this.params.offset = +this.responseData.count;
     }
 
     // Delete this console log
@@ -246,32 +287,7 @@ class MarvelQuery<Type extends Endpoint> {
         this.isComplete = true;
         console.warn("No more results to fetch");
       } else {
-        /** Failsafe in case there are more results but they are never returned */
-        const hasResults = results && results.length > 0;
-
-        if (!hasResults) {
-          console.warn("No results found");
-        }
-
-        const newResults = this.results != results;
-
-        if (!newResults) {
-          console.warn("No new results found");
-        }
-
-        const error = !hasResults || !newResults;
-
-        /** Triggers failsafe if no results are found, or if there are no new results, and only if it failed twice in a row. */
-        if (error && this.failsafe) {
-          this.isComplete = true;
-          throw new Error("Failsafe mode enabled and no results found.");
-        }
-
-        this.failsafe = error;
-
-        if (error) {
-          return this;
-        }
+        this.failsafeCheck(results);
       }
 
       /** Update properties with the response from the API */
@@ -293,13 +309,6 @@ class MarvelQuery<Type extends Endpoint> {
       console.error("Request error:", error);
       throw new Error("Request error");
     }
-  }
-
-  /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  async fetchSingle(): Promise<MarvelQuery<Type>> {
-    this.params.offset = 0;
-    this.params.limit = 1;
-    return this.fetch();
   }
 
   /** Build the URL of the query with the parameters, timestamp and hash. */
@@ -359,15 +368,44 @@ class MarvelQuery<Type extends Endpoint> {
     }
   }
 
-  /** Validate the parameters of the query. */
-  private validateParams(): void {
-    try {
-      /** Validate the parameters of the query using the schema determined by the endpoint type. */
-      ValidateParams[this.type].parse(this.params);
-    } catch (error) {
-      console.error("Parameter validation error:", error);
-      throw new Error("Invalid parameters");
+  /** Failsafe in case there are more results but they are never returned */
+  private failsafeCheck(results: ResultType<Type>[]) {
+    const hasResults = results && results.length > 0;
+
+    if (!hasResults) {
+      console.warn("No results found");
     }
+
+    const newResults = this.results != results;
+
+    if (!newResults) {
+      console.warn("No new results found");
+    }
+
+    const error = !hasResults || !newResults;
+
+    /** Triggers failsafe if no results are found, or if there are no new results, and only if it failed twice in a row. */
+    if (error && this.failsafe) {
+      this.isComplete = true;
+      throw new Error("Failsafe mode enabled and no results found.");
+    }
+
+    this.failsafe = error;
+
+    if (error) {
+      return this;
+    }
+  }
+
+  private saveResults(results: ResultType<Type>[]) {
+
+  }
+
+  /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
+  async fetchSingle(): Promise<MarvelQuery<Type>> {
+    this.params.offset = 0;
+    this.params.limit = 1;
+    return this.fetch();
   }
 }
 
