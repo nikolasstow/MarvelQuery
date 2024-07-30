@@ -42,31 +42,22 @@ const character = await createQuery(["characters"], {
 
 ## MarvelQuery
 
-Don't have API Keys? Visit https://developer.marvel.com/ to create an account for free.
+### Static Properties
+
+These are properties set during Don't have API Keys? Visit https://developer.marvel.com/ to create an account for free.
 
 | Property        | Type                            | Description                                                  |
 | --------------- | ------------------------------- | ------------------------------------------------------------ |
-| `publicKey`     | `string`                        | Marvel API public key as set during initialization.          |
-| `privateKey`    | `string`                        | Marvel API private key as set during initialization.         |
 | `globalParams`  | [`GlobalParams`](#globalparams) | Global parameters to be applied to all queries, or all queries of a specific type. |
 | `omitUndefined` | `boolean`                       | Remove undefined parameters from the query. Set as true by default. |
 | *`onRequest`*   | `(url: string) => void`         | An optional function that will be called before the request is sent. You can use it to log the request or track the number of requests to the API. |
 | *`onResult`*    | [`OnResultMap`](#onresultmap)   | Add custom functions to be called when a request of a specific type is complete. |
 
-| Function                                | Arguments                                                | Returns                                                  | Description                                                  |
-| --------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
-| `init`                                  | [`keys: APIKeys`](#apikeys), [`config: Config`](#config) | [`createQuery()`](#createquery)                          | Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. |
-| `createQuery` `<Type extends Endpoint>` | `endpoint: Type, params: ParamsType<Type>`               | `MarvelQuery<Type>`                                      | Private function to create a new query instance. Must be accessed via init() initialization. |
-| `fetch`                                 | `void`                                                   | [`Promise<MarvelQueryResult<Type>>`](#marvelqueryresult) | Validates parameters with zod, builds URL, makes the request, and returns a [`MarvelQueryResult`](#marvelqueryresult) object with the results from the API. |
-| `fetchSingle`                           | `void`                                                   | [`Promise<MarvelQueryResult<Type>>`](#marvelqueryresult) | Sets offset to 0 and limit to 1 to fetch a single result.    |
-| `buildURL`                              | `void`                                                   | `string`                                                 | Builds the URL of the query with the parameters, timestamp and hash. |
-| `request`                               | `url: string`                                            | [`Promise<APIWrapper<ResultType<Type>>>`](#apiwrapper)   | Sends the request to the API, and validate the response.     |
+| Function | Arguments                                                | Returns                         | Description                                                  |
+| -------- | -------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
+| `init`   | [`keys: APIKeys`](#apikeys), [`config: Config`](#config) | [`createQuery()`](#createquery) | Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. |
 
-## MarvelQueryResult
-
-MarvelQueryResult extends the [`MarvelQuery`](#marvelquery) class and inherits all of it's properties and functions. It adds additional properties and functions specific to the handling of API results.
-
-##### Additional Properties
+### Instance Properties
 
 | Property        | Type                                  | Description                                              |
 | --------------- | ------------------------------------- | -------------------------------------------------------- |
@@ -77,41 +68,13 @@ MarvelQueryResult extends the [`MarvelQuery`](#marvelquery) class and inherits a
 | `results`       | [`ResultType<Type>[]`](#resulttype)   | The results of the query.                                |
 | `resultHistory` | [`ResultType<Type>[]`](#resulttype)   | The conjunction of all results from this query instance. |
 
-##### Additional Functions
-
-| Function | Arguments | Returns                                                  | Description                                                  |
-| -------- | --------- | -------------------------------------------------------- | ------------------------------------------------------------ |
-| `fetch`  | `void`    | [`Promise<MarvelQueryResult<Type>>`](#marvelqueryresult) | Provides the same function as in the [`MarvelQuery`](#marvelquery) class but increments the offset to return the next page of results. |
-
-#### Summary of Inherited Properties and Functions
-
-For detailed descriptions of the inherited properties and methods, please refer to the [MarvelQuery](#marvelquery) class documentation.
-
-**Inherited Properties:**
-
-​	•	publicKey
-
-​	•	privateKey
-
-​	•	globalParams
-
-​	•	omitUndefined
-
-​	•	static onRequest
-
-​	•	static onResult
-
-**Inherited Functions:**
-
-​	•	init
-
-​	•	fetch (Note: Overridden to support pagination)
-
-​	•	fetchSingle
-
-​	•	buildURL
-
-​	•	request
+| Function                                | Arguments                                  | Returns                                                | Description                                                  |
+| --------------------------------------- | ------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------ |
+| `createQuery` `<Type extends Endpoint>` | `endpoint: Type, params: ParamsType<Type>` | `MarvelQuery<Type>`                                    | Private function to create a new query instance. Must be accessed via init() initialization. |
+| `fetch`                                 | `void`                                     | [`Promise<MarvelQuery<Type>>`](#marvelquery)           | Validates parameters with zod, builds URL, makes the request, and returns a [`MarvelQueryResult`](#marvelqueryresult) object with the results from the API. |
+| `fetchSingle`                           | `void`                                     | [`Promise<MarvelQuery<Type>>`](#marvelquery)           | Sets offset to 0 and limit to 1 to fetch a single result.    |
+| `buildURL`                              | `void`                                     | `string`                                               | Builds the URL of the query with the parameters, timestamp and hash. |
+| `request`                               | `url: string`                              | [`Promise<APIWrapper<ResultType<Type>>>`](#apiwrapper) | Sends the request to the API, and validate the response.     |
 
 ## Endpoints
 

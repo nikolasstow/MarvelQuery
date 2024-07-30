@@ -25,9 +25,9 @@ import { ValidateParams } from "./definitions/schemas/param-schemas";
  * and validates the query parameters and the response using zod. */
 class MarvelQuery<Type extends Endpoint> {
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
-  static publicKey: string;
+  private static publicKey: string;
   /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
-  static privateKey: string;
+  private static privateKey: string;
   // Options
   /** Global parameters to be applied to all queries, or all queries of a specific type.
    * @example ```globalParams: {
@@ -104,6 +104,8 @@ class MarvelQuery<Type extends Endpoint> {
   isComplete: boolean = false;
   /** The query has been fetched at least once. */
   hasFetched: boolean = false;
+  /** The query has failed twice in a row. */
+  failsafe: boolean = false;
   /** The URL of the query
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
    */
@@ -125,7 +127,7 @@ class MarvelQuery<Type extends Endpoint> {
    */
   responseData: APIResponseData;
   /** The first result of the query. */
-  result: ResultType<Type>;
+  result: ResultType<Type> | undefined;
   /** The results of the query. */
   results: ResultType<Type>[];
   /** The conjunction of all results from this query instance. */
@@ -211,28 +213,19 @@ class MarvelQuery<Type extends Endpoint> {
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
   async fetch(): Promise<MarvelQuery<Type>> {
+    /** If the query has already been fetched, increment the offset by the count. */
     if (this.hasFetched) {
-      /** Get the total number of results and calculate the remaining results to fetch. */
-      const total = this.responseData.total;
-      const fetched = this.responseData.offset + this.responseData.count;
-      const remaining = total - fetched;
-      /** If there are no more results to fetch, stop and return the current instance. */
-      if (remaining <= 0) {
-        this.isComplete = true;
-        console.error("No more results to fetch");
-        return this;
-      }
-
-      /** Increment the offset by the limit to get the next page. */
+      /** Increment the offset by the count to get the next page. */
       const offset = this.responseData.offset + this.responseData.count;
       this.params = {
         ...this.params,
         offset,
-      }
+      };
     } else {
       this.validateParams();
     }
 
+    // Delete this console log
     console.log(this.params);
 
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
@@ -243,16 +236,50 @@ class MarvelQuery<Type extends Endpoint> {
       const { data, ...metadata } = await this.request(url);
       const { results, ...responseData } = data;
 
-      if (results && results[0]) {
-        /** Update properties with the response from the API */
-        this.metadata = metadata;
-        this.responseData = responseData;
-        this.results = results;
-        this.result = results[0];
-        this.resultHistory = [...this.resultHistory, ...results];
+      /** Determine the remaining number of results. */
+      const total = responseData.total;
+      const fetched = responseData.offset + responseData.count;
+      const remaining = total - fetched;
+
+      /** If there are no more results to fetch, stop and return the current instance. */
+      if (remaining <= 0) {
+        this.isComplete = true;
+        console.warn("No more results to fetch");
       } else {
-        console.warn("No results found");
+        /** Failsafe in case there are more results but they are never returned */
+        const hasResults = results && results.length > 0;
+
+        if (!hasResults) {
+          console.warn("No results found");
+        }
+
+        const newResults = this.results != results;
+
+        if (!newResults) {
+          console.warn("No new results found");
+        }
+
+        const error = !hasResults || !newResults;
+
+        /** Triggers failsafe if no results are found, or if there are no new results, and only if it failed twice in a row. */
+        if (error && this.failsafe) {
+          this.isComplete = true;
+          throw new Error("Failsafe mode enabled and no results found.");
+        }
+
+        this.failsafe = error;
+
+        if (error) {
+          return this;
+        }
       }
+
+      /** Update properties with the response from the API */
+      this.metadata = metadata;
+      this.responseData = responseData;
+      this.results = results;
+      this.result = results[0];
+      this.resultHistory = [...this.resultHistory, ...results];
 
       this.hasFetched = true;
 
