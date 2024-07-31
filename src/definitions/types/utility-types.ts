@@ -8,6 +8,7 @@ import {
   MarvelSeries,
   APIResponseData,
   Metadata,
+  APIWrapper,
 } from "./data-types";
 import {
   ComicParams,
@@ -164,7 +165,7 @@ export interface APIKeys {
   /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
   privateKey: string;
 }
-
+export type FetchFunction = <E extends Endpoint>(url: string) => Promise<APIWrapper<ResultType<E>>>;
 /** Arguments for initialization of the API */
 export interface Config {
   // Options
@@ -191,7 +192,7 @@ export interface Config {
   /** An optional function that will be called before the request is sent.
    * You can use it to log the request or track the number of requests to the API. */
   onRequest?: (url: string) => void;
-  fetchFunction?: (url: string) => Promise<unknown>;
+  fetchFunction?: FetchFunction;
 }
 
 /** Response data restructured from the API to create new instance of MarvelQueryResult, extending the MarvelQuery object with the new data and helper functions. */

@@ -1,5 +1,5 @@
 import * as CryptoJS from "crypto-js";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 import {
   Endpoint,
@@ -18,11 +18,13 @@ import {
   GlobalParams,
   AnyResultFunction,
   AnyParams,
+  FetchFunction,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
+import { unknown } from "zod";
 
-class MarvelQuery<Type extends Endpoint> {
+class MarvelQuery<E extends Endpoint> {
   /** Endpoint types that can be queried */
   private static validEndpoints = new Set([
     "comics",
@@ -62,12 +64,12 @@ class MarvelQuery<Type extends Endpoint> {
    */
   static onResult?: OnResultMap;
   /** Replace the default fetch function (axios) with your own http client */
-  static fetchFunction?: <Type = unknown>(url: string) => Promise<Type>;
+  static fetchFunction: FetchFunction = (url) => axios.get(url).then((response) => response.data);
   /** Function to create an instance of the MarvelQuery class */
-  private static createQuery = <Type extends Endpoint>(
-    endpoint: Type,
-    params: ParamsType<Type> = {} as ParamsType<Type>
-  ): MarvelQuery<Type> => {
+  private static createQuery = <T extends Endpoint>(
+    endpoint: T,
+    params: ParamsType<T> = {} as ParamsType<T>
+  ): MarvelQuery<T> => {
     /** Validate the endpoint. */
     if (!endpoint) {
       throw new Error("Missing endpoint");
@@ -77,7 +79,7 @@ class MarvelQuery<Type extends Endpoint> {
       throw new Error("Missing public or private keys");
     }
     /** Create a new query with the MarvelQuery class. */
-    return new MarvelQuery<Type>(endpoint, params);
+    return new MarvelQuery<T>(endpoint, params);
   };
   /** Initialize the API library with your public and private keys and other options.
    * @param keys.publicKey - Marvel API public key.
@@ -129,9 +131,9 @@ class MarvelQuery<Type extends Endpoint> {
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes ["characters", 1009491, "comics"]
    */
-  endpoint: Type;
+  endpoint: E;
   /** Parameters of the query */
-  params: ParamsType<Type>;
+  params: ParamsType<E>;
   /** Function that will be called when the query is finished. */
   onResult?: OnResultFunction<ResultMap[EndpointType]> | AnyResultFunction;
   /** The data type of the results of the query */
@@ -158,11 +160,11 @@ class MarvelQuery<Type extends Endpoint> {
    */
   responseData: APIResponseData;
   /** The first result of the query. */
-  result: ResultType<Type> | undefined;
+  result: ResultType<E> | undefined;
   /** The results of the query. */
-  results: ResultType<Type>[];
+  results: ResultType<E>[];
   /** The conjunction of all results from this query instance. */
-  resultHistory: ResultType<Type>[] = [];
+  resultHistory: ResultType<E>[] = [];
 
   /** The query is complete when all results have been fetched. */
   isComplete: boolean = false;
@@ -172,13 +174,13 @@ class MarvelQuery<Type extends Endpoint> {
   failsafe: boolean = false;
 
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
-  constructor(endpoint: Type, params: ParamsType<Type>) {
+  constructor(endpoint: E, params: ParamsType<E>) {
     this.initializeEndpoint(endpoint);
     this.initializeParams(params);
     this.initializeResultHandler();
   }
 
-  private initializeEndpoint(endpoint: Type): void {
+  private initializeEndpoint(endpoint: E): void {
     /** Validate the endpoint. */
     this.endpoint = this.validateEndpoint(endpoint);
     /** Determine the data type of the query from the endpoint. */
@@ -187,7 +189,7 @@ class MarvelQuery<Type extends Endpoint> {
     ) as EndpointType;
   }
 
-  private validateEndpoint(endpoint: Type): Type {
+  private validateEndpoint(endpoint: E): E {
     /** Validate the endpoint. */
     if (!endpoint) {
       throw new Error("Endpoint is required");
@@ -222,7 +224,7 @@ class MarvelQuery<Type extends Endpoint> {
     return endpoint;
   }
 
-  private initializeParams(params: ParamsType<Type>): void {
+  private initializeParams(params: ParamsType<E>): void {
     /** Remove undefined parameters unless 'omitUndefined' is false. */
     const cleanParams = MarvelQuery.omitUndefined
       ? this.omitUndefined(params)
@@ -244,10 +246,10 @@ class MarvelQuery<Type extends Endpoint> {
   }
 
   /** Remove undefined parameters. */
-  private omitUndefined(params: ParamsType<Type>): ParamsType<Type> {
+  private omitUndefined(params: ParamsType<E>): ParamsType<E> {
     return Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined)
-    ) as ParamsType<Type>;
+    ) as ParamsType<E>;
   }
 
   private initializeResultHandler(): void {
@@ -264,7 +266,7 @@ class MarvelQuery<Type extends Endpoint> {
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
-  async fetch(): Promise<MarvelQuery<Type>> {
+  async fetch(): Promise<MarvelQuery<E>> {
     /** If the query has already been fetched, increment the offset by the count. */
     if (this.hasFetched) {
       this.params.offset = +this.responseData.count;
@@ -339,22 +341,26 @@ class MarvelQuery<Type extends Endpoint> {
   }
 
   /** Send the request to the API, and validate the response. */
-  async request(url: string): Promise<APIWrapper<ResultType<Type>>> {
+  async request(url: string): Promise<APIWrapper<ResultType<E>>> {
     try {
       /** Call the onRequest function if it is defined. */
       if (MarvelQuery.onRequest) {
         MarvelQuery.onRequest(url);
       }
 
-      let response;
+      const response = await MarvelQuery.fetchFunction<E>(url);
 
-      /** Use the custom http client if the fetchFunction is defined. */
-      if (MarvelQuery.fetchFunction) {
-        response = await MarvelQuery.fetchFunction(url);
-      } else {
-        response = await axios.get(url);
-      }
+      this.validateResults(response.data.results);
 
+      /** Return the response data. */
+      return response;
+    } catch (error) {
+      console.error("Error fetching data from API:", error);
+      throw new Error("Failed to fetch data from Marvel API");
+    }
+  }
+
+  private validateResults(results: ResultType<E>[]) {
       /** Determine expected result schema */
       const resultSchema = ResultSchemaMap[this.type];
       if (!resultSchema) {
@@ -362,18 +368,14 @@ class MarvelQuery<Type extends Endpoint> {
       }
 
       /** Validate the response data with the result schema. */
-      resultSchema.parse(response.data.data.results);
-
-      /** Return the response data. */
-      return response.data as APIWrapper<ResultType<Type>>;
-    } catch (error) {
-      console.error("Error fetching data from API:", error);
-      throw new Error("Failed to fetch data from Marvel API");
-    }
+      const result = resultSchema.safeParse(results);
+      if(!result.success) {
+        console.error("Error validating results:", result.error);
+      }
   }
 
   /** Failsafe in case there are more results but they are never returned */
-  private failsafeCheck(results: ResultType<Type>[]) {
+  private failsafeCheck(results: ResultType<E>[]) {
     const hasResults = results && results.length > 0;
 
     if (!hasResults) {
@@ -401,12 +403,12 @@ class MarvelQuery<Type extends Endpoint> {
     }
   }
 
-  private saveResults(results: ResultType<Type>[]) {
+  private saveResults(results: ResultType<E>[]) {
 
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  async fetchSingle(): Promise<MarvelQuery<Type>> {
+  async fetchSingle(): Promise<MarvelQuery<E>> {
     this.params.offset = 0;
     this.params.limit = 1;
     return this.fetch();
