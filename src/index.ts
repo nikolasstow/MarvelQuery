@@ -39,7 +39,7 @@ class MarvelQuery<E extends Endpoint> {
   private static publicKey: string;
   /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
   private static privateKey: string;
-  // Options
+  // Configuration Options
   /** Global parameters to be applied to all queries, or all queries of a specific type.
    * @example ```globalParams: {
    * all: { limit: 10 },
@@ -64,7 +64,8 @@ class MarvelQuery<E extends Endpoint> {
    */
   static onResult?: OnResultMap;
   /** Replace the default fetch function (axios) with your own http client */
-  static fetchFunction: FetchFunction = (url) => axios.get(url).then((response) => response.data);
+  static fetchFunction: FetchFunction = (url) =>
+    axios.get(url).then((response) => response.data);
   /** Function to create an instance of the MarvelQuery class */
   private static createQuery = <T extends Endpoint>(
     endpoint: T,
@@ -104,11 +105,12 @@ class MarvelQuery<E extends Endpoint> {
     return MarvelQuery.createQuery;
   }
 
+  /** Validate the global parameters. */
   private static validateGlobalParams(globalParams: GlobalParams): void {
-    const types = Object.keys(globalParams);
+    const types = Object.keys(globalParams); // get the keys of the globalParams object
     for (const type of types) {
-      if (this.validEndpoints.has(type)) {
-        this.validateParams(type as EndpointType, globalParams[type]);
+      if (this.validEndpoints.has(type)) { // check if the endpoint type is valid
+        this.validateParams(type as EndpointType, globalParams[type]); // validate the parameters of the query for the endpoint type
       }
     }
   }
@@ -116,10 +118,11 @@ class MarvelQuery<E extends Endpoint> {
   /** Validate the parameters of the query. */
   private static validateParams(type: EndpointType, params: AnyParams): void {
     try {
-      /** Validate the parameters of the query using the schema determined by the endpoint type. */
+      // Confirm there's a validation function for the endpoint type
       if (!ValidateParams[type]) {
-        throw new Error(`Unknown endpoint type: ${type}`);
+        throw new Error(`Could not find validation schema for Endpoint: ${type}`);
       }
+      // Validate the parameters for the endpoint type
       ValidateParams[type].parse(params);
     } catch (error) {
       console.error("Parameter validation error:", error);
@@ -143,6 +146,10 @@ class MarvelQuery<E extends Endpoint> {
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
    */
   url: string;
+  /** The number of results returned by the query */
+  count: number = 0;
+  /** The total number of results available for the query. */
+  total: number = 0;
   /** Metadata included in the API response.
    * @property code: The HTTP status code of the returned result.
    * @property status: A string description of the call status.
@@ -168,11 +175,6 @@ class MarvelQuery<E extends Endpoint> {
 
   /** The query is complete when all results have been fetched. */
   isComplete: boolean = false;
-  /** The query has been fetched at least once. */
-  hasFetched: boolean = false;
-  /** The query has failed twice in a row. */
-  failsafe: boolean = false;
-
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
   constructor(endpoint: E, params: ParamsType<E>) {
     this.initializeEndpoint(endpoint);
@@ -180,6 +182,7 @@ class MarvelQuery<E extends Endpoint> {
     this.initializeResultHandler();
   }
 
+  /** Validate the endpoint and set the data type of the query. */
   private initializeEndpoint(endpoint: E): void {
     /** Validate the endpoint. */
     this.endpoint = this.validateEndpoint(endpoint);
@@ -189,12 +192,14 @@ class MarvelQuery<E extends Endpoint> {
     ) as EndpointType;
   }
 
+  /** Validate the endpoint */
   private validateEndpoint(endpoint: E): E {
     /** Validate the endpoint. */
     if (!endpoint) {
       throw new Error("Endpoint is required");
     }
 
+    // Validation methods for endpoint parts
     const validate = {
       type: (element?: string) => {
         if (element && !MarvelQuery.validEndpoints.has(element)) {
@@ -224,6 +229,7 @@ class MarvelQuery<E extends Endpoint> {
     return endpoint;
   }
 
+  /** Clean, validate, and set the parameters. */
   private initializeParams(params: ParamsType<E>): void {
     /** Remove undefined parameters unless 'omitUndefined' is false. */
     const cleanParams = MarvelQuery.omitUndefined
@@ -252,6 +258,7 @@ class MarvelQuery<E extends Endpoint> {
     ) as ParamsType<E>;
   }
 
+  /** Set the onResult function for the specific type, or the 'any' type if not provided. */
   private initializeResultHandler(): void {
     /** Set the onResult function for the specific type, or the 'any' type if not provided. */
     if (MarvelQuery.onResult) {
@@ -267,43 +274,39 @@ class MarvelQuery<E extends Endpoint> {
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
   async fetch(): Promise<MarvelQuery<E>> {
-    /** If the query has already been fetched, increment the offset by the count. */
-    if (this.hasFetched) {
-      this.params.offset = +this.responseData.count;
-    }
-
-    // Delete this console log
-    console.log(this.params);
-
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
     const url = this.buildURL();
+
+    if (this.url === url) {
+      throw new Error("Duplicate request");
+    }
 
     try {
       /** Send the request and call the onResult function with the results of the request. */
       const { data, ...metadata } = await this.request(url);
       const { results, ...responseData } = data;
+      const { total, count, offset } = responseData;
 
       /** Determine the remaining number of results. */
-      const total = responseData.total;
-      const fetched = responseData.offset + responseData.count;
+      const fetched = offset + count;
       const remaining = total - fetched;
 
-      /** If there are no more results to fetch, stop and return the current instance. */
-      if (remaining <= 0) {
-        this.isComplete = true;
-        console.warn("No more results to fetch");
-      } else {
-        this.failsafeCheck(results);
-      }
+      this.count = fetched;
+      this.params.offset = fetched;
 
-      /** Update properties with the response from the API */
+      const complete = this.verify(remaining <= 0, "No more results found");
+      const duplicateResults = this.verify(
+        results === this.results,
+        "Duplicate results"
+      );
+      const noResults = this.verify(!results.length, "No results found");
+
+      this.isComplete = complete || duplicateResults || noResults;
       this.metadata = metadata;
       this.responseData = responseData;
       this.results = results;
       this.result = results[0];
       this.resultHistory = [...this.resultHistory, ...results];
-
-      this.hasFetched = true;
 
       /** Call the onResult function with the results of the request. */
       if (this.onResult) {
@@ -315,6 +318,15 @@ class MarvelQuery<E extends Endpoint> {
       console.error("Request error:", error);
       throw new Error("Request error");
     }
+  }
+
+  /** Verify that the condition is true, and if not, throw a warning. */
+  verify(logic: boolean, message: string) {
+    if (logic) {
+      console.warn(message);
+    }
+
+    return logic;
   }
 
   /** Build the URL of the query with the parameters, timestamp and hash. */
@@ -360,51 +372,19 @@ class MarvelQuery<E extends Endpoint> {
     }
   }
 
+  /** Validate the results of the query. */
   private validateResults(results: ResultType<E>[]) {
-      /** Determine expected result schema */
-      const resultSchema = ResultSchemaMap[this.type];
-      if (!resultSchema) {
-        throw new Error(`Invalid result schema, ${this.type}`);
-      }
-
-      /** Validate the response data with the result schema. */
-      const result = resultSchema.safeParse(results);
-      if(!result.success) {
-        console.error("Error validating results:", result.error);
-      }
-  }
-
-  /** Failsafe in case there are more results but they are never returned */
-  private failsafeCheck(results: ResultType<E>[]) {
-    const hasResults = results && results.length > 0;
-
-    if (!hasResults) {
-      console.warn("No results found");
+    /** Determine expected result schema */
+    const resultSchema = ResultSchemaMap[this.type];
+    if (!resultSchema) {
+      throw new Error(`Invalid result schema, ${this.type}`);
     }
 
-    const newResults = this.results != results;
-
-    if (!newResults) {
-      console.warn("No new results found");
+    /** Validate the response data with the result schema. */
+    const result = resultSchema.safeParse(results);
+    if (!result.success) {
+      console.error("Error validating results:", result.error);
     }
-
-    const error = !hasResults || !newResults;
-
-    /** Triggers failsafe if no results are found, or if there are no new results, and only if it failed twice in a row. */
-    if (error && this.failsafe) {
-      this.isComplete = true;
-      throw new Error("Failsafe mode enabled and no results found.");
-    }
-
-    this.failsafe = error;
-
-    if (error) {
-      return this;
-    }
-  }
-
-  private saveResults(results: ResultType<E>[]) {
-
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
