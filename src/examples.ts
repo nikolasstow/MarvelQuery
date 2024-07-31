@@ -71,7 +71,7 @@ const peterParker = await createQuery(["characters"], {
   name: "Peter Parker",
 })
   .fetchSingle()
-  .then((query) => query.result.id); // Returns '1009491'
+  .then((query) => query.result?.id); // Returns '1009491'
 // The we can use that id to create a new query to get the latest comics he appears in.
 const spiderComics = await createQuery(["characters", peterParker, "comics"], {
   format: "comic", // We only want the latest comic issues, so lets exclude everything else.

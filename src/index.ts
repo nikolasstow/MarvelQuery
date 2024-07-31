@@ -17,6 +17,7 @@ import {
   Metadata,
   GlobalParams,
   AnyResultFunction,
+  AnyParams,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
@@ -105,15 +106,18 @@ class MarvelQuery<Type extends Endpoint> {
     const types = Object.keys(globalParams);
     for (const type of types) {
       if (this.validEndpoints.has(type)) {
-        this.validateParams(type, globalParams[type]);
+        this.validateParams(type as EndpointType, globalParams[type]);
       }
     }
   }
 
   /** Validate the parameters of the query. */
-  private static validateParams(type, params): void {
+  private static validateParams(type: EndpointType, params: AnyParams): void {
     try {
       /** Validate the parameters of the query using the schema determined by the endpoint type. */
+      if (!ValidateParams[type]) {
+        throw new Error(`Unknown endpoint type: ${type}`);
+      }
       ValidateParams[type].parse(params);
     } catch (error) {
       console.error("Parameter validation error:", error);
@@ -225,7 +229,7 @@ class MarvelQuery<Type extends Endpoint> {
       : params;
 
     /** Validate the parameters. */
-    MarvelQuery.validateParams(cleanParams, this.type);
+    MarvelQuery.validateParams(this.type, cleanParams);
 
     this.params = {
       // Default parameters

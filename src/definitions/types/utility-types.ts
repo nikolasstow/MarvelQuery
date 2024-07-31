@@ -134,6 +134,16 @@ type AnyType =
   | MarvelSeries
   | MarvelStory;
 
+export type AnyParams =
+  | APIBaseParams
+  | ComicParams
+  | CharacterParams
+  | CreatorParams
+  | EventParams
+  | StoryParams
+  | SeriesParams
+  | undefined;
+
 /** A map of functions, one for each result type, as well as 'any' to be called when the query is finished */
 export type OnResultMap = {
   [K in EndpointType]?: OnResultFunction<ResultMap[K]>;
