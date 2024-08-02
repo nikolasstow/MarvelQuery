@@ -1,6 +1,6 @@
 # Data Types
 
-## Metadata
+## `Metadata`
 
 The Metadata interface represents key information included in the API response from the Marvel API. It includes the HTTP status code, a textual status description, copyright notices, attribution information that must be displayed when using the API data, and a unique etag for caching purposes.
 
@@ -22,7 +22,7 @@ The Metadata interface represents key information included in the API response f
 
 These codes indicate the success or failure of the request and provide insights into why a request might not have succeeded.
 
-## APIResponseData
+## `APIResponseData`
 
 | Property | Type     | Description                                                  |
 | -------- | -------- | ------------------------------------------------------------ |
@@ -31,7 +31,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `total`  | `number` | The total number of resources available given the current filter set. |
 | `count`  | `number` | The total number of results returned by this call            |
 
-## MarvelComic
+## `MarvelComic`
 
 | Property             | Type                                | Description                                                  |
 | -------------------- | ----------------------------------- | ------------------------------------------------------------ |
@@ -65,7 +65,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `stories`            | [`StoryList[]`](#storylist)         | A resource list containing the stories which appear in this comic. |
 | `events`             | [`EventList[]`](#eventlist)         | A resource list containing the events in which this comic appears. |
 
-## MarvelEvent
+## `MarvelEvent`
 
 | Property      | Type                                | Description                                                  |
 | ------------- | ----------------------------------- | ------------------------------------------------------------ |
@@ -86,7 +86,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `next`        | [`EventSummary[]`](#eventsummary)   | A summary representation of the event which follows this event in the timeline. |
 | `previous`    | [`EventSummary[]`](#eventsummary)   | A summary representation of the event which preceded this event in the timeline. |
 
-## MarvelSeries
+## `MarvelSeries`
 
 | Property      | Type                                | Description                                                  |
 | ------------- | ----------------------------------- | ------------------------------------------------------------ |
@@ -108,7 +108,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `next`        | [`SeriesSummary[]`](#seriessummary) | A summary representation of the series which follows this series in the timeline. |
 | `previous`    | [`SeriesSummary[]`](#seriessummary) | A summary representation of the series which preceded this series in the timeline. |
 
-## MarvelCreator
+## `MarvelCreator`
 
 | Property      | Type                          | Description                                                  |
 | ------------- | ----------------------------- | ------------------------------------------------------------ |
@@ -127,7 +127,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `comics`      | [`ComicList[]`](#comiclist)   | A resource list containing the comics which feature work by this creator. |
 | `events`      | [`EventList[]`](#eventlist)   | A resource list containing the events which feature work by this creator. |
 
-## MarvelCharacter
+## `MarvelCharacter`
 
 | Property      | Type                          | Description                                                  |
 | ------------- | ----------------------------- | ------------------------------------------------------------ |
@@ -143,7 +143,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `events`      | [`EventList[]`](#eventlist)   | A resource list containing the events in which this character appears. |
 | `series`      | [`SeriesList[]`](#serieslist) | A resource list containing the series in which this character appears. |
 
-## MarvelStory
+## `MarvelStory`
 
 | Property        | Type                                | Description                                                  |
 | --------------- | ----------------------------------- | ------------------------------------------------------------ |
@@ -162,7 +162,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `creators`      | [`CreatorList[]`](#creatorlist)     | A resource list of creators who worked on this story.        |
 | `originalIssue` | [`ComicSummary[]`](#comicsummary)   | A summary representation of the issue in which this story was originally published. |
 
-### Text Object
+### `TextObject`
 
 | Property   | Type     | Description                                                  |
 | ---------- | -------- | ------------------------------------------------------------ |
@@ -170,28 +170,28 @@ These codes indicate the success or failure of the request and provide insights 
 | `language` | `string` | The IETF language tag denoting the language the text object is written in. |
 | `text`     | `string` | The text.                                                    |
 
-### URL
+### `URL`
 
 | Property | Type     | Description                                      |
 | -------- | -------- | ------------------------------------------------ |
 | `type`   | `string` | A text identifier for the URL.                   |
 | `url`    | `string` | A full URL (including scheme, domain, and path). |
 
-### Image
+### `Image`
 
 | Property    | Type     | Description                                      |
 | ----------- | -------- | ------------------------------------------------ |
 | `path`      | `string` | The directory path of the image.                 |
 | `extension` | `string` | A full URL (including scheme, domain, and path). |
 
-### ComicDate
+### `ComicDate`
 
 | Property | Type     | Description                                             |
 | -------- | -------- | ------------------------------------------------------- |
 | `type`   | `string` | A description of the date (e.g. onsale date, FOC date). |
 | `date`   | `string` | The date.                                               |
 
-### Comic Price
+### `Comic Price`
 
 | Property | Type     | Description                                                  |
 | -------- | -------- | ------------------------------------------------------------ |
@@ -211,14 +211,14 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 - `digital comic`
 - `infinite comic`
 
-### Summary
+### `Summary`
 
 | Property      | Type     | Description                          |
 | ------------- | -------- | ------------------------------------ |
 | `resourceURI` | `string` | The path to the individual resource. |
 | `name`        | `string` | The canonical name of the resource.  |
 
-### RoleSummary
+### `RoleSummary`
 
 | Property      | Type     | Description                                  |
 | ------------- | -------- | -------------------------------------------- |
@@ -226,7 +226,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `name`        | `string` | The canonical name of the resource.          |
 | `role`        | `string` | The role of the person in the parent entity. |
 
-### TypeSummary
+### `TypeSummary`
 
 | Property      | Type     | Description                          |
 | ------------- | -------- | ------------------------------------ |
@@ -234,14 +234,14 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `name`        | `string` | The canonical name of the resource.  |
 | `type`        | `string` | The type of the entity.              |
 
-### ComicSummary
+### `ComicSummary`
 
 | Property      | Type     | Description                                |
 | ------------- | -------- | ------------------------------------------ |
 | `resourceURI` | `string` | The path to the individual comic resource. |
 | `name`        | `string` | The canonical name of the comic.           |
 
-### StorySummary
+### `StorySummary`
 
 | Property      | Type     | Description                                |
 | ------------- | -------- | ------------------------------------------ |
@@ -249,14 +249,14 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `name`        | `string` | The canonical name of the story.           |
 | `role`        | `string` | The type of the story (interior or cover). |
 
-### SeriesSummary
+### `SeriesSummary`
 
 | Property      | Type     | Description                                 |
 | ------------- | -------- | ------------------------------------------- |
 | `resourceURI` | `string` | The path to the individual series resource. |
 | `name`        | `string` | The canonical name of the series.           |
 
-### CreatorSummary
+### `CreatorSummary`
 
 | Property      | Type     | Description                                   |
 | ------------- | -------- | --------------------------------------------- |
@@ -264,7 +264,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `name`        | `string` | The full name of the creator.                 |
 | `role`        | `string` | The role of the creator in the parent entity. |
 
-### CharacterSummary
+### `CharacterSummary`
 
 | Property      | Type     | Description                                     |
 | ------------- | -------- | ----------------------------------------------- |
@@ -272,14 +272,14 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `name`        | `string` | The full name of the character.                 |
 | `role`        | `string` | The role of the character in the parent entity. |
 
-### EventSummary
+### `EventSummary`
 
 | Property      | Type     | Description                                |
 | ------------- | -------- | ------------------------------------------ |
 | `resourceURI` | `string` | The path to the individual event resource. |
 | `name`        | `string` | The name of the event.                     |
 
-### List
+### `List`
 
 | Property        | Type                  | Description                                                  |
 | --------------- | --------------------- | ------------------------------------------------------------ |
@@ -288,7 +288,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `collectionURI` | `string`              | The path to the full list of items in this collection.       |
 | `items`         | [`Summary`](#summary) | The list of returned items in this collection.               |
 
-### ComicList
+### `ComicList`
 
 | Property        | Type                            | Description                                                  |
 | --------------- | ------------------------------- | ------------------------------------------------------------ |
@@ -297,7 +297,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `collectionURI` | `string`                        | The path to the full list of issues in this collection.      |
 | `items`         | [`ComicSummary`](#comicsummary) | The list of returned issues in this collection.              |
 
-### StoryList
+### `StoryList`
 
 | Property        | Type                            | Description                                                  |
 | --------------- | ------------------------------- | ------------------------------------------------------------ |
@@ -306,7 +306,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `collectionURI` | `string`                        | The path to the full list of stories in this collection.     |
 | `items`         | [`StorySummary`](#storysummary) | The list of returned stories in this collection.             |
 
-### SeriesList
+### `SeriesList`
 
 | Property        | Type                              | Description                                                  |
 | --------------- | --------------------------------- | ------------------------------------------------------------ |
@@ -315,7 +315,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `collectionURI` | `string`                          | The path to the full list of series in this collection.      |
 | `items`         | [`SeriesSummary`](#seriessummary) | The list of returned series in this collection.              |
 
-### EventList
+### `EventList`
 
 | Property        | Type                            | Description                                                  |
 | --------------- | ------------------------------- | ------------------------------------------------------------ |
@@ -324,7 +324,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `collectionURI` | `string`                        | The path to the full list of events in this collection.      |
 | `items`         | [`EventSummary`](#eventsummary) | The list of returned events in this collection.              |
 
-### CreatorList
+### `CreatorList`
 
 | Property        | Type                                | Description                                                  |
 | --------------- | ----------------------------------- | ------------------------------------------------------------ |
@@ -333,7 +333,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `collectionURI` | `string`                            | The path to the full list of creators in this collection.    |
 | `items`         | [`CreatorSummary`](#creatorsummary) | The list of returned creators in this collection.            |
 
-### CharacterList
+### `CharacterList`
 
 | Property        | Type                                    | Description                                                  |
 | --------------- | --------------------------------------- | ------------------------------------------------------------ |
@@ -342,7 +342,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | `collectionURI` | `string`                                | The path to the full list of characters in this collection.  |
 | `items`         | [`CharacterSummary`](#charactersummary) | The list of returned characters in this collection.          |
 
-### MarvelResult
+### `MarvelResult`
 
 The core properties found in all data-types returned by the Marvel API
 

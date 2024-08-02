@@ -10,43 +10,39 @@ import {
   SeriesSchema,
   StoriesSchema,
 } from "../schemas/param-schemas";
-import { Formats, FormatsSchema, OrderByValues } from "../schemas/schema-utilities";
+import {
+  Formats,
+  FormatsSchema,
+  OrderByValues,
+} from "../schemas/schema-utilities";
 
 /** Remove a property, and replace it with a stricter type. */
-type Restrict<
-  ZodSchema,
-  Property extends keyof ZodSchema,
-  StrictProperty
-> = Omit<ZodSchema, Property> & StrictProperty;
+type Restrict<Z, P extends keyof Z, StrictProperty> = Omit<Z, P> &
+  StrictProperty;
 
 /** Create a stricter type for the 'orderBy' property. */
-type OrderByType<Type extends EndpointType> =
-  (typeof OrderByValues)[Type][number]; // Creates a union of strings from OrderByValues[Type].
-type PrefixWithDash<Type extends string> = `-${Type}`; // Prefixes a string with '-'
-type AddDescending<Type extends string> = Type | PrefixWithDash<Type>; // Creates a union of the original string with the prefixed string.
-type OrderByOptions<Type extends EndpointType> = AddDescending<
-  OrderByType<Type>
->; // creates a union of the strings from OrderByValues[Type] with the prefixed strings.
+type OrderByType<T extends EndpointType> = (typeof OrderByValues)[T][number]; // Creates a union of strings from OrderByValues[Type].
+type PrefixWithDash<F extends string> = `-${F}`; // Prefixes a string with '-'
+type AddDescending<F extends string> = F | PrefixWithDash<F>; // Creates a union of the original string with the prefixed string.
+type OrderByOptions<F extends EndpointType> = AddDescending<OrderByType<F>>; // creates a union of the strings from OrderByValues[Type] with the prefixed strings.
 
 /** Add an 'orderBy' property with a union of OrderByOptions (union of orderBy options for each endpoint) and an array of the same type. */
-type OrderByProperty<Type extends EndpointType> = {
-  orderBy?: OrderByOptions<Type> | OrderByOptions<Type>[];
+type OrderByProperty<T extends EndpointType> = {
+  orderBy?: OrderByOptions<T> | OrderByOptions<T>[];
 };
 
 /** Restrict the 'orderBy' property with a stricter type */
 type OrderBy<
-  Schema extends { orderBy?: string | string[] | undefined },
-  Type extends EndpointType
-> = Restrict<Schema, "orderBy", OrderByProperty<Type>>;
+  Z extends { orderBy?: string | string[] | undefined },
+  T extends EndpointType
+> = Restrict<Z, "orderBy", OrderByProperty<T>>;
 
 /** Select one or multiple values from a list of valid values */
-type SelectMultiple<Options extends readonly string[]> =
-  | Options[number]
-  | Options[number][];
+type SelectMultiple<F extends readonly string[]> = F[number] | F[number][];
 
 /** Select one or multiple formats. */
 type SelectMultipleFormats = SelectMultiple<typeof Formats>;
-type Format = typeof Formats[number];
+type Format = (typeof Formats)[number];
 
 // Base parameters for all queries
 /** ### Base Parameters
@@ -77,7 +73,11 @@ export type CharacterParams = OrderBy<
   "characters"
 >;
 
-type StrictComic = Restrict<z.input<typeof ComicsSchema>, "format", { format?: Format }>;
+type StrictComic = Restrict<
+  z.input<typeof ComicsSchema>,
+  "format",
+  { format?: Format }
+>;
 /**| Property            | Type                                                                                                    | Description
  * |---------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------
  * | `format`            | `Format`                                                                                                | Filter by format (e.g. comic, digital comic, trade paperback).

@@ -19,7 +19,7 @@ This TypeScript library provides a robust and developer-friendly way to interact
 ## Installation
 
 ```bash npm2yarn
-npm i marvelquery
+npm i marvelquery axios
 ```
 
 ## Example
@@ -51,20 +51,4 @@ const spiderComics = await createQuery(["characters", peterParker, "comics"], {
   .then((query) => query.results);
 ```
 
-   <!-- Add link to config documentation -->
-
-<!-- 2. Building a Query:
-   - Use the createQuery function with an endpoint (e.g., characters) and optional parameters.
-   - The library automatically validates the parameters against pre-defined types.
-3. Fetching Data:
-   - Call the fetch method on the MarvelQuery object.
-   - It constructs the URL with authentication details and your parameters.
-   - Zod ensures the response structure adheres to the expected schema.
-4. Handling Results:
-   - The fetch method returns a MarvelQueryResult object containing:
-     - Fetched data (characters, comics, etc.)
-     - Metadata about the request
-     - Response data from the API
-   - You can access individual results or the entire set.
-5. Pagination:
-   - The MarvelQueryResult object allows for effortless pagination. Simply call fetch again to retrieve subsequent pages of results. -->
+For more information and to get started, please visit the [Getting Started](./getting-started.md) guide.

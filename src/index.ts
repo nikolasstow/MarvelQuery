@@ -18,7 +18,8 @@ import {
   GlobalParams,
   AnyResultFunction,
   AnyParams,
-  FetchFunction,
+  HTTPClient,
+  OnRequestFunction,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
@@ -49,10 +50,12 @@ class MarvelQuery<E extends Endpoint> {
   static globalParams?: GlobalParams;
   /** Remove undefined parameters from the query */
   static omitUndefined?: boolean = true;
+  /** Enable verbose logging. */
+  private static verbose?: boolean = false;
   // Functions
   /** An optional function that will be called before the request is sent.
    * You can use it to log the request or track the number of requests to the API. */
-  static onRequest?: (url: string) => void;
+  static onRequest?: OnRequestFunction;
   /** Add custom functions to be called when a request of a specific type is complete.
    * @example ```onResult: {
    * comics: (items) => {
@@ -64,7 +67,7 @@ class MarvelQuery<E extends Endpoint> {
    */
   static onResult?: OnResultMap;
   /** Replace the default fetch function (axios) with your own http client */
-  static fetchFunction: FetchFunction = (url) =>
+  private static httpClient: HTTPClient = (url) =>
     axios.get(url).then((response) => response.data);
   /** Function to create an instance of the MarvelQuery class */
   private static createQuery = <T extends Endpoint>(
@@ -91,10 +94,11 @@ class MarvelQuery<E extends Endpoint> {
    * @param config.globalParams - Global parameters to be applied to all queries, or all queries of a specific type.
    * @param config.onRequest - An optional function that will be called before the request is sent.
    * @param config.onResult - Add custom functions to be called when a request of a specific type is complete.
-   * @param config.fetchFunction - Replace the default fetch function (axios) with your own http client.
+   * @param config.httpClient - Replace the default fetch function (axios) with your own http client.
    ** For more information, visit https://github.com/nikolasstow/MarvelQuery
    */
   static init(keys: APIKeys, config: Config = {}) {
+    MarvelQuery.log("Initializing MarvelQuery");
     /** Validate the global parameters. */
     if (config.globalParams) {
       this.validateGlobalParams(config.globalParams);
@@ -105,8 +109,11 @@ class MarvelQuery<E extends Endpoint> {
     return MarvelQuery.createQuery;
   }
 
+
+
   /** Validate the global parameters. */
   private static validateGlobalParams(globalParams: GlobalParams): void {
+    MarvelQuery.log("Validating global parameters");
     const types = Object.keys(globalParams); // get the keys of the globalParams object
     for (const type of types) {
       if (this.validEndpoints.has(type)) { // check if the endpoint type is valid
@@ -130,6 +137,14 @@ class MarvelQuery<E extends Endpoint> {
     }
   }
 
+  private static log(message: string) {
+    if (this.verbose) {
+      console.log(message);
+    }
+  }
+  
+  /** Function that will be called when the query is finished. */
+  private onResult?: OnResultFunction<ResultMap[EndpointType]> | AnyResultFunction;
   /** Endpoint of the query
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes ["characters", 1009491, "comics"]
@@ -137,8 +152,6 @@ class MarvelQuery<E extends Endpoint> {
   endpoint: E;
   /** Parameters of the query */
   params: ParamsType<E>;
-  /** Function that will be called when the query is finished. */
-  onResult?: OnResultFunction<ResultMap[EndpointType]> | AnyResultFunction;
   /** The data type of the results of the query */
   type: EndpointType;
 
@@ -146,7 +159,7 @@ class MarvelQuery<E extends Endpoint> {
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
    */
   url: string;
-  /** The number of results returned by the query */
+  /** The number of results returned by the query. */
   count: number = 0;
   /** The total number of results available for the query. */
   total: number = 0;
@@ -194,6 +207,7 @@ class MarvelQuery<E extends Endpoint> {
 
   /** Validate the endpoint */
   private validateEndpoint(endpoint: E): E {
+    MarvelQuery.log(`Validating endpoint: ${endpoint}`);
     /** Validate the endpoint. */
     if (!endpoint) {
       throw new Error("Endpoint is required");
@@ -231,6 +245,7 @@ class MarvelQuery<E extends Endpoint> {
 
   /** Clean, validate, and set the parameters. */
   private initializeParams(params: ParamsType<E>): void {
+    MarvelQuery.log("Validating parameters");
     /** Remove undefined parameters unless 'omitUndefined' is false. */
     const cleanParams = MarvelQuery.omitUndefined
       ? this.omitUndefined(params)
@@ -274,6 +289,7 @@ class MarvelQuery<E extends Endpoint> {
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
   async fetch(): Promise<MarvelQuery<E>> {
+    MarvelQuery.log("Fetching results");
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
     const url = this.buildURL();
 
@@ -354,13 +370,16 @@ class MarvelQuery<E extends Endpoint> {
 
   /** Send the request to the API, and validate the response. */
   async request(url: string): Promise<APIWrapper<ResultType<E>>> {
+    MarvelQuery.log(`Requesting: ${url}`);
     try {
       /** Call the onRequest function if it is defined. */
       if (MarvelQuery.onRequest) {
-        MarvelQuery.onRequest(url);
+        MarvelQuery.onRequest(url, this.endpoint, this.params);
       }
 
-      const response = await MarvelQuery.fetchFunction<E>(url);
+      const response = await MarvelQuery.httpClient<E>(url);
+
+      MarvelQuery.log("Recieved response");
 
       this.validateResults(response.data.results);
 
@@ -385,10 +404,13 @@ class MarvelQuery<E extends Endpoint> {
     if (!result.success) {
       console.error("Error validating results:", result.error);
     }
+
+    MarvelQuery.log("Validated results");
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
   async fetchSingle(): Promise<MarvelQuery<E>> {
+    MarvelQuery.log("Fetching single result");
     this.params.offset = 0;
     this.params.limit = 1;
     return this.fetch();

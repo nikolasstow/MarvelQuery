@@ -43,10 +43,7 @@ export type Endpoint = DistinctEndpointType<
 /** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
 export type EndpointType = keyof ParameterMap;
 /** Utility type that removes the passed type from the available endpoint types */
-type EndpointResultType<Type extends EndpointType> = Exclude<
-  EndpointType,
-  Type
->;
+type EndpointResultType<T extends EndpointType> = Exclude<EndpointType, T>;
 /** Utility type that infers the type of the first element of the endpoint, so it can be passed to the EndpointResultType.
  * This removes the type of the first element from the available endpoint types for the last element, ensuring they do not match.
  */
@@ -58,7 +55,7 @@ type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> =
     : never;
 
 /** Create a map of any data type with the endpoint as the key. */
-export type EndpointMap<Value> = Record<EndpointType, Value>;
+export type EndpointMap<V> = Record<EndpointType, V>;
 
 /** A map of parameters to their corresponding types providing type safety. */
 export type ParameterMap = {
@@ -84,19 +81,19 @@ export type ResultMap = {
  * It works by checking the endpoint and looking for the last data type in the endpoint.
  * If the last element is a type, use it. If it's a number, use the type in the first element.
  */
-type DataType<ArrayType extends readonly unknown[]> = ArrayType extends [
+type DataType<E extends readonly unknown[]> = E extends [
   ...infer _,
   infer LastElement extends EndpointType
 ]
   ? LastElement extends number
-    ? ArrayType extends [infer FirstElement, ...unknown[]]
+    ? E extends [infer FirstElement, ...unknown[]]
       ? FirstElement
       : never
     : LastElement
   : never;
 
 /** Utility type that gets the parameters from the endpoint. */
-export type ParamsType<Endpoint extends readonly unknown[]> = Endpoint extends [
+export type ParamsType<E extends readonly unknown[]> = E extends [
   infer First,
   infer Second,
   infer Third
@@ -104,23 +101,24 @@ export type ParamsType<Endpoint extends readonly unknown[]> = Endpoint extends [
   ? Third extends EndpointType // Is the third element a data type?
     ? ParameterMap[Third] // The third element is the data type
     : never
-  : Endpoint extends [infer First, infer Second] // Does the Endpoint have two elements?
+  : E extends [infer First, infer Second] // Does the Endpoint have two elements?
   ? Second extends number // Is the second element a number?
     ? never // No parameters when the endpoint is for an individual item
     : never
-  : Endpoint extends [infer First] // Is the endpoint only one element?
+  : E extends [infer First] // Is the endpoint only one element?
   ? First extends EndpointType // Is the element a data type?
     ? ParameterMap[First] // The element is the data type
     : never
   : APIBaseParams;
 
 /** Utility type that gets the result type from the endpoint. */
-export type ResultType<Type extends Endpoint> =
-  DataType<Type> extends EndpointType ? ResultMap[DataType<Type>] : never;
+export type ResultType<E extends Endpoint> = DataType<E> extends EndpointType
+  ? ResultMap[DataType<E>]
+  : never;
 
 /** Type of function that will be called when the query is finished, and passes the results as an array. */
-export type OnResultFunction<Type extends MarvelResult> = (
-  data: Type[]
+export type OnResultFunction<R extends MarvelResult> = (
+  data: R[]
 ) => void | Promise<unknown>;
 
 /** A function that will be called when a query of any type is finished, unless overridden with onResult function for a specific type. */
@@ -159,13 +157,23 @@ export interface GlobalParams extends Partial<ParameterMap> {
   all?: APIBaseParams;
 }
 
+export type OnRequestFunction = (
+  url: string,
+  endpoint: Endpoint,
+  params: Record<string, unknown>
+) => void;
+
 export interface APIKeys {
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   publicKey: string;
   /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
   privateKey: string;
 }
-export type FetchFunction = <E extends Endpoint>(url: string) => Promise<APIWrapper<ResultType<E>>>;
+
+/** Replace the default fetch function with a custom one.  */
+export type HTTPClient = <E extends Endpoint>(
+  url: string
+) => Promise<APIWrapper<ResultType<E>>>;
 /** Arguments for initialization of the API */
 export interface Config {
   // Options
@@ -178,6 +186,11 @@ export interface Config {
   globalParams?: GlobalParams;
   /** Remove undefined parameters from the query */
   omitUndefined?: boolean; // set to true (by default) this will remove undefined values from the query
+  /** Enable verbose logging. */
+  verbose?: boolean;
+  /** An optional function that will be called before the request is sent.
+   * You can use it to log the request or track the number of requests to the API. */
+  onRequest?: OnRequestFunction;
   // Functions
   /** Add custom functions to be called when a request of a specific type is complete.
    * @example ```onResult: {
@@ -189,16 +202,14 @@ export interface Config {
    * }```
    */
   onResult?: OnResultMap;
-  /** An optional function that will be called before the request is sent.
-   * You can use it to log the request or track the number of requests to the API. */
-  onRequest?: (url: string) => void;
-  fetchFunction?: FetchFunction;
+  /** Replace the default http client (axios) with your own http client.  */
+  httpClient?: HTTPClient;
 }
 
 /** Response data restructured from the API to create new instance of MarvelQueryResult, extending the MarvelQuery object with the new data and helper functions. */
-export type MarvelQueryResults<Type extends Endpoint> = {
+export type MarvelQueryResults<E extends Endpoint> = {
   url: string;
   metadata: Metadata;
   responseData: APIResponseData;
-  results: ResultType<Type>[];
+  results: ResultType<E>[];
 };

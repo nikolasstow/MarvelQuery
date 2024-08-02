@@ -7,7 +7,7 @@
 | `limit`          | `number`              | Limit the result set to the specified number of resources.
 | `offset`         | `number`              | Skip the specified number of resources in the result set.
 
-## CharacterParams
+## `CharacterParams`
 
 | Property         | Type                | Description                                                                                         
 |------------------|---------------------|-----------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@
 | `limit`          | `number`            | Limit the result set to the specified number of resources.
 | `offset`         | `number`            | Skip the specified number of resources in the result set.
 
-## ComicParams
+## `ComicParams`
 | Property            | Type                                                    | Description                                                                                         
 |---------------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------
 | `format`            | [`Format`](#formats)                                    | Filter by format (e.g. comic, digital comic, trade paperback).
@@ -52,7 +52,7 @@
 | `limit`             | `number`                                                | Limit the result set to the specified number of resources.
 | `offset`            | `number`                                                | Skip the specified number of resources in the result set.
 
-## CreatorParams
+## `CreatorParams`
 
 | Property               | Type                                                    | Description                                                                                         
 |------------------------|---------------------------------------------------------|-----------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@
 | `limit`                | `number`                                                | Limit the result set to the specified number of resources.
 | `offset`               | `number`                                                | Skip the specified number of resources in the result set.
 
-## EventParams
+## `EventParams`
 
 | Property         | Type                          | Description                                                                                         
 |------------------|-------------------------------|-----------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@
 | `limit`          | `number`                      | Limit the result set to the specified number of resources.
 | `offset`         | `number`                      | Skip the specified number of resources in the result set.
 
-## SeriesParams
+## `SeriesParams`
 
 | Property          | Type                                        | Description                                                                                         
 |-------------------|---------------------------------------------|-----------------------------------------------------------------------------------------------------
@@ -107,7 +107,7 @@
 | `limit`           | `number`                                    | Limit the result set to the specified number of resources.
 | `offset`          | `number`                                    | Skip the specified number of resources in the result set.
 
-## StoryParams
+## `StoryParams`
 
 | Property        | Type                | Description                                                                                         
 |-----------------|---------------------|-----------------------------------------------------------------------------------------------------
@@ -125,7 +125,7 @@
 
 ### Formats
 
-The `Format` type categorizes different forms of comic publications, ranging from traditional print editions like comics, magazines, and graphic novels, to modern digital formats such as digital comics and infinite comics. Available formats include:
+The `Format` type categorizes various forms of comic publications, ranging from traditional print editions like comics, magazines, and graphic novels, to modern digital formats such as digital comics and infinite comics. Available formats include:
 - `comic`
 - `magazine`
 - `trade paperback`
@@ -135,16 +135,16 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 - `digital comic`
 - `infinite comic`
 
-### IDList
+### `IDList`
 
-This type represents a list of Marvel API item IDs. It can be a single number or an array of numbers, which will be transformed into a comma-separated string for API compatibility. The IDs should generally match the type suggested by the property’s name. For example, if a property of this type is named ‘comics’, the IDs should be comic IDs. This does not apply to all uses of this type, so if unsure, please reference the documentation of the specific property.
+The `IDList` type represents a list of Marvel API item IDs. It can be a single number or an array of numbers, which will be transformed into a comma-separated string for API compatibility. Generally, the IDs should match the type suggested by the property’s name. For example, if a property of this type is named ‘comics’, the IDs should be comic IDs. This does not apply to all uses of this type, so if unsure, please reference the documentation for the specific property.
 
 - **Single ID:** A number representing a single item ID.
 - **Multiple IDs:** An array of numbers representing multiple item IDs, which will be joined into a comma-separated string.
 
 ### Dates
 
-The `Date` input accepts various date formats and transforms them into an ISO 8601 date string before being sent to the API. This transformation ensures that the date string is both accurate and universally recognizable.
+The `Date` type accepts various date formats and transforms them into an ISO 8601 date string before being sent to the API. This transformation ensures that the date string is both accurate and universally recognizable.
 
 #### Accepted Input Formats
 
@@ -154,3 +154,4 @@ The following date formats are accepted:
 - **YYYY-MM-DD**: A simple date string with year, month, and day.
 - **YYYY-MM-DDTHH:MM:SS**: Includes date and time in hours, minutes, and seconds.
 - **YYYY-MM-DDTHH:MM:SS±HH:MM**: A complete date and time string including a timezone offset (e.g., `-05:00` for EST).
+

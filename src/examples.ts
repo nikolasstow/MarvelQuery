@@ -21,7 +21,7 @@ const createQuery = MarvelQuery.init(
      * An optional function that will be called before the request is sent,
      * you can use it to log the request or do something else.
      */
-    onRequest: (url) => {
+    onRequest: (url, endpoint, params) => {
       checkAndUpdateCounters();
     },
     /**
@@ -49,7 +49,7 @@ const createQuery = MarvelQuery.init(
       },
       // ...and so on
     },
-    // fetchFunction: (url) => fetch(url),
+    // httpClient: (url) => fetch(url),
   }
 );
 /**

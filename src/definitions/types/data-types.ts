@@ -344,9 +344,9 @@ export interface APIResponseData {
  * @property count: The total number of results returned by this call
  * @property results: The results of the query
  */
-export interface APIResponseResults<MarvelType extends MarvelResult>
+export interface APIResponseResults<R extends MarvelResult>
   extends APIResponseData {
-  results: MarvelType[];
+  results: R[];
 }
 
 /** DataWrapper of the API response
@@ -358,6 +358,6 @@ export interface APIResponseResults<MarvelType extends MarvelResult>
  * @property etag: A digest value of the content returned by the call.
  * @property data: The results returned by the call.
  */
-export interface APIWrapper<T extends MarvelResult> extends Metadata {
-  data: APIResponseResults<T>;
+export interface APIWrapper<R extends MarvelResult> extends Metadata {
+  data: APIResponseResults<R>;
 }

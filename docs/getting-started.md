@@ -10,7 +10,7 @@ npm i marvelquery axios
 
 ## Setup
 
-MarvelQuery.init() has two arguments, [`APIKeys`](#apikeys) and [`configuration options`](#config)
+First, initialize the library with your API keys and pass in your [configuration options](#config) using the static function `MarvelQuery.init()`.
 
 ```ts
 const createQuery = MarvelQuery.init({
@@ -21,17 +21,23 @@ const createQuery = MarvelQuery.init({
   });
 ```
 
+This will return a function referred to in this documentation as `createQuery`, though you can name it anything you like. This function takes two arguments: the [endpoint](#endpoint) and the [parameters](#parameters). As its name suggests, it creates an instance of [MarvelQuery](#marvelquery).
+
 ## Creating a Query
 
-```ts
-// A query is made up of two parts, the endpoint and the parameters
+A query is made up of two parts, the endpoint and the query parameters: `createQuery(endpoint, parameters )`.
 
+```ts
 const spiders = await createQuery(["characters"], {
   nameStartsWith: "Spider",
 });
+```
 
-// The endpoint is an array with 1 to 3 elements
+### Defining your Endpoint
 
+The endpoint is an array containing 1 to 3 elements that specify the target locations for data retrieval and determine the data type of the results.
+
+```ts
 ["comics"] // Search for comics
 ["comics", 98310] // Search for a comic with it's ID
 ["comics", 98310, "characters"] // Search for characters in a specific comic
@@ -41,15 +47,19 @@ const spiders = await createQuery(["characters"], {
 ["comics"] // returns MarvelComic[]
 ["comics", 98310] // returns MarvelComic[] (length = 1)
 ["comics", 98310, "characters"] // returns MarvelCharacter[]
+```
 
-// The endpoint data types also determine the parameters available for the query.
+### Adding Parameters
 
+The data type returned by an endpoint determines the available parameters for the query. As a general rule, the last data type specified in the endpoint indicates the type of data the query will return.
+
+```ts
 // With a single element in the endpoint, that will be the data type.
 const thisWeek = createQuery(["comics"], {
   dateDescriptor: "thisWeek", // Parameters for "comics" (ComicParams)
 });
 
-// The second element is always an id. Without a third element, your endpoint represents a single item and therefore no need for parameters.
+// The second element is always an id. Without a third element, your endpoint represents a single item and therefore has no available parameters.
 const sheHulk = createQuery(["comics", 409]);
 
 // When you add a third element, another data type, you are searching for items of that type that are linked to the id in the endpoint.
@@ -61,6 +71,10 @@ const sheHulk = createQuery(["comics", 409, "creators"], {
 ```
 
 ## Retrieving Results
+
+To fetch data with your query, call `.fetch()` on your MarvelQuery object. This is an asynchronous method, so be sure to include `await`. The `fetchSingle()` method also exists, limiting your query to a single result, which is useful when querying a character or creator, or any time one result is all that's expected.
+
+### `.fetch()`
 
 ```ts
 // To fetch data with your query, call .fetch() and don't forget to add "await".
@@ -83,15 +97,33 @@ const slottsSheHulk = await query.fetch()
 await slottsSheHulk.fetch();
 // And then the next...
 await slottsSheHulk.fetch();
-// Until there are no more results left
 
-// When searching for a single item, use fetchSingle() to request only one result.
+// If you want every result available, you can accomplish this with a while loop and the .isComplete property.
+while(!latest.isComplete) {
+  await latest.fetch(); // This will continue until all results have been received
+}
+```
+
+### `.fetchSingle()`
+
+When searching for a single item, use fetchSingle() to request only one result.
+
+```ts
 const spiderMan = await createQuery(["characters"], {
     name: "Peter Parker",
   }).fetchSingle();
 ```
 
-The [`fetch()`](#marvelquery) and `fetchSingle()` functions return a [`MarvelQueryResult`](#marvelqueryresult) object containing the data returned by the request and helper functions. This includes the query `url`, `metadata` (code, status, copyright), `responseData` (offset, limit, total, count), `result` (a single result item), `results` (array of results), and `resultHistory` (The combined results of all requests with this query).
+
+
+The [`fetch()`](#marvelquery) and `fetchSingle()` functions return `this`, the MarvelQuery instance now containing the data returned by the request and helper functions. This includes:
+
+- `url`: The query URL.
+- `metadata`: Information such as code, status, and copyright.
+- `responseData`: Details like offset, limit, total, and count.
+- `result`: A single result item.
+- `results`: An array of results.
+- `resultHistory`: The combined results of all requests with this query.
 
 ```ts
 // Using the properties of MarvelQueryResult
@@ -108,66 +140,7 @@ const characters = await createQuery(["comics", 98310, "characters"])
   .fetch() // Fetch characters in this comic (id # 98310)
   .then((query) => query.results.map((character) => character.name)); // Return an array of character names.
 
-// TODO: Move offset change to constructor?
+
 ```
 
-
-
-| Property        | Type                                  | Description                                              |
-| --------------- | ------------------------------------- | -------------------------------------------------------- |
-| `url`           | `string`                              | The URL generated for the API request.                   |
-| `metadata`      | [`Metadata`](#metadata)               | Metadata included in the API response.                   |
-| `responseData`  | [`APIResponseData`](#apiresponsedata) | Data for the API response.                               |
-| `result`        | [`ResultType<Type>`](#resulttype)     | The first result of the query.                           |
-| `results`       | [`ResultType<Type>[]`](#resulttype)   | The results of the query.                                |
-| `resultHistory` | [`ResultType<Type>[]`](#resulttype)   | The conjunction of all results from this query instance. |
-
-## Configuration Options
-
-**Global Parameters**
-
-```ts
-const createQuery = MarvelQuery.init({ ... }, {
-  // Global parameters
-  all: { // Applies to all queries
-    limit: 10
-  },
-  comics: { // Applies to all queries of type 'comics'
-    noVariants: true
-  },
-});
-```
-
-**Custom HTTP Client**
-
-```ts
-// In this example we'll use the axios package, but you can use whichever http client you prefer.
-
-// Map to store ongoing requests for de-duping
-const cache = new Map<string, Promise<any>>();
-
-const createQuery = MarvelQuery.init({ ... }, {
-  // Global parameters
-  fetchFunction: (url: string): Promise<unknown> => {
-    if (cache.has(url)) return cache.get(url)!;
-  
-    const promise = new Promise<unknown>((resolve, reject) => {
-      const timeout = setTimeout(() => reject(new Error('Timeout')), 5000);
-  
-      axios.get(url).then((response) => {
-        clearTimeout(timeout);
-        resolve(response.data);
-      }).catch((error) => {
-        clearTimeout(timeout);
-        reject(error);
-      }).finally(() => {
-        cache.delete(url);
-      });
-    });
-  
-    cache.set(url, promise);
-    return promise;
-  }
-});
-```
-
+I recommend referencing the [`MarvelQuery`](#marvelquery) documentation for more information about its properties.
