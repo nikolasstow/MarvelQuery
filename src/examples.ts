@@ -15,43 +15,9 @@ const createQuery = MarvelQuery.init(
   {
     publicKey: "your-public-key",
     privateKey: "your-private-key",
-  },
-  {
-    /**
-     * An optional function that will be called before the request is sent,
-     * you can use it to log the request or do something else.
-     */
-    onRequest: (url, endpoint, params) => {
-      checkAndUpdateCounters();
-    },
-    /**
-     * You can pass in a map of functions (all of them are optional) for saving results to your database.
-     * This way, you don't have to implement it yourself.
-     */
-    onResult: {
-      comics: (items) => {
-        items.map((comic) => {
-          // Type safety means you know what properties are available during development
-          console.log("Saving comic:", comic.title);
-
-          return {
-            issn: comic.issn,
-            isbn: comic.isbn,
-            upc: comic.upc,
-            ean: comic.ean,
-          };
-        });
-      },
-      characters: (items) => {
-        items.forEach((character) =>
-          console.log("Saving character:", character.name)
-        );
-      },
-      // ...and so on
-    },
-    // httpClient: (url) => fetch(url),
   }
 );
+
 /**
  * Fetches information about Spider-Man.
  * Calls the API to get data about the character "Peter Parker" and handles pagination automatically.
@@ -59,9 +25,25 @@ const createQuery = MarvelQuery.init(
 async function spiderMan() {
   const spiderMan = await createQuery(["characters"], {
     name: "Peter Parker",
-  }).fetch();
+  }).fetchSingle();
   // Need more results? Just call fetch again
-  spiderMan.fetch();
+  // spiderMan.fetch("comics",{
+  //   format: "comic",
+  // });
+  const endpoint = await spiderMan.query("comics", {
+    format: "comic",
+  }).fetch();
+
+
+// const spiderMoan = await createQuery(["characters"], {
+//     name: "Peter Parker",
+//   }).query("comics", {
+    
+//   })
+
+  // const comics = createQuery(endpoint, {
+  //   format: "comic",
+  // })
   // The library automatically handles pagination for you, updating the offset parameter to get the next batch
   // You can continue to do this until there are no more results.
 }
@@ -231,6 +213,13 @@ export async function latest(): Promise<MarvelComic[]> {
   })
     .fetch()
     .then((api) => api.results);
+}
+
+export async function comicsWithCharacter(name: string): Promise<MarvelComic[]> {
+  return createQuery(['characters'], { name })
+    .fetchSingle()
+    .then((character) => character.query('comics', { format: 'comic' }).fetch())
+    .then((comics) => comics.results);
 }
 
 /**

@@ -12,7 +12,6 @@ import {
   APIKeys,
   Config,
   APIWrapper,
-  MarvelQueryResults,
   APIResponseData,
   Metadata,
   GlobalParams,
@@ -20,12 +19,31 @@ import {
   AnyParams,
   HTTPClient,
   OnRequestFunction,
+  Extendpoint,
+
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
 import { unknown } from "zod";
 
-class MarvelQuery<E extends Endpoint> {
+type InitQuery<E extends Endpoint, Type extends StateTypes> = {
+  endpoint: E;
+  params: ParamsType<E>;
+};
+
+type StateTypes = keyof QueryMap;
+
+
+type ClassState<Type extends StateTypes> = {
+  query: QueryMap[Type];
+}
+
+type QueryMap = {
+  init: never;
+  loaded: typeof MarvelQuery.prototype.callQuery;
+}
+
+class MarvelQuery<E extends Endpoint, State extends StateTypes> implements ClassState<State> {
   /** Endpoint types that can be queried */
   private static validEndpoints = new Set([
     "comics",
@@ -35,6 +53,8 @@ class MarvelQuery<E extends Endpoint> {
     "series",
     "stories",
   ]);
+
+  query: QueryMap[State] = this.callQuery as unknown as QueryMap[State];
 
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   private static publicKey: string;
@@ -73,7 +93,7 @@ class MarvelQuery<E extends Endpoint> {
   private static createQuery = <T extends Endpoint>(
     endpoint: T,
     params: ParamsType<T> = {} as ParamsType<T>
-  ): MarvelQuery<T> => {
+  ): MarvelQuery<T, 'init'> => {
     /** Validate the endpoint. */
     if (!endpoint) {
       throw new Error("Missing endpoint");
@@ -83,7 +103,7 @@ class MarvelQuery<E extends Endpoint> {
       throw new Error("Missing public or private keys");
     }
     /** Create a new query with the MarvelQuery class. */
-    return new MarvelQuery<T>(endpoint, params);
+    return new MarvelQuery<T, 'init'>({ endpoint, params });
   };
   /** Initialize the API library with your public and private keys and other options.
    * @param keys.publicKey - Marvel API public key.
@@ -108,8 +128,6 @@ class MarvelQuery<E extends Endpoint> {
     /** Pass the createQuery function once the library is initialized. */
     return MarvelQuery.createQuery;
   }
-
-
 
   /** Validate the global parameters. */
   private static validateGlobalParams(globalParams: GlobalParams): void {
@@ -188,8 +206,9 @@ class MarvelQuery<E extends Endpoint> {
 
   /** The query is complete when all results have been fetched. */
   isComplete: boolean = false;
+
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
-  constructor(endpoint: E, params: ParamsType<E>) {
+  constructor({ endpoint, params }: InitQuery<E, 'init'>) {
     this.initializeEndpoint(endpoint);
     this.initializeParams(params);
     this.initializeResultHandler();
@@ -207,7 +226,7 @@ class MarvelQuery<E extends Endpoint> {
 
   /** Validate the endpoint */
   private validateEndpoint(endpoint: E): E {
-    MarvelQuery.log(`Validating endpoint: ${endpoint}`);
+    MarvelQuery.log(`Validating endpoint: ${endpoint.join("/")}`);
     /** Validate the endpoint. */
     if (!endpoint) {
       throw new Error("Endpoint is required");
@@ -284,11 +303,34 @@ class MarvelQuery<E extends Endpoint> {
     }
   }
 
+  // private createEndpoint<T extends EndpointType>(type: T): Extendpoint<E, T> {
+  //   const basePoint: EndpointType = this.type;
+  //   const id = this.result?.id;
+  //   return [basePoint, id, type] as Extendpoint<E, T>;
+  // }
+
+  callQuery<T extends EndpointType>(type: T, params: ParamsType<Extendpoint<E, T>>): MarvelQuery<Extendpoint<E, T>, 'init'> {
+    if (!this.result || !this.result.id) {
+      throw new Error("No result to query");
+    }
+
+    console.log("Creating query from result");
+    const basePoint: E[0] = this.type;
+    const id = this.result.id;
+    const endpoint: Extendpoint<E, T> = [basePoint, id, type] as Extendpoint<E, T>
+    const query: InitQuery<Extendpoint<E, T>, 'init'> = {
+      endpoint,
+      params,
+    }
+    console.log(query);
+    return new MarvelQuery<Extendpoint<E, T>, 'init'>(query);
+  }
+
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
-  async fetch(): Promise<MarvelQuery<E>> {
+  async fetch (): Promise<MarvelQuery<E, 'loaded'>> {
     MarvelQuery.log("Fetching results");
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
     const url = this.buildURL();
@@ -329,7 +371,7 @@ class MarvelQuery<E extends Endpoint> {
         this.onResult(results);
       }
 
-      return this;
+      return this as MarvelQuery<E, 'loaded'>;
     } catch (error) {
       console.error("Request error:", error);
       throw new Error("Request error");
@@ -409,7 +451,7 @@ class MarvelQuery<E extends Endpoint> {
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  async fetchSingle(): Promise<MarvelQuery<E>> {
+  async fetchSingle(): Promise<MarvelQuery<E, 'loaded'>> {
     MarvelQuery.log("Fetching single result");
     this.params.offset = 0;
     this.params.limit = 1;

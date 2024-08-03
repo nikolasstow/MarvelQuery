@@ -44,7 +44,7 @@ export const ComicDateSchema = z.object({
   type: z
     .string()
     .describe("A description of the date (e.g. onsale date, FOC date)."),
-  date: z.string().datetime({ offset: true }).describe("The date."),
+  date: z.string().describe("The date."),
 });
 
 export const ComicPriceSchema = z.object({

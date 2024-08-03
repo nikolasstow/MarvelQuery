@@ -111,6 +111,8 @@ export type ParamsType<E extends readonly unknown[]> = E extends [
     : never
   : APIBaseParams;
 
+export type Extendpoint<E extends Endpoint, T extends EndpointType> = [E[0], number, T] extends Endpoint ? [E[0], number, T] : never;
+
 /** Utility type that gets the result type from the endpoint. */
 export type ResultType<E extends Endpoint> = DataType<E> extends EndpointType
   ? ResultMap[DataType<E>]
@@ -206,10 +208,8 @@ export interface Config {
   httpClient?: HTTPClient;
 }
 
-/** Response data restructured from the API to create new instance of MarvelQueryResult, extending the MarvelQuery object with the new data and helper functions. */
-export type MarvelQueryResults<E extends Endpoint> = {
-  url: string;
-  metadata: Metadata;
-  responseData: APIResponseData;
-  results: ResultType<E>[];
-};
+
+
+// export type StateConfig<Type extends StateTypes> = Config & QueryState<Type>;
+
+// export type StateTypes = 'init' | 'loading' | 'loaded';
