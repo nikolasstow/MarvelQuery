@@ -34,6 +34,16 @@ async function spiderMan() {
     format: "comic",
   }).fetch();
 
+  const comics = await createQuery(['comics'], {
+    dateDescriptor: 'thisWeek',
+  }).fetch();
+
+  for (const comic of comics.results) {
+    comic.query('characters', {
+      name: 'Peter Parker',
+    })
+  }
+
 
 // const spiderMoan = await createQuery(["characters"], {
 //     name: "Peter Parker",

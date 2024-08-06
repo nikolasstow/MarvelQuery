@@ -57,6 +57,24 @@ type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> =
 /** Create a map of any data type with the endpoint as the key. */
 export type EndpointMap<V> = Record<EndpointType, V>;
 
+// export type LoadedState = () => Promise<any>; // Replace with actual return type
+
+export interface StateMap<TLoaded> {
+  init: never;
+  loaded: TLoaded;
+}
+
+export type InitQuery<E extends Endpoint> = {
+  endpoint: E;
+  params: ParamsType<E>;
+};
+
+export type StateTypes<TLoaded> = keyof StateMap<TLoaded>;
+
+export type ClassState<TLoaded, Type extends StateTypes<TLoaded>> = {
+  query: StateMap<TLoaded>[Type];
+};
+
 /** A map of parameters to their corresponding types providing type safety. */
 export type ParameterMap = {
   comics: ComicParams;
@@ -111,7 +129,13 @@ export type ParamsType<E extends readonly unknown[]> = E extends [
     : never
   : APIBaseParams;
 
-export type Extendpoint<E extends Endpoint, T extends EndpointType> = [E[0], number, T] extends Endpoint ? [E[0], number, T] : never;
+export type Extendpoint<E extends Endpoint, T extends EndpointType> = [
+  E[0],
+  number,
+  T
+] extends Endpoint
+  ? [E[0], number, T]
+  : never;
 
 /** Utility type that gets the result type from the endpoint. */
 export type ResultType<E extends Endpoint> = DataType<E> extends EndpointType
@@ -207,9 +231,3 @@ export interface Config {
   /** Replace the default http client (axios) with your own http client.  */
   httpClient?: HTTPClient;
 }
-
-
-
-// export type StateConfig<Type extends StateTypes> = Config & QueryState<Type>;
-
-// export type StateTypes = 'init' | 'loading' | 'loaded';

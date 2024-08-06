@@ -30,6 +30,10 @@ import {
   MarvelStorySchema,
 } from "../schemas/data-schemas";
 
+type FormattedResult<Z extends z.ZodType<any, any>, QF> = z.infer<Z> & {
+  query: QF;
+}
+
 /**| Property   | Type     | Description                                                 
  * | ---------- | -------- | ------------------------------------------------------------
  * | `type`     | `string` | Only return resources created or changed since the specified date.
