@@ -11,12 +11,10 @@ import MarvelQuery, {
  * Initialize the Marvel API with your public and private keys.
  * Optionally, you can add functions for logging requests and saving results.
  */
-const createQuery = MarvelQuery.init(
-  {
-    publicKey: "your-public-key",
-    privateKey: "your-private-key",
-  }
-);
+const createQuery = MarvelQuery.init({
+  publicKey: "your-public-key",
+  privateKey: "your-private-key",
+});
 
 /**
  * Fetches information about Spider-Man.
@@ -30,28 +28,29 @@ async function spiderMan() {
   // spiderMan.fetch("comics",{
   //   format: "comic",
   // });
-  const endpoint = await spiderMan.query("comics", {
-    format: "comic",
-  }).fetch();
+  const endpoint = await spiderMan
+    .query("comics", {
+      format: "comic",
+    })
+    .fetch();
 
-  const comics = await createQuery(['comics'], {
-    dateDescriptor: 'thisWeek',
+  const comics = await createQuery(["comics"], {
+    dateDescriptor: "thisWeek",
   }).fetch();
 
   for (const comic of comics.results.slice(0, 2)) {
-    console.log('Checking comic:', comic.title);
-    comic.query('characters', {
-      name: 'Peter Parker',
+    console.log("Checking comic:", comic.title);
+    comic.query("characters", {
+      name: "Peter Parker",
       // format: 'comic',
-    })
+    });
   }
 
+  // const spiderMoan = await createQuery(["characters"], {
+  //     name: "Peter Parker",
+  //   }).query("comics", {
 
-// const spiderMoan = await createQuery(["characters"], {
-//     name: "Peter Parker",
-//   }).query("comics", {
-    
-//   })
+  //   })
 
   // const comics = createQuery(endpoint, {
   //   format: "comic",
@@ -227,10 +226,12 @@ export async function latest(): Promise<MarvelComic[]> {
     .then((api) => api.results);
 }
 
-export async function comicsWithCharacter(name: string): Promise<MarvelComic[]> {
-  return createQuery(['characters'], { name })
+export async function comicsWithCharacter(
+  name: string
+): Promise<MarvelComic[]> {
+  return createQuery(["characters"], { name })
     .fetchSingle()
-    .then((character) => character.query('comics', { format: 'comic' }).fetch())
+    .then((character) => character.query("comics", { format: "comic" }).fetch())
     .then((comics) => comics.results);
 }
 

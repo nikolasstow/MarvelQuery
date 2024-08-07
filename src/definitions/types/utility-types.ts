@@ -66,7 +66,7 @@ export interface StateMap<TLoaded> {
 
 export type InitQuery<E extends Endpoint> = {
   endpoint: E;
-  params: ParamsType<E>;
+  params: Parameters<E>;
 };
 
 export type StateTypes<TLoaded> = keyof StateMap<TLoaded>;
@@ -111,7 +111,7 @@ type DataType<E extends readonly unknown[]> = E extends [
   : never;
 
 /** Utility type that gets the parameters from the endpoint. */
-export type ParamsType<E extends readonly unknown[]> = E extends [
+export type Parameters<E extends readonly unknown[]> = E extends [
   infer First,
   infer Second,
   infer Third
@@ -138,7 +138,7 @@ export type Extendpoint<E extends Endpoint, T extends EndpointType> = [
   : never;
 
 /** Utility type that gets the result type from the endpoint. */
-export type ResultType<E extends Endpoint> = DataType<E> extends EndpointType
+export type Result<E extends Endpoint> = DataType<E> extends EndpointType
   ? ResultMap[DataType<E>]
   : never;
 
@@ -199,7 +199,7 @@ export interface APIKeys {
 /** Replace the default fetch function with a custom one.  */
 export type HTTPClient = <E extends Endpoint>(
   url: string
-) => Promise<APIWrapper<ResultType<E>>>;
+) => Promise<APIWrapper<Result<E>>>;
 /** Arguments for initialization of the API */
 export interface Config {
   // Options

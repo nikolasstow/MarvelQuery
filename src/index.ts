@@ -3,8 +3,8 @@ import axios, { AxiosResponse } from "axios";
 
 import {
   Endpoint,
-  ParamsType,
-  ResultType,
+  Parameters,
+  Result,
   EndpointType,
   OnResultMap,
   OnResultFunction,
@@ -37,14 +37,48 @@ import { ValidateParams } from "./definitions/schemas/param-schemas";
 //   fetch: unknown;
 // };
 
-type ExtendResultType<E extends Endpoint> = ResultType<E> & {
+// Add props to subtypes
+type ResourceObject = {
+  resourceURI: string;
+} & { [key: string]: any };
+
+type ExtendedResourceObject<E extends Endpoint> = WithQueryAndEndpoint<
+  E,
+  ResourceObject
+>;
+
+type WithQueryFunctions<E extends Endpoint, T> = T & QueryFunctions<E>;
+type WithEndpoint<E extends Endpoint, T> = T & EndpointProperty<E>;
+type WithQueryAndEndpoint<E extends Endpoint, T> = T &
+  EndpointProperty<E> &
+  QueryFunctions<E>;
+
+type QueryFunctions<E extends Endpoint> = {
   query: QueryFunction<E>;
   fetch: () => Promise<void>;
 };
 
+type EndpointProperty<E extends Endpoint> = {
+  endpoint: E;
+};
+
+type ExtendSubType<E extends Endpoint, T> = T extends { items: Array<infer U> }
+  ? Omit<T, "items"> & { items: Array<WithQueryFunctions<E, U>> }
+  : T;
+
+type ExtendResult<E extends Endpoint> = {
+  [K in keyof Result<E>]: ExtendSubType<E, Result<E>[K]>;
+};
+
+// Add props to the result type
+type ExtendedResult<E extends Endpoint> = WithQueryAndEndpoint<
+  E,
+  ExtendResult<E>
+>;
+
 type QueryFunction<E extends Endpoint> = <T extends EndpointType>(
   type: T,
-  params: ParamsType<Extendpoint<E, T>>
+  params: Parameters<Extendpoint<E, T>>
 ) => InitializedQuery<E, T>;
 
 type InitializedQuery<E extends Endpoint, T extends EndpointType> = MarvelQuery<
@@ -112,7 +146,7 @@ class MarvelQuery<
   /** Function to create an instance of the MarvelQuery class */
   private static createQuery = <T extends Endpoint>(
     endpoint: T,
-    params: ParamsType<T> = {} as ParamsType<T>
+    params: Parameters<T> = {} as Parameters<T>
   ): MarvelQuery<T, "init"> => {
     /** Validate the endpoint. */
     if (!endpoint) {
@@ -194,7 +228,7 @@ class MarvelQuery<
    */
   endpoint: E;
   /** Parameters of the query */
-  params: ParamsType<E>;
+  params: Parameters<E>;
   /** The data type of the results of the query */
   type: EndpointType;
 
@@ -223,11 +257,11 @@ class MarvelQuery<
    */
   responseData: APIResponseData;
   /** The first result of the query. */
-  result: ExtendResultType<E> | undefined;
+  result: ExtendedResult<E> | undefined;
   /** The results of the query. */
-  results: ExtendResultType<E>[];
+  results: ExtendedResult<E>[];
   /** The conjunction of all results from this query instance. */
-  resultHistory: ExtendResultType<E>[] = [];
+  resultHistory: ExtendedResult<E>[] = [];
 
   /** The query is complete when all results have been fetched. */
   isComplete: boolean = false;
@@ -288,7 +322,7 @@ class MarvelQuery<
   }
 
   /** Clean, validate, and set the parameters. */
-  private initializeParams(params: ParamsType<E>): void {
+  private initializeParams(params: Parameters<E>): void {
     MarvelQuery.log("Validating parameters");
     /** Remove undefined parameters unless 'omitUndefined' is false. */
     const cleanParams = MarvelQuery.omitUndefined
@@ -311,10 +345,10 @@ class MarvelQuery<
   }
 
   /** Remove undefined parameters. */
-  private omitUndefined(params: ParamsType<E>): ParamsType<E> {
+  private omitUndefined(params: Parameters<E>): Parameters<E> {
     return Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined)
-    ) as ParamsType<E>;
+    ) as Parameters<E>;
   }
 
   /** Set the onResult function for the specific type, or the 'any' type if not provided. */
@@ -328,18 +362,53 @@ class MarvelQuery<
     }
   }
 
-  private addQueryFunction(result: ResultType<E>): ExtendResultType<E> {
-    const endpoint = this.createEndpointFromURI(result.resourceURI);
+  private insertEndpoint<T extends ResourceObject>(
+    item: T
+  ): WithEndpoint<Endpoint, T> {
+    const endpoint = this.createEndpointFromURI(item.resourceURI);
+    return {
+      ...item,
+      endpoint,
+    };
+  }
+
+  private insertQueryFunction<T extends Endpoint>(
+    endpoint: T,
+    item: WithEndpoint<T, ResourceObject>
+  ): ExtendedResourceObject<T> {
+    return {
+      ...item,
+      query: <TType extends EndpointType>(
+        type: TType,
+        params: Parameters<Extendpoint<T, TType>>
+      ) => {
+        return this.configureQuery(endpoint, type, params);
+      },
+      fetch: async (): Promise<void> => {
+        console.log("Fetching from result");
+      },
+    };
+  }
+
+  private addQueryFunction(result: Result<E>): ExtendedResult<E> {
+    for (const key in result) {
+      if (MarvelQuery.validEndpoints.has(key)) {
+        
+      }
+    }
+    
+    const withEndpoint = this.insertEndpoint(result);
+    const endpoint = withEndpoint.endpoint;
 
     const query: QueryFunction<E> = <T extends EndpointType>(
       type: T,
-      params: ParamsType<Extendpoint<E, T>>
+      params: Parameters<Extendpoint<E, T>>
     ) => {
-      return this.configureQuery(endpoint, type, params);
-    }
-    
+      return this.configureQuery<typeof endpoint, T>(endpoint, type, params);
+    };
+
     return {
-      ...result,
+      ...withEndpoint,
       query,
       fetch: async (): Promise<void> => {
         console.log("Fetching from result");
@@ -356,17 +425,17 @@ class MarvelQuery<
     return [type, Number(id)] as Endpoint;
   }
 
-  private configureQuery<T extends EndpointType>(
+  private configureQuery<B extends Endpoint, T extends EndpointType>(
     endpoint: Endpoint,
     type: T,
-    params: ParamsType<Extendpoint<E, T>>
-  ): InitializedQuery<E, T> {
-    return this.initializeQuery<T, typeof endpoint>(type, params, endpoint);
+    params: Parameters<Extendpoint<B, T>>
+  ): InitializedQuery<B, T> {
+    return this.initializeQuery<typeof endpoint, T>(type, params, endpoint);
   }
 
-  private initializeQuery<T extends EndpointType, B extends Endpoint = E>(
+  private initializeQuery<B extends Endpoint, T extends EndpointType>(
     type: T,
-    params: ParamsType<Extendpoint<B, T>>,
+    params: Parameters<Extendpoint<B, T>>,
     baseEndpoint?: B
   ): InitializedQuery<E, T> {
     if (!this.result || !this.result.id) {
@@ -476,7 +545,7 @@ class MarvelQuery<
   }
 
   /** Send the request to the API, and validate the response. */
-  async request(url: string): Promise<APIWrapper<ResultType<E>>> {
+  async request(url: string): Promise<APIWrapper<Result<E>>> {
     MarvelQuery.log(`Requesting: ${url}`);
     try {
       /** Call the onRequest function if it is defined. */
@@ -499,7 +568,7 @@ class MarvelQuery<
   }
 
   /** Validate the results of the query. */
-  private validateResults(results: ResultType<E>[]) {
+  private validateResults(results: Result<E>[]) {
     /** Determine expected result schema */
     const resultSchema = ResultSchemaMap[this.type];
     if (!resultSchema) {
