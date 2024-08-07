@@ -38,9 +38,11 @@ async function spiderMan() {
     dateDescriptor: 'thisWeek',
   }).fetch();
 
-  for (const comic of comics.results) {
+  for (const comic of comics.results.slice(0, 2)) {
+    console.log('Checking comic:', comic.title);
     comic.query('characters', {
       name: 'Peter Parker',
+      // format: 'comic',
     })
   }
 

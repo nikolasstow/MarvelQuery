@@ -24,15 +24,38 @@ import {
   ClassState,
   StateMap,
   InitQuery,
+  MarvelComic,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
 
 /** Type of the query function. */
-type QueryFunction = MarvelQuery<any, "init">["fetchQuery"];
+// type QueryFunction = MarvelQuery<any, "init">["initializeQuery"];
 
-class MarvelQuery<E extends Endpoint, State extends StateTypes<QueryFunction>>
-  implements ClassState<QueryFunction, State>
+// type AddQueryFunctions<T> = T & {
+//   query: QueryFunction;
+//   fetch: unknown;
+// };
+
+type ExtendResultType<E extends Endpoint> = ResultType<E> & {
+  query: QueryFunction<E>;
+  fetch: () => Promise<void>;
+};
+
+type QueryFunction<E extends Endpoint> = <T extends EndpointType>(
+  type: T,
+  params: ParamsType<Extendpoint<E, T>>
+) => InitializedQuery<E, T>;
+
+type InitializedQuery<E extends Endpoint, T extends EndpointType> = MarvelQuery<
+  Endpoint,
+  "init"
+>;
+
+class MarvelQuery<
+  E extends Endpoint,
+  State extends StateTypes<QueryFunction<E>>
+> implements ClassState<QueryFunction<E>, State>
 {
   /** Endpoint types that can be queried */
   private static validEndpoints = new Set([
@@ -50,8 +73,8 @@ class MarvelQuery<E extends Endpoint, State extends StateTypes<QueryFunction>>
    * class unnecessarily. If you disagree, let me know. This is my first published project,
    * so any feedback would be greatly appreciated */
   /** Create a new query with the result. */
-  query: StateMap<QueryFunction>[State] = this
-    .fetchQuery as unknown as StateMap<QueryFunction>[State];
+  query: StateMap<QueryFunction<E>>[State] = this
+    .initializeQuery as unknown as StateMap<QueryFunction<E>>[State];
 
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   private static publicKey: string;
@@ -200,11 +223,11 @@ class MarvelQuery<E extends Endpoint, State extends StateTypes<QueryFunction>>
    */
   responseData: APIResponseData;
   /** The first result of the query. */
-  result: ResultType<E> | undefined;
+  result: ExtendResultType<E> | undefined;
   /** The results of the query. */
-  results: ResultType<E>[];
+  results: ExtendResultType<E>[];
   /** The conjunction of all results from this query instance. */
-  resultHistory: ResultType<E>[] = [];
+  resultHistory: ExtendResultType<E>[] = [];
 
   /** The query is complete when all results have been fetched. */
   isComplete: boolean = false;
@@ -305,27 +328,63 @@ class MarvelQuery<E extends Endpoint, State extends StateTypes<QueryFunction>>
     }
   }
 
-  fetchQuery<T extends EndpointType>(
+  private addQueryFunction(result: ResultType<E>): ExtendResultType<E> {
+    const endpoint = this.createEndpointFromURI(result.resourceURI);
+
+    const query: QueryFunction<E> = <T extends EndpointType>(
+      type: T,
+      params: ParamsType<Extendpoint<E, T>>
+    ) => {
+      return this.configureQuery(endpoint, type, params);
+    }
+    
+    return {
+      ...result,
+      query,
+      fetch: async (): Promise<void> => {
+        console.log("Fetching from result");
+      },
+    };
+  }
+
+  private createEndpointFromURI(url: string): Endpoint {
+    // Remove everything from 'http' to '/public/'
+    const cleanedUrl = url.replace(/^.*\/public\//, "");
+
+    // Split the remaining part of the URL by '/'
+    const [type, id] = cleanedUrl.split("/");
+    return [type, Number(id)] as Endpoint;
+  }
+
+  private configureQuery<T extends EndpointType>(
+    endpoint: Endpoint,
     type: T,
     params: ParamsType<Extendpoint<E, T>>
-  ): MarvelQuery<Extendpoint<E, T>, "init"> {
+  ): InitializedQuery<E, T> {
+    return this.initializeQuery<T, typeof endpoint>(type, params, endpoint);
+  }
+
+  private initializeQuery<T extends EndpointType, B extends Endpoint = E>(
+    type: T,
+    params: ParamsType<Extendpoint<B, T>>,
+    baseEndpoint?: B
+  ): InitializedQuery<E, T> {
     if (!this.result || !this.result.id) {
       throw new Error("No result to query");
     }
 
     console.log("Creating query from result");
-    const basePoint: E[0] = this.type;
-    const id = this.result.id;
-    const endpoint: Extendpoint<E, T> = [basePoint, id, type] as Extendpoint<
-      E,
-      T
-    >;
-    const query: InitQuery<Extendpoint<E, T>> = {
+
+    const basePoint: B[0] = baseEndpoint ? baseEndpoint[0] : this.type;
+    const id = baseEndpoint ? baseEndpoint[1] : this.result.id;
+    const endpoint = [basePoint, id, type] as Extendpoint<B, T>;
+
+    const query: InitQuery<Extendpoint<B, T>> = {
       endpoint,
       params,
     };
     console.log(query);
-    return new MarvelQuery<Extendpoint<E, T>, "init">(query);
+    return new MarvelQuery<Extendpoint<B, T>, "init">(query);
   }
 
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
@@ -361,12 +420,16 @@ class MarvelQuery<E extends Endpoint, State extends StateTypes<QueryFunction>>
       );
       const noResults = this.verify(!results.length, "No results found");
 
+      const formattedResults = results.map((result) =>
+        this.addQueryFunction(result)
+      );
+
       this.isComplete = complete || duplicateResults || noResults;
       this.metadata = metadata;
       this.responseData = responseData;
-      this.results = results;
-      this.result = results[0];
-      this.resultHistory = [...this.resultHistory, ...results];
+      this.results = formattedResults;
+      this.result = formattedResults[0];
+      this.resultHistory = [...this.resultHistory, ...formattedResults];
 
       /** Call the onResult function with the results of the request. */
       if (this.onResult) {
@@ -440,7 +503,8 @@ class MarvelQuery<E extends Endpoint, State extends StateTypes<QueryFunction>>
     /** Determine expected result schema */
     const resultSchema = ResultSchemaMap[this.type];
     if (!resultSchema) {
-      throw new Error(`Invalid result schema, ${this.type}`);
+      // throw new Error(`Invalid result schema, ${this.type}`);
+      console.warn(`Invalid result schema, ${this.type}`);
     }
 
     /** Validate the response data with the result schema. */
