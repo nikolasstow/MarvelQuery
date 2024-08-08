@@ -42,28 +42,27 @@ type ResourceObject = {
   resourceURI: string;
 } & { [key: string]: any };
 
-type ExtendedResourceObject<E extends Endpoint> = WithQueryAndEndpoint<
-  E,
-  ResourceObject
->;
+type ExtendedResourceObject<
+  E extends Endpoint,
+  I extends ResourceObject
+> = WithQueryAndEndpoint<E, I>;
 
-type WithQueryFunctions<E extends Endpoint, T> = T & QueryFunctions<E>;
-type WithEndpoint<E extends Endpoint, T> = T & EndpointProperty<E>;
-type WithQueryAndEndpoint<E extends Endpoint, T> = T &
-  EndpointProperty<E> &
-  QueryFunctions<E>;
+// type WithQueryFunctions<E extends Endpoint, T> = T & QueryFunctions<E>;
+// type WithEndpoint<E extends Endpoint, T> = T & EndpointProperty<E>;
+type WithQueryAndEndpoint<E extends Endpoint, T> = T & QueryAndEndpoint<E>;
 
-type QueryFunctions<E extends Endpoint> = {
+type QueryAndEndpoint<E extends Endpoint> = {
+  endpoint: Endpoint;
   query: QueryFunction<E>;
   fetch: () => Promise<void>;
 };
 
-type EndpointProperty<E extends Endpoint> = {
-  endpoint: E;
-};
+// type EndpointProperty<E extends Endpoint> = {
+//   endpoint: E;
+// };
 
 type ExtendSubType<E extends Endpoint, T> = T extends { items: Array<infer U> }
-  ? Omit<T, "items"> & { items: Array<WithQueryFunctions<E, U>> }
+  ? Omit<T, "items"> & { items: Array<WithQueryAndEndpoint<E, U>> }
   : T;
 
 type ExtendResult<E extends Endpoint> = {
@@ -362,22 +361,24 @@ class MarvelQuery<
     }
   }
 
-  private insertEndpoint<T extends ResourceObject>(
-    item: T
-  ): WithEndpoint<Endpoint, T> {
-    const endpoint = this.createEndpointFromURI(item.resourceURI);
+  // private insertEndpoint<T extends ResourceObject>(
+  //   item: T
+  // ): WithEndpoint<Endpoint, T> {
+  //   const endpoint = this.createEndpointFromURI(item.resourceURI);
+  //   return {
+  //     ...item,
+  //     endpoint,
+  //   };
+  // }
+
+  private extendResource<T extends Endpoint, I extends ResourceObject>(
+    type: T,
+    item: I
+  ): ExtendedResourceObject<T, I> {
+    const endpoint: Endpoint = this.createEndpointFromURI(item.resourceURI);
     return {
       ...item,
       endpoint,
-    };
-  }
-
-  private insertQueryFunction<T extends Endpoint>(
-    endpoint: T,
-    item: WithEndpoint<T, ResourceObject>
-  ): ExtendedResourceObject<T> {
-    return {
-      ...item,
       query: <TType extends EndpointType>(
         type: TType,
         params: Parameters<Extendpoint<T, TType>>
@@ -391,29 +392,24 @@ class MarvelQuery<
   }
 
   private addQueryFunction(result: Result<E>): ExtendedResult<E> {
-    for (const key in result) {
-      if (MarvelQuery.validEndpoints.has(key)) {
-        
+    MarvelQuery.validEndpoints.forEach((key: EndpointType) => {
+      if (result[key]) {
+        const endpoint: Endpoint = [key];
+        const items: ExtendedResourceObject<typeof endpoint, ResourceObject> =
+          result[key].map((item: ResourceObject) => {
+            return this.extendResource(endpoint, item);
+          });
+        result[key] = items;
       }
-    }
-    
-    const withEndpoint = this.insertEndpoint(result);
-    const endpoint = withEndpoint.endpoint;
+    });
 
-    const query: QueryFunction<E> = <T extends EndpointType>(
-      type: T,
-      params: Parameters<Extendpoint<E, T>>
-    ) => {
-      return this.configureQuery<typeof endpoint, T>(endpoint, type, params);
-    };
+    const extendedSubtypes: ExtendResult<E> = result as ExtendResult<E>;
 
-    return {
-      ...withEndpoint,
-      query,
-      fetch: async (): Promise<void> => {
-        console.log("Fetching from result");
-      },
-    };
+    const extendedResult = this.extendResource<E, ExtendResult<E>>(
+      this.endpoint,
+      extendedSubtypes
+    );
+    return extendedResult;
   }
 
   private createEndpointFromURI(url: string): Endpoint {
@@ -484,7 +480,8 @@ class MarvelQuery<
 
       const complete = this.verify(remaining <= 0, "No more results found");
       const duplicateResults = this.verify(
-        results === this.results,
+        results.map((result) => result.id) ===
+          this.results.map((result) => result.id),
         "Duplicate results"
       );
       const noResults = this.verify(!results.length, "No results found");

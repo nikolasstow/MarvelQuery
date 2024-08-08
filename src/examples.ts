@@ -228,7 +228,8 @@ export async function latest(): Promise<MarvelComic[]> {
 
 export async function comicsWithCharacter(
   name: string
-): Promise<MarvelComic[]> {
+) // : Promise<MarvelComic[]> 
+{
   return createQuery(["characters"], { name })
     .fetchSingle()
     .then((character) => character.query("comics", { format: "comic" }).fetch())
