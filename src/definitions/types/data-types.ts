@@ -365,3 +365,5 @@ export interface APIResponseResults<R extends MarvelResult>
 export interface APIWrapper<R extends MarvelResult> extends Metadata {
   data: APIResponseResults<R>;
 }
+
+/** Extend Types */

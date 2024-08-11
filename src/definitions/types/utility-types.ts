@@ -1,3 +1,4 @@
+import { AddQuery, MarvelQuery, WithQueryAndEndpoint } from "src";
 import {
   MarvelResult,
   MarvelCharacter,
@@ -9,6 +10,13 @@ import {
   APIResponseData,
   Metadata,
   APIWrapper,
+  List,
+  ComicList,
+  CharacterList,
+  CreatorList,
+  EventList,
+  StoryList,
+  SeriesList,
 } from "./data-types";
 import {
   ComicParams,
@@ -19,6 +27,7 @@ import {
   SeriesParams,
   APIBaseParams,
 } from "./param-types";
+// import { Endpoint, Result, EndpointType, Extendpoint } from "./utility-types";
 
 /** The endpoint contains up to three elements. A type, a Marvel ID, and another type.
  * This follows the same pattern as the URI/URL string, but split into an array by slashes.
@@ -57,24 +66,6 @@ type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> =
 /** Create a map of any data type with the endpoint as the key. */
 export type EndpointMap<V> = Record<EndpointType, V>;
 
-// export type LoadedState = () => Promise<any>; // Replace with actual return type
-
-export interface StateMap<TLoaded> {
-  init: never;
-  loaded: TLoaded;
-}
-
-export type InitQuery<E extends Endpoint> = {
-  endpoint: E;
-  params: Parameters<E>;
-};
-
-export type StateTypes<TLoaded> = keyof StateMap<TLoaded>;
-
-export type ClassState<TLoaded, Type extends StateTypes<TLoaded>> = {
-  query: StateMap<TLoaded>[Type];
-};
-
 /** A map of parameters to their corresponding types providing type safety. */
 export type ParameterMap = {
   comics: ComicParams;
@@ -94,6 +85,25 @@ export type ResultMap = {
   stories: MarvelStory;
   series: MarvelSeries;
 };
+
+// export type LoadedState = () => Promise<any>; // Replace with actual return type
+
+export interface StateMap<TLoaded> {
+  init: never;
+  loaded: TLoaded;
+}
+
+export type InitQuery<E extends Endpoint> = {
+  endpoint: E;
+  params: Parameters<E>;
+};
+
+export type StateTypes<TLoaded> = keyof StateMap<TLoaded>;
+
+export type ClassState<TLoaded, Type extends StateTypes<TLoaded>> = {
+  query: StateMap<TLoaded>[Type];
+};
+
 
 /** Utitility type that determines which type of data being queried.
  * It works by checking the endpoint and looking for the last data type in the endpoint.
@@ -151,7 +161,7 @@ export type OnResultFunction<R extends MarvelResult> = (
 export type AnyResultFunction = OnResultFunction<AnyType>;
 
 /** A union of all data types. */
-type AnyType =
+export type AnyType =
   | MarvelComic
   | MarvelCharacter
   | MarvelCreator
@@ -230,4 +240,38 @@ export interface Config {
   onResult?: OnResultMap;
   /** Replace the default http client (axios) with your own http client.  */
   httpClient?: HTTPClient;
-}
+} /** Type of the query function. */
+export type ResourceObject = {
+  resourceURI: string;
+} & { [key: string]: any; };
+export type ExtendedResourceObject<
+  E extends Endpoint,
+  I extends ResourceObject
+> = WithQueryAndEndpoint<E, I>;
+// The type project
+export type Modify<T, M> = Omit<T, keyof M> & M;
+
+export type ListMap = {
+  comics: ComicList;
+  characters: CharacterList;
+  creators: CreatorList;
+  events: EventList;
+  stories: StoryList;
+  series: SeriesList;
+};
+
+// Helper type to check if a type includes 'resourceURI'
+export type HasResourceURI<T> = T extends { resourceURI: string; } ? true : false;
+// Helper type to check if a type includes 'collectionURI'
+export type HasCollectionURI<T> = T extends { collectionURI: string; } ? true : false;
+export type ResourceList<T> = T extends { items: Array<infer List> } ? Modify<
+  T, {
+    items: Array<T["items"][number] & AddQuery>;
+  }
+> : never;
+// type QueryFunction = MarvelQuery<any, "init">["initializeQuery"];
+// type AddQueryFunctions<T> = T & {
+//   query: QueryFunction;
+//   fetch: unknown;
+// };
+// Add props to subtypes

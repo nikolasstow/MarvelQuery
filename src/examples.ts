@@ -1,10 +1,11 @@
 import MarvelQuery, {
-  DateDescriptor,
-  MarvelCharacter,
-  MarvelComic,
-  MarvelCreator,
-  MarvelEvent,
-  MarvelSeries,
+  Query,
+  Comic,
+  Character,
+  Creator,
+  Event,
+  Series,
+  Story,
 } from ".";
 
 /**
@@ -28,21 +29,26 @@ async function spiderMan() {
   // spiderMan.fetch("comics",{
   //   format: "comic",
   // });
-  const endpoint = await spiderMan
-    .query("comics", {
-      format: "comic",
-    })
-    .fetch();
+  const spiderManComics = await spiderMan.query("comics", {
+    format: "comic",
+    ntrs: true,
+  });
 
   const comics = await createQuery(["comics"], {
     dateDescriptor: "thisWeek",
   }).fetch();
 
+  const test = await comics.result?.characters.items.forEach((item) => {
+    console.log(item);
+  });
+
+
+
   for (const comic of comics.results.slice(0, 2)) {
     console.log("Checking comic:", comic.title);
-    comic.query("characters", {
+    comic.query("comics", {
+      format: "comic",
       name: "Peter Parker",
-      // format: 'comic',
     });
   }
 
@@ -82,7 +88,7 @@ const spiderComics = await createQuery(["characters", peterParker, "comics"], {
 export async function series(
   title: string,
   startYear: number
-): Promise<MarvelSeries[]> {
+): Promise<Series[]> {
   return await createQuery(["series"], {
     title,
     startYear,
@@ -101,7 +107,7 @@ export async function series(
 export async function comics(
   title: string,
   releaseDate?: Date | string
-): Promise<MarvelComic[]> {
+): Promise<Comic[]> {
   // Create Date Range
   const createRange = (date: Date) => {
     const formattedDate = date.toISOString().slice(0, 10);
@@ -132,7 +138,7 @@ export async function comics(
  * @param name - The name of the event.
  * @returns A promise that resolves to an array of MarvelEvent objects.
  */
-export async function events(name: string): Promise<MarvelEvent[]> {
+export async function events(name: string): Promise<Event[]> {
   return createQuery(["events"], {
     name,
   })
@@ -154,7 +160,7 @@ export async function creators(
   firstName?: string,
   middleName?: string,
   suffix?: string
-): Promise<MarvelCreator[]> {
+): Promise<Creator[]> {
   return await createQuery(["creators"], {
     lastName,
     firstName,
@@ -171,7 +177,7 @@ export async function creators(
  * @param name - The name of the character.
  * @returns A promise that resolves to an array of MarvelCharacter objects.
  */
-export async function characters(name: string): Promise<MarvelCharacter[]> {
+export async function characters(name: string): Promise<Character[]> {
   return createQuery(["characters"], {
     name,
   })
@@ -187,9 +193,9 @@ export async function characters(name: string): Promise<MarvelCharacter[]> {
  * @returns A promise that resolves to an array of MarvelComic objects.
  */
 export async function catalog(
-  dateDescriptor: DateDescriptor, // options: "lastWeek" | "thisWeek" | "nextWeek" | "thisMonth"
+  dateDescriptor: Query.DateDescriptor, // options: "lastWeek" | "thisWeek" | "nextWeek" | "thisMonth"
   params?: Record<string, unknown>
-): Promise<MarvelComic[]> {
+): Promise<Comic[]> {
   const catalog = await createQuery(["comics"], {
     ...params,
     format: "comic",
@@ -205,7 +211,7 @@ export async function catalog(
  *
  * @returns A promise that resolves to an array of MarvelComic objects or false if there are no results.
  */
-export async function latest(): Promise<MarvelComic[]> {
+export async function latest(): Promise<Comic[]> {
   console.log("Fetching latest comics");
 
   const formattedDate = (date: Date) => date.toISOString().slice(0, 10);
@@ -228,8 +234,7 @@ export async function latest(): Promise<MarvelComic[]> {
 
 export async function comicsWithCharacter(
   name: string
-) // : Promise<MarvelComic[]> 
-{
+): Promise<MarvelComic[]> {
   return createQuery(["characters"], { name })
     .fetchSingle()
     .then((character) => character.query("comics", { format: "comic" }).fetch())
