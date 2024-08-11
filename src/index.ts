@@ -21,67 +21,19 @@ import {
   OnRequestFunction,
   Extendpoint,
   StateTypes,
-  ClassState,
+  MarvelQueryInterface,
   StateMap,
   InitQuery,
-  AnyType,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
+import { QueryFunction, ExtendResult, ExtendType, QueryAndEndpoint, InitializedQuery } from "./definitions/types/utility-types";
 
-
-export type ResourceObject = {
-  resourceURI: string;
-} & { [key: string]: any; };
-export type ExtendedResourceObject<
-  E extends Endpoint,
-  I extends ResourceObject
-> = WithQueryAndEndpoint<E, I>;
-// The type project
-export type Modify<T, M> = Omit<T, keyof M> & M;
-
-export type WithQueryAndEndpoint<E extends Endpoint, T> = T & QueryAndEndpoint<E>;
-
-// Helper type to check if a type includes 'resourceURI'
-export type HasResourceURI<T> = T extends { resourceURI: string; } ? true : false;
-// Helper type to check if a type includes 'collectionURI'
-export type HasCollectionURI<T> = T extends { collectionURI: string; } ? true : false;
-export type ResourceList<T> = T extends { items: Array<infer List> } ? Modify<
-  T, {
-    items: Array<List & QueryAndEndpoint>;
-  }
-> : never;
-
-type QueryAndEndpoint<T extends Endpoint = Endpoint> = {
-  endpoint: Endpoint;
-  query: QueryFunction<T>;
-  fetch: () => Promise<void>;
-};
-export type QueryFunction<TEndpoint extends Endpoint> = <
-  TType extends EndpointType
->(
-  type: TType,
-  params: Parameters<[TType]>
-) => InitializedQuery<TEndpoint>;
-
-export type InitializedQuery<E extends Endpoint> = MarvelQuery<E, "init">;
-
-export type ExtendType<T extends AnyType> = {
-  [K in keyof T]: [K] extends Endpoint // If the key is an endpoint
-    ? HasResourceURI<T[K]> extends true
-      ? T[K] & QueryAndEndpoint<[K]>
-      : HasCollectionURI<T[K]> extends true
-        ? ResourceList<T[K]> & QueryAndEndpoint
-        : T[K]
-    : T[K];
-};
-
-export type ExtendResult<E extends Endpoint> = Modify<ExtendType<Result<E>>, QueryAndEndpoint>;
 
 export class MarvelQuery<
   E extends Endpoint,
-  State extends StateTypes<QueryFunction<E>>
-> implements ClassState<QueryFunction<E>, State>
+  State extends StateTypes<E>
+> implements MarvelQueryInterface<E, State>
 {
   /** Endpoint types that can be queried */
   private static validEndpoints: Set<EndpointType> = new Set([
@@ -99,8 +51,8 @@ export class MarvelQuery<
    * class unnecessarily. If you disagree, let me know. This is my first published project,
    * so any feedback would be greatly appreciated */
   /** Create a new query with the result. */
-  query: StateMap<QueryFunction<E>>[State] = this
-    .initializeQuery as unknown as StateMap<QueryFunction<E>>[State];
+  query: StateMap<E>[State] = this
+    .initializeQuery as unknown as StateMap<E>[State];
 
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   private static publicKey: string;
@@ -214,39 +166,24 @@ export class MarvelQuery<
   private onResult?:
     | OnResultFunction<ResultMap[EndpointType]>
     | AnyResultFunction;
-  /** Endpoint of the query
-   * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
-   * becomes ["characters", 1009491, "comics"]
-   */
+    
+  /** Endpoint of the query */
   endpoint: E;
   /** Parameters of the query */
   params: Parameters<E>;
   /** The data type of the results of the query */
   type: EndpointType;
 
-  /** The URL of the query
-   * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
-   */
+  /** The URL of the query */
   url: string;
   /** The number of results returned by the query. */
   count: number = 0;
   /** The total number of results available for the query. */
   total: number = 0;
   /** Metadata included in the API response.
-   * @property code: The HTTP status code of the returned result.
-   * @property status: A string description of the call status.
-   * @property copyright: The copyright notice for the returned result.
-   * @property attributionText: The attribution notice for this result. Please display either this notice or the contents of the attributionHTML field on all screens which contain data from the Marvel Comics API.
-   * @property attributionHTML: An HTML representation of the attribution notice for this result. Please display either this notice or the contents of the attributionText field on all screens which contain data from the Marvel Comics API.
-   * @property etag: A digest value of the content returned by the call.
    */
   metadata: Metadata;
-  /** Data for the API response.
-   * @property offset: The requested offset (number of skipped results) of the call.
-   * @property limit: The requested result limit.
-   * @property total: The total number of resources available given the current filter set.
-   * @property count: The total number of results returned by this call.
-   */
+  /** Data for the API response. */
   responseData: APIResponseData;
   /** The first result of the query. */
   result: ExtendResult<E> | undefined;
@@ -516,7 +453,7 @@ export class MarvelQuery<
   }
 
   /** Verify that the condition is true, and if not, throw a warning. */
-  verify(logic: boolean, message: string) {
+  private verify(logic: boolean, message: string): boolean {
     if (logic) {
       console.warn(message);
     }
