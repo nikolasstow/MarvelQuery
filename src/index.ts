@@ -24,18 +24,35 @@ import {
   ClassState,
   StateMap,
   InitQuery,
-  MarvelComic,
   AnyType,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
-import { Modify, HasResourceURI, HasCollectionURI, ResourceList } from "./definitions/types/utility-types";
 
-// type WithQueryFunctions<E extends Endpoint, T> = T & QueryFunctions<E>;
-// type WithEndpoint<E extends Endpoint, T> = T & EndpointProperty<E>;
+
+export type ResourceObject = {
+  resourceURI: string;
+} & { [key: string]: any; };
+export type ExtendedResourceObject<
+  E extends Endpoint,
+  I extends ResourceObject
+> = WithQueryAndEndpoint<E, I>;
+// The type project
+export type Modify<T, M> = Omit<T, keyof M> & M;
+
 export type WithQueryAndEndpoint<E extends Endpoint, T> = T & QueryAndEndpoint<E>;
 
-type QueryAndEndpoint<T extends Endpoint> = {
+// Helper type to check if a type includes 'resourceURI'
+export type HasResourceURI<T> = T extends { resourceURI: string; } ? true : false;
+// Helper type to check if a type includes 'collectionURI'
+export type HasCollectionURI<T> = T extends { collectionURI: string; } ? true : false;
+export type ResourceList<T> = T extends { items: Array<infer List> } ? Modify<
+  T, {
+    items: Array<List & QueryAndEndpoint>;
+  }
+> : never;
+
+type QueryAndEndpoint<T extends Endpoint = Endpoint> = {
   endpoint: Endpoint;
   query: QueryFunction<T>;
   fetch: () => Promise<void>;
@@ -52,21 +69,14 @@ export type InitializedQuery<E extends Endpoint> = MarvelQuery<E, "init">;
 export type ExtendType<T extends AnyType> = {
   [K in keyof T]: [K] extends Endpoint // If the key is an endpoint
     ? HasResourceURI<T[K]> extends true
-      ? T[K] & AddQuery<[K]>
+      ? T[K] & QueryAndEndpoint<[K]>
       : HasCollectionURI<T[K]> extends true
-        ? ResourceList<T, K> & AddQuery
+        ? ResourceList<T[K]> & QueryAndEndpoint
         : T[K]
     : T[K];
 };
 
-export type ExtendResult<E extends Endpoint> = Modify<ExtendType<Result<E>>, AddQuery>;
-
-export type AddQuery<E extends Endpoint = Endpoint> = {
-  endpoint: Endpoint;
-  query: QueryFunction<E>;
-  // fetch: () => Promise<void> | any;
-};
-
+export type ExtendResult<E extends Endpoint> = Modify<ExtendType<Result<E>>, QueryAndEndpoint>;
 
 export class MarvelQuery<
   E extends Endpoint,
@@ -344,48 +354,6 @@ export class MarvelQuery<
     }
   }
 
-  // private insertEndpoint<T extends ResourceObject>(
-  //   item: T
-  // ): WithEndpoint<Endpoint, T> {
-  //   const endpoint = this.createEndpointFromURI(item.resourceURI);
-  //   return {
-  //     ...item,
-  //     endpoint,
-  //   };
-  // }
-
-  // private extendResource<
-  //   TEndpoint extends Endpoint,
-  //   TResource extends ResourceObject
-  // >(
-  //   type: TEndpoint[0],
-  //   item: TResource
-  // ): ExtendedResourceObject<TEndpoint, TResource> {
-  //   const endpoint: Endpoint = this.createEndpointFromURI(item.resourceURI);
-  //   return {
-  //     ...item,
-  //     endpoint,
-  //     query: <TType extends EndpointType>(
-  //       type: TType,
-  //       params: Parameters<Extendpoint<TEndpoint, TType>>
-  //     ) => {
-  //       return this.configureQuery<TEndpoint, TType>(endpoint, type, params);
-  //     },
-  //     fetch: async (): Promise<void> => {
-  //       console.log("Fetching from result");
-  //     },
-  //   };
-  // }
-
-  //   const extendedSubtypes: ExtendResult<E> = result as ExtendResult<E>;
-
-  //   const extendedResult = this.extendResource<E, ExtendResult<E>>(
-  //     this.type,
-  //     extendedSubtypes
-  //   );
-  //   return extendedResult;
-  // }
-
   private createEndpointFromURI(url: string): Endpoint {
     // Remove everything from 'http' to '/public/'
     const cleanedUrl = url.replace(/^.*\/public\//, "");
@@ -394,17 +362,6 @@ export class MarvelQuery<
     const [type, id] = cleanedUrl.split("/");
     return [type, Number(id)] as Endpoint;
   }
-
-  // private configureQuery<
-  //   TEndpoint extends Endpoint,
-  //   TType extends EndpointType
-  // >(
-  //   endpoint: TEndpoint,
-  //   type: TType,
-  //   params: Parameters<Extendpoint<TEndpoint, TType>>
-  // ): InitializedQuery<Extendpoint<TEndpoint, TType>> {
-  //   return this.initializeQuery<TEndpoint, TType>(type, params, endpoint);
-  // }
 
   private extendResourceItems(result: Result<E>): ExtendType<Result<E>> {
     const extendedResult = {} as ExtendType<Result<E>>;
@@ -438,7 +395,7 @@ export class MarvelQuery<
   private appendProperties<T>(
     URI: string,
     value: T
-  ): T & AddQuery {
+  ): T & QueryAndEndpoint {
     const endpoint = this.createEndpointFromURI(URI);
     const query = <TType extends EndpointType>(
       type: TType,
@@ -450,7 +407,7 @@ export class MarvelQuery<
       ...value,
       endpoint,
       query,
-    } as T & AddQuery;
+    } as T & QueryAndEndpoint;
   }
 
   private extendResource(

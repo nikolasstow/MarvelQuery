@@ -1,4 +1,3 @@
-import { AddQuery, MarvelQuery, WithQueryAndEndpoint } from "src";
 import {
   MarvelResult,
   MarvelCharacter,
@@ -241,37 +240,3 @@ export interface Config {
   /** Replace the default http client (axios) with your own http client.  */
   httpClient?: HTTPClient;
 } /** Type of the query function. */
-export type ResourceObject = {
-  resourceURI: string;
-} & { [key: string]: any; };
-export type ExtendedResourceObject<
-  E extends Endpoint,
-  I extends ResourceObject
-> = WithQueryAndEndpoint<E, I>;
-// The type project
-export type Modify<T, M> = Omit<T, keyof M> & M;
-
-export type ListMap = {
-  comics: ComicList;
-  characters: CharacterList;
-  creators: CreatorList;
-  events: EventList;
-  stories: StoryList;
-  series: SeriesList;
-};
-
-// Helper type to check if a type includes 'resourceURI'
-export type HasResourceURI<T> = T extends { resourceURI: string; } ? true : false;
-// Helper type to check if a type includes 'collectionURI'
-export type HasCollectionURI<T> = T extends { collectionURI: string; } ? true : false;
-export type ResourceList<T> = T extends { items: Array<infer List> } ? Modify<
-  T, {
-    items: Array<T["items"][number] & AddQuery>;
-  }
-> : never;
-// type QueryFunction = MarvelQuery<any, "init">["initializeQuery"];
-// type AddQueryFunctions<T> = T & {
-//   query: QueryFunction;
-//   fetch: unknown;
-// };
-// Add props to subtypes

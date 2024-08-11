@@ -18,67 +18,6 @@ const createQuery = MarvelQuery.init({
 });
 
 /**
- * Fetches information about Spider-Man.
- * Calls the API to get data about the character "Peter Parker" and handles pagination automatically.
- */
-async function spiderMan() {
-  const spiderMan = await createQuery(["characters"], {
-    name: "Peter Parker",
-  }).fetchSingle();
-  // Need more results? Just call fetch again
-  // spiderMan.fetch("comics",{
-  //   format: "comic",
-  // });
-  const spiderManComics = await spiderMan.query("comics", {
-    format: "comic",
-    ntrs: true,
-  });
-
-  const comics = await createQuery(["comics"], {
-    dateDescriptor: "thisWeek",
-  }).fetch();
-
-  const test = await comics.result?.characters.items.forEach((item) => {
-    console.log(item);
-  });
-
-
-
-  for (const comic of comics.results.slice(0, 2)) {
-    console.log("Checking comic:", comic.title);
-    comic.query("comics", {
-      format: "comic",
-      name: "Peter Parker",
-    });
-  }
-
-  // const spiderMoan = await createQuery(["characters"], {
-  //     name: "Peter Parker",
-  //   }).query("comics", {
-
-  //   })
-
-  // const comics = createQuery(endpoint, {
-  //   format: "comic",
-  // })
-  // The library automatically handles pagination for you, updating the offset parameter to get the next batch
-  // You can continue to do this until there are no more results.
-}
-
-// First we need to find his id using his name.
-const peterParker = await createQuery(["characters"], {
-  name: "Peter Parker",
-})
-  .fetchSingle()
-  .then((query) => query.result?.id); // Returns '1009491'
-// The we can use that id to create a new query to get the latest comics he appears in.
-const spiderComics = await createQuery(["characters", peterParker, "comics"], {
-  format: "comic", // We only want the latest comic issues, so lets exclude everything else.
-  noVariants: true, // Exclude variants, because we only want unique issues.
-  dateDescriptor: "nextWeek", // Get the next week's issues.
-}).fetch().then;
-
-/**
  * Fetches series information based on the title and start year.
  *
  * @param title - The title of the series.
@@ -230,15 +169,6 @@ export async function latest(): Promise<Comic[]> {
   })
     .fetch()
     .then((api) => api.results);
-}
-
-export async function comicsWithCharacter(
-  name: string
-): Promise<MarvelComic[]> {
-  return createQuery(["characters"], { name })
-    .fetchSingle()
-    .then((character) => character.query("comics", { format: "comic" }).fetch())
-    .then((comics) => comics.results);
 }
 
 /**
