@@ -371,7 +371,7 @@ export type ExtendType<T extends AnyType> = {
     ? HasResourceURI<T[K]> extends true
       ? T[K] & ExtendResource<[K]>
       : HasCollectionURI<T[K]> extends true
-      ? ResourceList<T[K]> & ExtendCollection
+      ? ResourceList<T[K]> & ExtendCollection<[K]>
       : T[K]
     : T[K];
 };

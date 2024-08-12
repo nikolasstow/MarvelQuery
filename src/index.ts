@@ -302,35 +302,33 @@ export class MarvelQuery<
     return [type, Number(id)] as Endpoint;
   }
 
+  /** Extend the properties of each result. */
   private extendResourceItems(result: Result<E>): ExtendType<Result<E>> {
     const extendedResult = {} as ExtendType<Result<E>>;
-
+  
     for (const key in result) {
       if (!result.hasOwnProperty(key)) continue;
-
+  
       const value = result[key];
-
-      if (
-        value &&
-        typeof value === "object" &&
-        ("resourceURI" in value || "collectionURI" in value)
-      ) {
-        const uri = (
-          "resourceURI" in value ? value.resourceURI : value.collectionURI
-        ) as string;
-        extendedResult[key as keyof ExtendType<Result<E>>] =
-          this.extendResource(uri, value);
+  
+      if (value && typeof value === "object") {
+        if ("resourceURI" in value) {
+          const uri = value.resourceURI as string;
+          extendedResult[key as keyof ExtendType<Result<E>>] = this.extendResource(uri, value);
+        } else if ("collectionURI" in value) {
+          const uri = value.collectionURI as string;
+          extendedResult[key as keyof ExtendType<Result<E>>] = this.extendCollection(uri, key, value);
+        } else {
+          extendedResult[key as keyof ExtendType<Result<E>>] = value as ExtendType<Result<E>>[keyof Result<E>];
+        }
         continue;
       }
-
-      extendedResult[key as keyof ExtendType<Result<E>>] = value as ExtendType<
-        Result<E>
-      >[keyof Result<E>];
+  
+      extendedResult[key as keyof ExtendType<Result<E>>] = value as ExtendType<Result<E>>[keyof Result<E>];
     }
-
+  
     return extendedResult;
   }
-
   private appendProperties<T>( // Break up
     URI: string,
     value: T
@@ -354,6 +352,31 @@ export class MarvelQuery<
     value: Result<E>[Extract<keyof Result<E>, string>]
   ): ExtendType<Result<E>>[keyof Result<E>] {
     return this.appendProperties(URI, value) as ExtendType<Result<E>>[keyof Result<E>];
+  }
+
+  private extendCollection<K extends keyof Result<E>>(
+    URI: string,
+    key: K,
+    value: Result<E>[K]
+  ): ExtendType<Result<E>>[K] {
+    const endpoint = this.createEndpointFromURI(URI);
+
+    const query = (
+      params: Parameters<typeof endpoint> // Param type issue?
+    ) => {
+      const initQuery: InitQuery<typeof endpoint> = {
+        endpoint,
+        params,
+      }
+
+      return new MarvelQuery<typeof endpoint, "init">(initQuery);
+    };
+
+    return {
+      ...value,
+      endpoint,
+      query,
+    } as ExtendType<Result<E>>[K];
   }
 
   private extendResultItem(
@@ -380,7 +403,6 @@ export class MarvelQuery<
     const extendedResult = this.extendResultItem(result.resourceURI, withExtendedResourceItems);
 
     return extendedResult;
-
   }
 
   private initializeQuery<
