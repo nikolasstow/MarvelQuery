@@ -27,7 +27,7 @@ import {
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
-import { QueryFunction, ExtendResult, ExtendType, QueryAndEndpoint, InitializedQuery } from "./definitions/types/utility-types";
+import { QueryCollection, ExtendResult, ExtendType, ExtendCollection, InitializedQuery, ExtendResource, ExtensionProperties } from "./definitions/types/utility-types";
 
 
 export class MarvelQuery<
@@ -35,6 +35,7 @@ export class MarvelQuery<
   State extends StateTypes<E>
 > implements MarvelQueryInterface<E, State>
 {
+  /** ********* Static Properties ********* */
   /** Endpoint types that can be queried */
   private static validEndpoints: Set<EndpointType> = new Set([
     "comics",
@@ -44,15 +45,6 @@ export class MarvelQuery<
     "series",
     "stories",
   ]);
-
-  /** Look, I'm not happy about this. I don't like type assertions, but the alternative is to
-   * create a new instance for each state change which will cause external references to point
-   * to outdated instances. There are workarounds, but they increase the complexity of using this
-   * class unnecessarily. If you disagree, let me know. This is my first published project,
-   * so any feedback would be greatly appreciated */
-  /** Create a new query with the result. */
-  query: StateMap<E>[State] = this
-    .initializeQuery as unknown as StateMap<E>[State];
 
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   private static publicKey: string;
@@ -161,6 +153,16 @@ export class MarvelQuery<
       console.log(message);
     }
   }
+
+  /** ********* Instance Properties ********* */
+  /** Look, I'm not happy about this. I don't like type assertions, but the alternative is to
+   * create a new instance for each state change which will cause external references to point
+   * to outdated instances. There are workarounds, but they increase the complexity of using this
+   * class unnecessarily. If you disagree, let me know. This is my first published project,
+   * so any feedback would be greatly appreciated */
+  /** Create a new query with the result. */
+  query: StateMap<E>[State] = this
+    .initializeQuery as unknown as StateMap<E>[State];
 
   /** Function that will be called when the query is finished. */
   private onResult?:
@@ -329,10 +331,10 @@ export class MarvelQuery<
     return extendedResult;
   }
 
-  private appendProperties<T>(
+  private appendProperties<T>( // Break up
     URI: string,
     value: T
-  ): T & QueryAndEndpoint {
+  ): T & ExtendCollection {
     const endpoint = this.createEndpointFromURI(URI);
     const query = <TType extends EndpointType>(
       type: TType,
@@ -344,7 +346,7 @@ export class MarvelQuery<
       ...value,
       endpoint,
       query,
-    } as T & QueryAndEndpoint;
+    } as T & ExtendCollection;
   }
 
   private extendResource(
@@ -354,16 +356,28 @@ export class MarvelQuery<
     return this.appendProperties(URI, value) as ExtendType<Result<E>>[keyof Result<E>];
   }
 
-  private extendResult(
+  private extendResultItem(
     URI: string,
     value: ExtendType<Result<E>>
   ): ExtendResult<E> {
-    return this.appendProperties(URI, value);
+    const endpoint = this.createEndpointFromURI(URI);
+    const query = <TType extends EndpointType>(
+      type: TType,
+      params: Parameters<Extendpoint<E, TType>> // Param type issue?
+    ) => {
+      return this.initializeQuery(type, params);
+    };
+
+    return {
+      ...value,
+      endpoint,
+      query,
+    } as ExtendResult<typeof endpoint>;
   }
 
   private addQueryFunction(result: Result<E>): ExtendResult<E> {
     const withExtendedResourceItems = this.extendResourceItems(result)
-    const extendedResult = this.extendResult(result.resourceURI, withExtendedResourceItems);
+    const extendedResult = this.extendResultItem(result.resourceURI, withExtendedResourceItems);
 
     return extendedResult;
 

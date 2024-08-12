@@ -29,25 +29,35 @@ async function spiderMan() {
   // spiderMan.fetch("comics",{
   //   format: "comic",
   // });
-  const spiderManComics = await spiderMan.query("comics", {
+  const spiderManComics = await createQuery(["comics"], {
     format: "comic",
-  });
+  }).fetch();
+
+  spiderManComics.results[0].query("events", {
+    name: "Secret Wars",
+  })
+
+  // Notes for tomorrow:
+  // - Return from fetch on a chained query is the wrong data type. Showing first result type from the previous query.
+  // - The conditional type for extending the results need to be different from collectionURI and resourceURI.
+
 
   const comics = await createQuery(["comics"], {
     dateDescriptor: "thisWeek",
   }).fetch();
+  
+  // comics.results[0].characters.items[0].
 
-  const test = await comics.result?.series.query("comics", {
+  // const test = await comics.result?.series.
 
-  })
-
+  // So I've added this new feature that lets you query a resource directly from another resource.
+  // This way you can chain queries together like this:
 
 
   for (const comic of comics.results.slice(0, 2)) {
     console.log("Checking comic:", comic.title);
     comic.query("comics", {
       format: "comic",
-      name: "Peter Parker",
     });
   }
 

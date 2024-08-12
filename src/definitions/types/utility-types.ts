@@ -88,7 +88,7 @@ export type ResultMap = {
 
 export interface StateMap<E extends Endpoint> {
   init: never;
-  loaded: QueryFunction<E>;
+  loaded: ExtendQuery<E>;
 }
 
 export type InitQuery<E extends Endpoint> = {
@@ -154,11 +154,11 @@ export type MarvelQueryInterface<
    */
   fetch(): Promise<MarvelQueryInterface<E, "loaded">>;
   /** Build the URL of the query with the parameters, timestamp and hash. */
-  buildURL(): string
+  buildURL(): string;
   /** Send the request to the API, and validate the response. */
-  request(url: string): Promise<APIWrapper<Result<E>>>
+  request(url: string): Promise<APIWrapper<Result<E>>>;
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  fetchSingle(): Promise<MarvelQueryInterface<E, "loaded">>
+  fetchSingle(): Promise<MarvelQueryInterface<E, "loaded">>;
 };
 
 /** Utitility type that determines which type of data being queried.
@@ -307,8 +307,7 @@ export type ExtendedResourceObject<
 // The type project
 export type Modify<T, M> = Omit<T, keyof M> & M;
 
-export type WithQueryAndEndpoint<E extends Endpoint, T> = T &
-  QueryAndEndpoint<E>;
+export type WithQueryAndEndpoint<E extends Endpoint, T> = T & ExtendResource<E>;
 // Helper type to check if a type includes 'resourceURI'
 
 export type HasResourceURI<T> = T extends { resourceURI: string }
@@ -322,36 +321,61 @@ export type ResourceList<T> = T extends { items: Array<infer List> }
   ? Modify<
       T,
       {
-        items: Array<List & QueryAndEndpoint>;
+        items: Array<List & ExtendResource>;
       }
     >
   : never;
-export type QueryAndEndpoint<T extends Endpoint = Endpoint> = {
+export type ExtendCollection<T extends Endpoint = Endpoint> =
+  ExtensionProperties<QueryCollection<T>>;
+
+export type ExtendResource<T extends Endpoint = Endpoint> = ExtensionProperties<
+  ExtendQuery<T>
+>;
+
+// export type ExtendResultItem<T extends Endpoint = Endpoint> =
+//   ExtensionProperties<ExtendQuery<T>>;
+
+export type ExtensionProperties<Q> = {
   endpoint: Endpoint;
-  query: QueryFunction<T>;
-  fetch: () => Promise<void>;
+  query: Q;
+  fetch?: () => Promise<void>;
 };
-export type QueryFunction<TEndpoint extends Endpoint> = <
-  TType extends EndpointType
+
+type NoSameEndpointType<T extends EndpointType> = Exclude<EndpointType, T>;
+
+export type ExtendQuery<TEndpoint extends Endpoint> = <
+  TType extends NoSameEndpointType<TEndpoint[0]>
 >(
   type: TType,
   params: Parameters<[TType]>
 ) => InitializedQuery<TEndpoint>;
 
-export type InitializedQuery<E extends Endpoint> = MarvelQueryInterface<E, "init">;
+// export type ExtendResultQuery<TEndpoint extends Endpoint> = <
+//   TType extends EndpointType
+// >(
+//   type: TType,
+//   params: Parameters<Extendpoint<TEndpoint, TType>>
+// ) => InitializedQuery<TEndpoint>;
+
+export type QueryCollection<E extends Endpoint> = (
+  params: Parameters<E>
+) => InitializedQuery<E>;
+
+export type InitializedQuery<E extends Endpoint> = MarvelQueryInterface<
+  E,
+  "init"
+>;
 
 export type ExtendType<T extends AnyType> = {
   [K in keyof T]: [K] extends Endpoint // If the key is an endpoint
     ? HasResourceURI<T[K]> extends true
-      ? T[K] & QueryAndEndpoint<[K]>
+      ? T[K] & ExtendResource<[K]>
       : HasCollectionURI<T[K]> extends true
-      ? ResourceList<T[K]> & QueryAndEndpoint
+      ? ResourceList<T[K]> & ExtendCollection
       : T[K]
     : T[K];
 };
 
-export type ExtendResult<E extends Endpoint> = Modify<
-  ExtendType<Result<E>>,
-  QueryAndEndpoint
->;
+export type ExtendResult<E extends Endpoint> = ExtendType<Result<E>> &
+  ExtendResource<E>;
 /** Type of the query function. */
