@@ -154,16 +154,6 @@ export class MarvelQuery<
     }
   }
 
-  /** ********* Instance Properties ********* */
-  /** Look, I'm not happy about this. I don't like type assertions, but the alternative is to
-   * create a new instance for each state change which will cause external references to point
-   * to outdated instances. There are workarounds, but they increase the complexity of using this
-   * class unnecessarily. If you disagree, let me know. This is my first published project,
-   * so any feedback would be greatly appreciated */
-  /** Create a new query with the result. */
-  query: StateMap<E>[State] = this
-    .initializeQuery as unknown as StateMap<E>[State];
-
   /** Function that will be called when the query is finished. */
   private onResult?:
     | OnResultFunction<ResultMap[EndpointType]>
@@ -562,11 +552,15 @@ export class MarvelQuery<
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  async fetchSingle(): Promise<MarvelQuery<E, "loaded">> {
+  async fetchSingle(): Promise<ExtendResult<E>> {
     MarvelQuery.log("Fetching single result");
     this.params.offset = 0;
     this.params.limit = 1;
-    return this.fetch();
+    const query = await this.fetch();
+    if(!query.result) {
+      throw new Error("No result found.")
+    }
+    return query.result;
   }
 }
 export type Comic = ExtendResult<["comics"]>;

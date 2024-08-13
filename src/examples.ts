@@ -35,23 +35,22 @@ async function spiderMan() {
 
   spiderManComics.results[0].query("events", {
     name: "Secret Wars",
-  })
+  });
 
   // Or you can do it like this
 
   spiderManComics.results[0].events.query({
     name: "Secret Wars",
-  })
+  });
 
   // Notes for tomorrow:
   // - Return from fetch on a chained query is the wrong data type. Showing first result type from the previous query.
   // - The conditional type for extending the results need to be different from collectionURI and resourceURI.
 
-
   const comics = await createQuery(["comics"], {
     dateDescriptor: "thisWeek",
   }).fetch();
-  
+
   // comics.results[0].characters.items[0].
 
   // const test = await comics.result?.series.
@@ -59,9 +58,15 @@ async function spiderMan() {
   // So I've added this new feature that lets you query a resource directly from another resource.
   // This way you can chain queries together like this:
 
-
   for (const comic of comics.results.slice(0, 2)) {
     console.log("Checking comic:", comic.title);
+    comic.characters.items[0].query("series", {
+
+    })
+    const character = await comic.characters.items[0].fetch();
+    const char = await comic.series.query("characters", {
+
+    }).fetch()
     comic.query("characters", {
       // format: "comic",
       name: "Peter Parker",
@@ -81,18 +86,19 @@ async function spiderMan() {
   // You can continue to do this until there are no more results.
 }
 
+// Below is outdated example
 // First we need to find his id using his name.
-const peterParker = await createQuery(["characters"], {
-  name: "Peter Parker",
-})
-  .fetchSingle()
-  .then((query) => query.result?.id); // Returns '1009491'
-// The we can use that id to create a new query to get the latest comics he appears in.
-const spiderComics = await createQuery(["characters", peterParker, "comics"], {
-  format: "comic", // We only want the latest comic issues, so lets exclude everything else.
-  noVariants: true, // Exclude variants, because we only want unique issues.
-  dateDescriptor: "nextWeek", // Get the next week's issues.
-}).fetch().then;
+// const peterParker = await createQuery(["characters"], {
+//   name: "Peter Parker", // Note to self, are states still needed?
+// })
+//   .fetchSingle()
+//   .then((query) => query.result?.id); // Returns '1009491'
+// // The we can use that id to create a new query to get the latest comics he appears in.
+// const spiderComics = await createQuery(["characters", peterParker, "comics"], {
+//   format: "comic", // We only want the latest comic issues, so lets exclude everything else.
+//   noVariants: true, // Exclude variants, because we only want unique issues.
+//   dateDescriptor: "nextWeek", // Get the next week's issues.
+// }).fetch().then;
 
 /**
  * Fetches series information based on the title and start year.
@@ -248,12 +254,10 @@ export async function latest(): Promise<Comic[]> {
     .then((api) => api.results);
 }
 
-export async function comicsWithCharacter(
-  name: string
-): Promise<MarvelComic[]> {
+export async function comicsWithCharacter(name: string): Promise<Comic[]> {
   return createQuery(["characters"], { name })
     .fetchSingle()
-    .then((character) => character.query("comics", { format: "comic" }).fetch())
+    .then((character) => character.comics.query({ format: "comic" }).fetch())
     .then((comics) => comics.results);
 }
 
