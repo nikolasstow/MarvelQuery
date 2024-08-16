@@ -24,10 +24,12 @@ import {
   MarvelQueryInterface,
   StateMap,
   InitQuery,
+  List,
+  Summary,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
-import { QueryCollection, ExtendResult, ExtendType, ExtendCollection, InitializedQuery, ExtendResource, ExtensionProperties } from "./definitions/types/utility-types";
+import { QueryCollection, ExtendResult, ExtendType, ExtendCollectionProperties, InitializedQuery, ExtendResourceProperties, ExtensionProperties, ExtendedResourceList, ExtendCollection, ExtendResource, ExtendQuery, } from "./definitions/types/utility-types";
 
 
 export class MarvelQuery<
@@ -292,134 +294,150 @@ export class MarvelQuery<
     return [type, Number(id)] as Endpoint;
   }
 
-  /** Extend the properties of each result. */
-  private extendResourceItems(result: Result<E>): ExtendType<Result<E>> {
-    const extendedResult = {} as ExtendType<Result<E>>;
   
-    for (const key in result) {
-      if (!result.hasOwnProperty(key)) continue;
+  // /** Extend the properties of each result. */
+  // private extendResultProperties(result: Result<E>): ExtendType<E> {
+  //   const extendedResult = {} as ExtendType<E>;
   
-      const value = result[key];
+  //   for (const key in result) {
+  //     if (!result.hasOwnProperty(key)) continue;
   
-      if (value && typeof value === "object") {
-        if ("resourceURI" in value) {
-          const uri = value.resourceURI as string;
-          extendedResult[key as keyof ExtendType<Result<E>>] = this.extendResource(uri, value);
-        } else if ("collectionURI" in value) {
-          const uri = value.collectionURI as string;
-          extendedResult[key as keyof ExtendType<Result<E>>] = this.extendCollection(uri, key, value);
-        } else {
-          extendedResult[key as keyof ExtendType<Result<E>>] = value as ExtendType<Result<E>>[keyof Result<E>];
-        }
-        continue;
-      }
+  //     const value = result[key];
   
-      extendedResult[key as keyof ExtendType<Result<E>>] = value as ExtendType<Result<E>>[keyof Result<E>];
-    }
+  //     if (value && typeof value === "object") {
+  //       if ("resourceURI" in value) { // Value is a resource
+  //         const uri = value.resourceURI as string;
+  //         const endpoint = this.createEndpointFromURI(uri);
+  //         extendedResult[key] = this.extendResource(endpoint, value);
+  //       } else if ("collectionURI" in value) { // Value is a collection
+  //         const uri = value.collectionURI as string;
+  //         const endpoint = this.createEndpointFromURI(uri);
+  //         extendedResult[key as keyof ExtendType<E>] = this.extendCollection(endpoint, key, value);
+  //       } else {
+  //         extendedResult[key as keyof ExtendType<E>] = value as ExtendType<E>[keyof Result<E>];
+  //       }
+  //       continue;
+  //     }
   
-    return extendedResult;
-  }
-  private appendProperties<T>( // Break up
-    URI: string,
-    value: T
-  ): T & ExtendCollection {
-    const endpoint = this.createEndpointFromURI(URI);
-    const query = <TType extends EndpointType>(
-      type: TType,
-      params: Parameters<Extendpoint<typeof endpoint, TType>>
-    ) => {
-      return this.initializeQuery(type, params, endpoint);
-    };
-    return {
-      ...value,
-      endpoint,
-      query,
-    } as T & ExtendCollection;
-  }
+  //     extendedResult[key as keyof ExtendType<E>] = value as ExtendType<E>[keyof Result<E>];
+  //   }
+  
+  //   return extendedResult;
+  // }
+  // private appendProperties<TEndpoint extends Endpoint, T>(
+  //   endpoint: TEndpoint,
+  //   value: T
+  // ): ExtendResource<T, TEndpoint> {
+  //   const query: ExtendQuery<TEndpoint> = <TType extends EndpointType>(
+  //     type: TType,
+  //     params: Parameters<Extendpoint<TEndpoint, TType>>
+  //   ) => {
+  //     return this.initializeQuery(type, params, endpoint);
+  //   };
+  //   return {
+  //     ...value,
+  //     endpoint,
+  //     query,
+  //   }
+  // }
 
-  private extendResource(
-    URI: string,
-    value: Result<E>[Extract<keyof Result<E>, string>]
-  ): ExtendType<Result<E>>[keyof Result<E>] {
-    return this.appendProperties(URI, value) as ExtendType<Result<E>>[keyof Result<E>];
-  }
+  // private extendResource<TEndpoint extends Endpoint, V extends Result<E>[Extract<keyof Result<E>, string>]>(
+  //   endpoint: TEndpoint,
+  //   value: V
+  // ): ExtendResource<V, TEndpoint> {
+  //   return this.appendProperties(endpoint, value);
+  // }
 
-  private extendCollection<K extends keyof Result<E>>(
-    URI: string,
-    key: K,
-    value: Result<E>[K]
-  ): ExtendType<Result<E>>[K] {
-    const endpoint = this.createEndpointFromURI(URI);
+  // private extendResourceItem<TEndpoint extends Endpoint, V extends List["items"][number]>(
+  //   endpoint: TEndpoint,
+  //   value: V,
+  // ): V & ExtendResourceProperties {
+  //   return this.appendProperties(endpoint, value);
+  // }
 
-    const query = (
-      params: Parameters<typeof endpoint> // Param type issue?
-    ) => {
-      const initQuery: InitQuery<typeof endpoint> = {
-        endpoint,
-        params,
-      }
+  // private extendCollection<TEndpoint extends Endpoint, K extends keyof Result<E>, V extends List>(
+  //   endpoint: TEndpoint,
+  //   key: K,
+  //   value: V
+  // ): ExtendCollection<V, TEndpoint> {
+  //   // const endpoint = this.createEndpointFromURI(URI);
 
-      return new MarvelQuery<typeof endpoint, "init">(initQuery);
-    };
+  //   const query = (
+  //     params: Parameters<typeof endpoint> // Param type issue?
+  //   ) => {
+  //     const initQuery: InitQuery<typeof endpoint> = {
+  //       endpoint,
+  //       params,
+  //     }
 
-    return {
-      ...value,
-      endpoint,
-      query,
-    } as ExtendType<Result<E>>[K];
-  }
+  //     return new MarvelQuery<typeof endpoint, "init">(initQuery);
+  //   };
 
-  private extendResultItem(
-    URI: string,
-    value: ExtendType<Result<E>>
-  ): ExtendResult<E> {
-    const endpoint = this.createEndpointFromURI(URI);
-    const query = <TType extends EndpointType>(
-      type: TType,
-      params: Parameters<Extendpoint<E, TType>> // Param type issue?
-    ) => {
-      return this.initializeQuery(type, params);
-    };
 
-    return {
-      ...value,
-      endpoint,
-      query,
-    } as ExtendResult<typeof endpoint>;
-  }
 
-  private addQueryFunction(result: Result<E>): ExtendResult<E> {
-    const withExtendedResourceItems = this.extendResourceItems(result)
-    const extendedResult = this.extendResultItem(result.resourceURI, withExtendedResourceItems);
+  //   const collection: ExtendedResourceList<typeof endpoint, V> = {
+  //     ...value,
+  //     items: value.items.map((item) => this.extendResourceItem(item.resourceURI, endpoint, item)),
+  //   }
 
-    return extendedResult;
-  }
+  //   return {
+  //     ...collection,
+  //     endpoint,
+  //     query,
+  //   }
+  // }
 
-  private initializeQuery<
-    TEndpoint extends Endpoint,
-    TType extends EndpointType
-  >(
-    type: TType,
-    params: Parameters<Extendpoint<TEndpoint, TType>>,
-    baseEndpoint?: TEndpoint
-  ): InitializedQuery<Extendpoint<TEndpoint, TType>> {
-    if (!this.result || !this.result.id) {
-      throw new Error("No result to query");
-    }
+  // private extendResultItem(
+  //   URI: string,
+  //   value: ExtendType<E>
+  // ): ExtendResult<E> {
+  //   const endpoint = this.createEndpointFromURI(URI);
+  //   const query = <TType extends EndpointType>(
+  //     type: TType,
+  //     params: Parameters<Extendpoint<E, TType>> // Param type issue?
+  //   ) => {
+  //     return this.initializeQuery(type, params);
+  //   };
 
-    console.log("Creating query from result");
+  //   return {
+  //     ...value,
+  //     endpoint,
+  //     query,
+  //   } as ExtendResult<typeof endpoint>;
+  // }
 
-    const basePoint: TEndpoint[0] = baseEndpoint ? baseEndpoint[0] : this.type;
-    const id = baseEndpoint ? baseEndpoint[1] : this.result.id;
-    const endpoint = [basePoint, id, type] as Extendpoint<TEndpoint, TType>;
+  // private addQueryFunction(result: Result<E>): ExtendResult<E> {
+  //   const withExtendedResourceItems = this.extendResultProperties(result)
+  //   const extendedResult = this.extendResultItem(result.resourceURI, withExtendedResourceItems);
 
-    const query: InitQuery<Extendpoint<TEndpoint, TType>> = {
-      endpoint,
-      params,
-    };
-    console.log(query);
-    return new MarvelQuery<Extendpoint<TEndpoint, TType>, "init">(query);
-  }
+  //   return extendedResult;
+  // }
+
+  // private initializeQuery<
+  //   TEndpoint extends Endpoint,
+  //   TType extends EndpointType
+  // >(
+  //   type: TType,
+  //   params: Parameters<Extendpoint<TEndpoint, TType>>,
+  //   baseEndpoint?: TEndpoint
+  // ): InitializedQuery<Extendpoint<TEndpoint, TType>> {
+  //   if (!this.result || !this.result.id) {
+  //     throw new Error("No result to query");
+  //   }
+
+  //   console.log("Creating query from result");
+
+  //   const basePoint: TEndpoint[0] = baseEndpoint ? baseEndpoint[0] : this.type;
+  //   const id = baseEndpoint ? baseEndpoint[1] : this.result.id;
+  //   const endpoint = [basePoint, id, type] as Extendpoint<TEndpoint, TType>;
+
+  //   const query: InitQuery<Extendpoint<TEndpoint, TType>> = {
+  //     endpoint,
+  //     params,
+  //   };
+  //   console.log(query);
+  //   return new MarvelQuery<Extendpoint<TEndpoint, TType>, "init">(query);
+  // }
 
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,

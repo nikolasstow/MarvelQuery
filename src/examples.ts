@@ -67,6 +67,7 @@ async function spiderMan() {
     const char = await comic.series.query("characters", {
 
     }).fetch()
+    // comic.collectedIssues
     comic.query("characters", {
       // format: "comic",
       name: "Peter Parker",

@@ -16,7 +16,9 @@ import {
   EventList,
   StoryList,
   SeriesList,
+  Summary,
 } from "./data-types";
+import { ExtendResourceProperties, ExtendResult } from "./extended-data-types";
 import {
   ComicParams,
   CharacterParams,
@@ -54,7 +56,7 @@ type EndpointResultType<T extends EndpointType> = Exclude<EndpointType, T>;
 /** Utility type that infers the type of the first element of the endpoint, so it can be passed to the EndpointResultType.
  * This removes the type of the first element from the available endpoint types for the last element, ensuring they do not match.
  */
-type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> =
+export type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> =
   E extends [infer First, number?, EndpointType?]
     ? First extends EndpointType
       ? [First, number?, EndpointResultType<First>?]
@@ -163,7 +165,7 @@ export type MarvelQueryInterface<
  * It works by checking the endpoint and looking for the last data type in the endpoint.
  * If the last element is a type, use it. If it's a number, use the type in the first element.
  */
-type DataType<E extends readonly unknown[]> = E extends [
+export type DataType<E extends readonly unknown[]> = E extends [
   ...infer _,
   infer LastElement extends EndpointType
 ]
@@ -305,34 +307,13 @@ export type ExtendedResourceObject<
 // The type project
 export type Modify<T, M> = Omit<T, keyof M> & M;
 
-export type WithQueryAndEndpoint<E extends Endpoint, T> = T & ExtendResource<E>;
-// Helper type to check if a type includes 'resourceURI'
+export type WithQueryAndEndpoint<E extends Endpoint, T> = T &
+  ExtendResourceProperties<E>;
 
-export type HasResourceURI<T> = T extends { resourceURI: string }
-  ? true
-  : false;
-// Helper type to check if a type includes 'collectionURI'
-export type HasCollectionURI<T> = T extends { collectionURI: string }
-  ? true
-  : false;
-export type ResourceList<K extends Endpoint, V> = V extends { items: Array<infer List> }
-  ? Modify<
-      V,
-      {
-        items: Array<List & ExtendResource<K>>;
-      }
-    >
-  : never;
-export type ExtendCollection<T extends Endpoint = Endpoint> = {
-  endpoint: Endpoint;
-  query: QueryCollection<T>;
-};
+export type ExtendedResourceListItem<K extends Endpoint, V> = V &
+  ExtendResourceProperties<K>;
 
-export type ExtendResource<T extends Endpoint = Endpoint> = {
-  endpoint: Endpoint;
-  query: ExtendQuery<T>;
-  fetch: () => Promise<MarvelQueryInterface<T, "loaded">>;
-};
+export type IsCollection<T> = T extends List ? true : false;
 
 // export type ExtendResultItem<T extends Endpoint = Endpoint> =
 //   ExtensionProperties<ExtendQuery<T>>;
@@ -348,7 +329,7 @@ export type ExtendQuery<TEndpoint extends Endpoint> = <
   TType extends NoSameEndpointType<TEndpoint[0]>
 >(
   type: TType,
-  params: Parameters<[TType]>
+  params: Parameters<Extendpoint<TEndpoint, TType>>
 ) => InitializedQuery<Extendpoint<TEndpoint, TType>>;
 
 // export type ExtendResultQuery<TEndpoint extends Endpoint> = <
@@ -366,17 +347,3 @@ export type InitializedQuery<E extends Endpoint> = MarvelQueryInterface<
   E,
   "init"
 >;
-
-export type ExtendType<T extends AnyType> = {
-  [K in keyof T]: [K] extends Endpoint // If the key is an endpoint
-    ? HasResourceURI<T[K]> extends true // Does the value have a resourceURI?
-      ? T[K] & ExtendResource<[K]> // Extend the resource
-      : HasCollectionURI<T[K]> extends true // Does the value have a collectionURI?
-      ? ResourceList<[K], T[K]> & ExtendCollection<[K]> // Extend the collection
-      : T[K]
-    : T[K];
-};
-
-export type ExtendResult<E extends Endpoint> = ExtendType<Result<E>> &
-  ExtendResource<E>;
-/** Type of the query function. */
