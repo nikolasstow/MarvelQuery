@@ -66,6 +66,12 @@ export type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?
 /** Create a map of any data type with the endpoint as the key. */
 export type EndpointMap<V> = Record<EndpointType, V>;
 
+export type KeyEndpointMap<T extends AnyType> = Partial<Record<keyof T, EndpointType>>;
+
+export type ExtendedResultEndpointMap = {
+	[K in keyof ResultMap]: KeyEndpointMap<ResultMap[K]>
+}
+
 /** A map of parameters to their corresponding types providing type safety. */
 export type ParameterMap = {
   comics: ComicParams;

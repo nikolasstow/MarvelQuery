@@ -1,8 +1,12 @@
 import {
   Endpoint,
+	EndpointType,
+  Extendpoint,
   ExtendQuery,
+  InitializedQuery,
   List,
   MarvelQueryInterface,
+  Parameters,
   QueryCollection,
   Result,
 } from "./definitions/types";
@@ -75,7 +79,15 @@ function extendCollection<V extends List, E extends Endpoint>(
 // Example of functions that might create the query objects
 function createExtendQuery<E extends Endpoint>(endpoint: E): ExtendQuery<E> {
   // Implementation specific to creating the query object
-  return {} as ExtendQuery<E>;
+  return <E extends Endpoint, T extends EndpointType>(type: T, params: Parameters<Extendpoint<E,T>>): InitializedQuery<Extendpoint<E,T>> => {
+		const query: InitQuery<Extendpoint<E,T>> = {
+      endpoint,
+      params,
+    };
+    console.log(query);
+    return new MarvelQuery<Extendpoint<E,T, "init">(query); // Wont work because or circular dependency
+		// return {} as InitializedQuery<Extendpoint<E,T>>;
+	}
 }
 
 function createQueryCollection<E extends Endpoint>(
