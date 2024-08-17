@@ -56,21 +56,39 @@ type EndpointResultType<T extends EndpointType> = Exclude<EndpointType, T>;
 /** Utility type that infers the type of the first element of the endpoint, so it can be passed to the EndpointResultType.
  * This removes the type of the first element from the available endpoint types for the last element, ensuring they do not match.
  */
-export type DistinctEndpointType<E extends [EndpointType, number?, EndpointType?]> =
-  E extends [infer First, number?, EndpointType?]
-    ? First extends EndpointType
-      ? [First, number?, EndpointResultType<First>?]
-      : ["Error: First type must be a valid EndpointType", First]
-    : never;
+export type DistinctEndpointType<
+  E extends [EndpointType, number?, EndpointType?]
+> = E extends [infer First, number?, EndpointType?]
+  ? First extends EndpointType
+    ? [First, number?, EndpointResultType<First>?]
+    : ["Error: First type must be a valid EndpointType", First]
+  : never;
+
+// Preferable 
+export type Extendpoint<E extends Endpoint, T extends EndpointType> = [
+  E[0],
+  number,
+  T
+] extends Endpoint
+  ? [E[0], number, T]
+  : never;
+
+// export type UniqueEndpoint<B extends EndpointType, >
+
+export type NewEndpoint<T extends EndpointType> = [T, number];
+
+type NoSameEndpointType<T extends EndpointType> = Exclude<EndpointType, T>;
 
 /** Create a map of any data type with the endpoint as the key. */
 export type EndpointMap<V> = Record<EndpointType, V>;
 
-export type KeyEndpointMap<T extends AnyType> = Partial<Record<keyof T, EndpointType>>;
+export type KeyEndpointMap<T extends AnyType> = Partial<
+  Record<keyof T, EndpointType>
+>;
 
 export type ExtendedResultEndpointMap = {
-	[K in keyof ResultMap]: KeyEndpointMap<ResultMap[K]>
-}
+  [K in keyof ResultMap]: KeyEndpointMap<ResultMap[K]>;
+};
 
 /** A map of parameters to their corresponding types providing type safety. */
 export type ParameterMap = {
@@ -201,14 +219,6 @@ export type Parameters<E extends readonly unknown[]> = E extends [
     : never
   : APIBaseParams;
 
-export type Extendpoint<E extends Endpoint, T extends EndpointType> = [
-  E[0],
-  number,
-  T
-] extends Endpoint
-  ? [E[0], number, T]
-  : never;
-
 /** Utility type that gets the result type from the endpoint. */
 export type Result<E extends Endpoint> = DataType<E> extends EndpointType
   ? ResultMap[DataType<E>]
@@ -328,8 +338,6 @@ export type ExtensionProperties<Q> = {
   endpoint: Endpoint;
   query: Q;
 };
-
-type NoSameEndpointType<T extends EndpointType> = Exclude<EndpointType, T>;
 
 export type ExtendQuery<TEndpoint extends Endpoint> = <
   TType extends NoSameEndpointType<TEndpoint[0]>

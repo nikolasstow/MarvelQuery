@@ -10,6 +10,7 @@ import {
   QueryCollection,
   Result,
 } from "./definitions/types";
+import { endpointMap } from "./definitions/types/endpoints";
 import {
   EndpointValues,
   ExtendType,
@@ -22,11 +23,10 @@ import {
 
 export default function extendApiResult<E extends Endpoint>(
   result: Result<E>,
-  endpointValues: EndpointValues<E>
 ): ExtendType<E> {
   return Object.keys(result).reduce<ExtendType<E>>((acc, key) => {
     const value = result[key];
-    const endpoint = endpointValues[key as keyof EndpointValues<E>];
+    const endpoint = endpointMap[key];
 
     // type
 
