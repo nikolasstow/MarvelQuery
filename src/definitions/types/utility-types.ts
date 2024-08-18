@@ -64,7 +64,7 @@ export type DistinctEndpointType<
     : ["Error: First type must be a valid EndpointType", First]
   : never;
 
-// Preferable 
+// Preferable
 export type Extendpoint<E extends Endpoint, T extends EndpointType> = [
   E[0],
   number,
@@ -112,21 +112,21 @@ export type ResultMap = {
 
 // export type LoadedState = () => Promise<any>; // Replace with actual return type
 
-export interface StateMap<E extends Endpoint> {
-  init: never;
-  loaded: ExtendQuery<E>;
-}
+// export interface StateMap<E extends Endpoint> {
+//   init: never;
+//   loaded: ExtendQuery<E>;
+// }
 
 export type InitQuery<E extends Endpoint> = {
   endpoint: E;
   params: Parameters<E>;
 };
 
-export type StateTypes<E extends Endpoint> = keyof StateMap<E>;
+// export type StateTypes<E extends Endpoint> = keyof StateMap<E>;
 
 export type MarvelQueryInterface<
-  E extends Endpoint,
-  Type extends StateTypes<E>
+  E extends Endpoint
+  // Type extends StateTypes<E>
 > = {
   /** Endpoint of the query
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
@@ -176,7 +176,7 @@ export type MarvelQueryInterface<
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
-  fetch(): Promise<MarvelQueryInterface<E, "loaded">>;
+  fetch(): Promise<MarvelQueryInterface<E>>;
   /** Build the URL of the query with the parameters, timestamp and hash. */
   buildURL(): string;
   /** Send the request to the API, and validate the response. */
@@ -357,7 +357,4 @@ export type QueryCollection<E extends Endpoint> = (
   params: Parameters<E>
 ) => InitializedQuery<E>;
 
-export type InitializedQuery<E extends Endpoint> = MarvelQueryInterface<
-  E,
-  "init"
->;
+export type InitializedQuery<E extends Endpoint> = MarvelQueryInterface<E>;

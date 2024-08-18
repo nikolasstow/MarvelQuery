@@ -7,10 +7,8 @@ import {
   MarvelEvent,
   MarvelSeries,
   MarvelStory,
-	EndpointType,
-	DistinctEndpointType,
 	ExtendedResultEndpointMap,
-} from ".";
+} from "./types";
 
 const comics: KeyEndpointMap<MarvelComic> = {
 	series: "series",
