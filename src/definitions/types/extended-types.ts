@@ -56,7 +56,7 @@ export type ExtendedResource<
   K extends keyof Result<E>
 > = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
   ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
-    ? ExtendResource<[E[0], number, EndpointValues<E>[K]], Result<E>[K]> // Add properties to the resource
+    ? ExtendResource<[EndpointValues<E>[K], number], Result<E>[K]> // Add properties to the resource
     : Result<E>[K]
   : Result<E>[K];
 
@@ -77,7 +77,7 @@ export type ExtendCollection<E, V extends List> = E extends Endpoint ? V &
 ExtendCollectionProperties<E, V> : ["Not an endpoint"];
 
 export type ExtendResourceList<
-  E extends Endpoint,
+  E,
   V extends List
 > = ExtendResource<E, V["items"][number]>[];
 
@@ -90,7 +90,7 @@ export type ExtendResourceProperties<E extends Endpoint> = {
 
 // New properties for collection
 export type ExtendCollectionProperties<E extends Endpoint, V extends List> = {
-  items: ExtendResourceList<E, V>;
+  items: ExtendResourceList<[E[2], number], V>;
   endpoint: E;
   query: QueryCollection<E>;
 };

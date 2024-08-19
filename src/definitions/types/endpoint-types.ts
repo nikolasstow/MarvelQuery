@@ -49,7 +49,7 @@ export type Extendpoint<
   T extends EndpointType
 > = E extends Endpoint
   ? T extends EndpointType
-    ? DistinctEndpointType<[E[0], number, T]>
+    ? [E[0], number, T]
     : ["Error, could not extend endpoint with type: ", T]
   : ["Error, could not extend endpoint with base endpoint", E];
 // export type UniqueEndpoint<B extends EndpointType, >

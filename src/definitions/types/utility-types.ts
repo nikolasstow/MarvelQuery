@@ -130,4 +130,4 @@ export type QueryCollection<E extends Endpoint> = (
   params: Parameters<E>
 ) => InitializedQuery<E>;
 
-export type InitializedQuery<E extends Endpoint> = MarvelQueryInterface<E>;
+export type InitializedQuery<E> = E extends Endpoint ? MarvelQueryInterface<E> : ["Cannot initialize query."];

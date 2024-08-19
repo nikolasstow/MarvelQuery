@@ -35,12 +35,18 @@ async function spiderMan() {
 
   spiderManComics.results[0].query("events", {
     name: "Secret Wars",
+    title: "Secret Wars",
   });
 
   // Or you can do it like this
 
   spiderManComics.results[0].events.query({
     name: "Secret Wars",
+    title: "Secret Wars",
+  })
+
+  spiderManComics.results[0].events.items[0].query("characters", {
+    name: "Peter Parker",
   })
   // Notes for tomorrow:
   // - Return from fetch on a chained query is the wrong data type. Showing first result type from the previous query.
