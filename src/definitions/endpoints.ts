@@ -1,5 +1,6 @@
 import {
   Endpoint,
+  EndpointType,
   KeyEndpointMap,
   MarvelCharacter,
   MarvelComic,
@@ -7,10 +8,20 @@ import {
   MarvelEvent,
   MarvelSeries,
   MarvelStory,
-	ExtendedResultEndpointMap,
+
 } from "./types";
 
-const comics: KeyEndpointMap<MarvelComic> = {
+import {
+	MarvelComicSchema
+} from "./schemas/data-schemas";
+
+// Utility function to help TypeScript infer exact types
+function createEndpointMap<T extends Record<string, EndpointType>>(map: T): T {
+	return map;
+}
+
+// Define your object with the exact types inferred
+const comics = createEndpointMap({
 	series: "series",
 	variants: "comics",
 	collections: "comics",
@@ -19,9 +30,9 @@ const comics: KeyEndpointMap<MarvelComic> = {
 	characters: "characters",
 	stories: "stories",
 	events: "events",
-}
+});
 
-const events: KeyEndpointMap<MarvelEvent> = {
+const events = createEndpointMap({
 	comics: "comics",
 	stories: "stories",
 	series: "series",
@@ -29,9 +40,9 @@ const events: KeyEndpointMap<MarvelEvent> = {
 	creators: "creators",
 	next: "events",
 	previous: "events",
-}
+});
 
-const series: KeyEndpointMap<MarvelSeries> = {
+const series = createEndpointMap({
 	comics: "comics",
 	stories: "stories",
 	events: "events",
@@ -39,32 +50,32 @@ const series: KeyEndpointMap<MarvelSeries> = {
 	creators: "creators",
 	next: "series",
 	previous: "series",
-}
+});
 
-const creators: KeyEndpointMap<MarvelCreator> = {
+const creators = createEndpointMap({
 	series: "series",
 	stories: "stories",
 	comics: "comics",
 	events: "events",
-}
+});
 
-const characters: KeyEndpointMap<MarvelCharacter> = {
+const characters = ({
 	comics: "comics",
 	stories: "stories",
 	events: "events",
 	series: "series",
-}
+});
 
-const stories: KeyEndpointMap<MarvelStory> = {
+const stories = createEndpointMap({
 	comics: "comics",
 	series: "series",
 	events: "events",
 	characters: "characters",
 	creators: "creators",
 	originalissue: "comics",
-}
+});
 
-export const endpointMap: ExtendedResultEndpointMap = {
+export const endpointMap = {
 	comics,
 	events,
 	series,

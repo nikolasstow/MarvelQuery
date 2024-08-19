@@ -6,9 +6,6 @@ import {
   MarvelEvent,
   MarvelStory,
   MarvelSeries,
-  APIResponseData,
-  Metadata,
-  APIWrapper,
   List,
   ComicList,
   CharacterList,
@@ -18,7 +15,9 @@ import {
   SeriesList,
   Summary,
 } from "./data-types";
-import { ExtendResourceProperties, ExtendResult } from "./extended-data-types";
+import { Endpoint, EndpointType, NoSameEndpointType, Extendpoint } from "./endpoint-types";
+import { ExtendResourceProperties } from "./extended-types";
+import { MarvelQueryInterface } from "./interface";
 import {
   ComicParams,
   CharacterParams,
@@ -28,67 +27,6 @@ import {
   SeriesParams,
   APIBaseParams,
 } from "./param-types";
-
-/** The endpoint contains up to three elements. A type, a Marvel ID, and another type.
- * This follows the same pattern as the URI/URL string, but split into an array by slashes.
- ** For example,
- *  http://gateway.marvel.com/v1/public/comics/              becomes ['comics']
- *  http://gateway.marvel.com/v1/public/comics/108992/events becomes ['comics', 108992, 'events']
- *
- ** The first element is the type of the subject of your query.
- * For example, if you are searching for a comic or comics, the first element is 'comics'.
- * The same goes for characters, creators, events, series and stories.
- ** The second element is the ID of the subject of your query.
- * With an id you can query a specific item from the API.
- ** The third element is the type of results you want back for the subject of your query.
- * If you are querying for events that feature the subject of your query, the third element is 'events'.
- * The same applies for stories or characters featured in a comic.
- * For example if you are looking for events in which Spider-Man appeared,
- * your query endpoint would be ['characters', '1009491', events']
- */
-export type Endpoint = DistinctEndpointType<
-  [EndpointType, number?, EndpointType?]
->;
-/** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
-export type EndpointType = keyof ParameterMap;
-/** Utility type that removes the passed type from the available endpoint types */
-type EndpointResultType<T extends EndpointType> = Exclude<EndpointType, T>;
-/** Utility type that infers the type of the first element of the endpoint, so it can be passed to the EndpointResultType.
- * This removes the type of the first element from the available endpoint types for the last element, ensuring they do not match.
- */
-export type DistinctEndpointType<
-  E extends [EndpointType, number?, EndpointType?]
-> = E extends [infer First, number?, EndpointType?]
-  ? First extends EndpointType
-    ? [First, number?, EndpointResultType<First>?]
-    : ["Error: First type must be a valid EndpointType", First]
-  : never;
-
-// Preferable
-export type Extendpoint<E extends Endpoint, T extends EndpointType> = [
-  E[0],
-  number,
-  T
-] extends Endpoint
-  ? [E[0], number, T]
-  : never;
-
-// export type UniqueEndpoint<B extends EndpointType, >
-
-export type NewEndpoint<T extends EndpointType> = [T, number];
-
-type NoSameEndpointType<T extends EndpointType> = Exclude<EndpointType, T>;
-
-/** Create a map of any data type with the endpoint as the key. */
-export type EndpointMap<V> = Record<EndpointType, V>;
-
-export type KeyEndpointMap<T extends AnyType> = Partial<
-  Record<keyof T, EndpointType>
->;
-
-export type ExtendedResultEndpointMap = {
-  [K in keyof ResultMap]: KeyEndpointMap<ResultMap[K]>;
-};
 
 /** A map of parameters to their corresponding types providing type safety. */
 export type ParameterMap = {
@@ -110,79 +48,9 @@ export type ResultMap = {
   series: MarvelSeries;
 };
 
-// export type LoadedState = () => Promise<any>; // Replace with actual return type
-
-// export interface StateMap<E extends Endpoint> {
-//   init: never;
-//   loaded: ExtendQuery<E>;
-// }
-
 export type InitQuery<E extends Endpoint> = {
   endpoint: E;
   params: Parameters<E>;
-};
-
-// export type StateTypes<E extends Endpoint> = keyof StateMap<E>;
-
-export type MarvelQueryInterface<
-  E extends Endpoint
-  // Type extends StateTypes<E>
-> = {
-  /** Endpoint of the query
-   * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
-   * becomes ["characters", 1009491, "comics"]
-   */
-  endpoint: E;
-  /** Parameters of the query */
-  params: Parameters<E>;
-  /** The data type of the results of the query */
-  type: EndpointType;
-
-  /** The URL of the query
-   * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
-   */
-  url: string;
-  /** The number of results returned by the query. */
-  count: number;
-  /** The total number of results available for the query. */
-  total: number;
-  /** Metadata included in the API response.
-   * @property code: The HTTP status code of the returned result.
-   * @property status: A string description of the call status.
-   * @property copyright: The copyright notice for the returned result.
-   * @property attributionText: The attribution notice for this result. Please display either this notice or the contents of the attributionHTML field on all screens which contain data from the Marvel Comics API.
-   * @property attributionHTML: An HTML representation of the attribution notice for this result. Please display either this notice or the contents of the attributionText field on all screens which contain data from the Marvel Comics API.
-   * @property etag: A digest value of the content returned by the call.
-   */
-  metadata: Metadata;
-  /** Data for the API response.
-   * @property offset: The requested offset (number of skipped results) of the call.
-   * @property limit: The requested result limit.
-   * @property total: The total number of resources available given the current filter set.
-   * @property count: The total number of results returned by this call.
-   */
-  responseData: APIResponseData;
-  /** The first result of the query. */
-  result: ExtendResult<E> | undefined;
-  /** The results of the query. */
-  results: ExtendResult<E>[];
-  /** The conjunction of all results from this query instance. */
-  resultHistory: ExtendResult<E>[];
-
-  /** The query is complete when all results have been fetched. */
-  isComplete: boolean;
-
-  /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
-   * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
-   * now with the results of the query, and offset adjusted to request the next page of results.
-   */
-  fetch(): Promise<MarvelQueryInterface<E>>;
-  /** Build the URL of the query with the parameters, timestamp and hash. */
-  buildURL(): string;
-  /** Send the request to the API, and validate the response. */
-  request(url: string): Promise<APIWrapper<Result<E>>>;
-  /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  fetchSingle(): Promise<ExtendResult<E>>;
 };
 
 /** Utitility type that determines which type of data being queried.
@@ -251,107 +119,12 @@ export type AnyParams =
   | SeriesParams
   | undefined;
 
-/** A map of functions, one for each result type, as well as 'any' to be called when the query is finished */
-export type OnResultMap = {
-  [K in EndpointType]?: OnResultFunction<ResultMap[K]>;
-} & {
-  any?: AnyResultFunction;
-};
-
-/** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
- * You can also apply global parameters to specific data types (comics, characters, events, etc.)
- */
-export interface GlobalParams extends Partial<ParameterMap> {
-  all?: APIBaseParams;
-}
-
-export type OnRequestFunction = (
-  url: string,
-  endpoint: Endpoint,
-  params: Record<string, unknown>
-) => void;
-
-export interface APIKeys {
-  /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
-  publicKey: string;
-  /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
-  privateKey: string;
-}
-
-/** Replace the default fetch function with a custom one.  */
-export type HTTPClient = <E extends Endpoint>(
-  url: string
-) => Promise<APIWrapper<Result<E>>>;
-/** Arguments for initialization of the API */
-export interface Config {
-  // Options
-  /** Global parameters to be applied to all queries, or all queries of a specific type.
-   * @example ```globalParams: {
-   * all: { limit: 10 },
-   * comics: { noVariants: true }
-   * }```
-   */
-  globalParams?: GlobalParams;
-  /** Remove undefined parameters from the query */
-  omitUndefined?: boolean; // set to true (by default) this will remove undefined values from the query
-  /** Enable verbose logging. */
-  verbose?: boolean;
-  /** An optional function that will be called before the request is sent.
-   * You can use it to log the request or track the number of requests to the API. */
-  onRequest?: OnRequestFunction;
-  // Functions
-  /** Add custom functions to be called when a request of a specific type is complete.
-   * @example ```onResult: {
-   * comics: (items) => {
-   *   items.map((comic) => {
-   *     console.log("Saving comic:", comic.title);
-   *   });
-   * }
-   * }```
-   */
-  onResult?: OnResultMap;
-  /** Replace the default http client (axios) with your own http client.  */
-  httpClient?: HTTPClient;
-}
-export type ResourceObject = {
-  resourceURI: string;
-} & { [key: string]: any };
-export type ExtendedResourceObject<
-  E extends Endpoint,
-  I extends ResourceObject
-> = WithQueryAndEndpoint<E, I>;
-// The type project
-export type Modify<T, M> = Omit<T, keyof M> & M;
-
-export type WithQueryAndEndpoint<E extends Endpoint, T> = T &
-  ExtendResourceProperties<E>;
-
-export type ExtendedResourceListItem<K extends Endpoint, V> = V &
-  ExtendResourceProperties<K>;
-
-export type IsCollection<T> = T extends List ? true : false;
-
-// export type ExtendResultItem<T extends Endpoint = Endpoint> =
-//   ExtensionProperties<ExtendQuery<T>>;
-
-export type ExtensionProperties<Q> = {
-  endpoint: Endpoint;
-  query: Q;
-};
-
 export type ExtendQuery<TEndpoint extends Endpoint> = <
-  TType extends NoSameEndpointType<TEndpoint[0]>
+  TType extends NoSameEndpointType<TEndpoint>
 >(
   type: TType,
   params: Parameters<Extendpoint<TEndpoint, TType>>
 ) => InitializedQuery<Extendpoint<TEndpoint, TType>>;
-
-// export type ExtendResultQuery<TEndpoint extends Endpoint> = <
-//   TType extends EndpointType
-// >(
-//   type: TType,
-//   params: Parameters<Extendpoint<TEndpoint, TType>>
-// ) => InitializedQuery<TEndpoint>;
 
 export type QueryCollection<E extends Endpoint> = (
   params: Parameters<E>

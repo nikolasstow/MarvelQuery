@@ -41,8 +41,7 @@ async function spiderMan() {
 
   spiderManComics.results[0].events.query({
     name: "Secret Wars",
-  });
-
+  })
   // Notes for tomorrow:
   // - Return from fetch on a chained query is the wrong data type. Showing first result type from the previous query.
   // - The conditional type for extending the results need to be different from collectionURI and resourceURI.
@@ -61,7 +60,8 @@ async function spiderMan() {
   for (const comic of comics.results.slice(0, 2)) {
     console.log("Checking comic:", comic.title);
     comic.characters.items[0].query("series", {
-
+      name: "Secret Wars",
+      title: "Secret Wars",
     })
     const character = await comic.characters.items[0].fetch();
     const char = await comic.series.query("characters", {

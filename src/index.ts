@@ -11,9 +11,6 @@ import {
   ResultMap,
   APIKeys,
   Config,
-  APIWrapper,
-  APIResponseData,
-  Metadata,
   GlobalParams,
   AnyResultFunction,
   AnyParams,
@@ -22,14 +19,20 @@ import {
   Extendpoint,
   MarvelQueryInterface,
   InitQuery,
-  List,
   InitializedQuery,
+  // data types
+  List,
+  APIWrapper,
+  APIResponseData,
+  Metadata,
+  // extended types
   ExtendResult,
   ExtendType,
   ExtendResource,
   ExtendCollection,
   ExtendResourceProperties,
   ExtendCollectionProperties,
+  NoSameEndpointType,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
@@ -180,8 +183,6 @@ export class MarvelQuery<E extends Endpoint>
   metadata: Metadata;
   /** Data for the API response. */
   responseData: APIResponseData;
-  /** The first result of the query. */
-  result: ExtendResult<E> | undefined;
   /** The results of the query. */
   results: ExtendResult<E>[];
   /** The conjunction of all results from this query instance. */
@@ -331,7 +332,7 @@ export class MarvelQuery<E extends Endpoint>
 
     const resultExtendingProperties: ExtendResourceProperties<E> = {
       endpoint,
-      query: <TType extends EndpointType>(
+      query: <TType extends NoSameEndpointType<E>>(
         type: TType,
         params: Parameters<Extendpoint<E, TType>>
       ): InitializedQuery<Extendpoint<E, TType>> => {
@@ -462,7 +463,6 @@ export class MarvelQuery<E extends Endpoint>
       this.metadata = metadata;
       this.responseData = responseData;
       this.results = formattedResults;
-      this.result = formattedResults[0];
       this.resultHistory = [...this.resultHistory, ...formattedResults];
 
       /** Call the onResult function with the results of the request. */
@@ -556,10 +556,10 @@ export class MarvelQuery<E extends Endpoint>
     this.params.offset = 0;
     this.params.limit = 1;
     const query = await this.fetch();
-    if (!query.result) {
+    if (!query.results[0]) {
       throw new Error("No result found.");
     }
-    return query.result;
+    return query.results[0];
   }
 }
 export type Comic = ExtendResult<["comics"]>;
