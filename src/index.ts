@@ -26,6 +26,7 @@ import {
   APIResponseData,
   Metadata,
   // extended types
+  ReturnType,
   ExtendResult,
   ExtendType,
   ExtendResource,
@@ -33,6 +34,9 @@ import {
   ExtendResourceProperties,
   ExtendCollectionProperties,
   NoSameEndpointType,
+  ResourceEndpoint,
+  NewEndpoint,
+  ExtendedQueryResult,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
@@ -335,7 +339,7 @@ export class MarvelQuery<E extends Endpoint>
       query: <TType extends NoSameEndpointType<E>>(
         type: TType,
         params: Parameters<Extendpoint<E, TType>>
-      ): InitializedQuery<Extendpoint<E, TType>> => {
+      ): MarvelQueryInterface<Extendpoint<E, TType>> => {
         return new MarvelQuery<Extendpoint<E, TType>>({
           endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<E, TType>,
           params,
@@ -372,7 +376,7 @@ export class MarvelQuery<E extends Endpoint>
         query: <TType extends EndpointType>(
           type: TType,
           params: Parameters<Extendpoint<TEndpoint, TType>>
-        ): InitializedQuery<Extendpoint<TEndpoint, TType>> => {
+        ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
           return new MarvelQuery<Extendpoint<TEndpoint, TType>>({
             endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
               TEndpoint,
@@ -402,7 +406,7 @@ export class MarvelQuery<E extends Endpoint>
       const items = value.items.map(
         (item) =>
           this.extendResource(item, baseType) as ExtendResource<
-            TEndpoint,
+            ResourceEndpoint<TEndpoint>,
             V["items"][number]
           >
       );
@@ -410,7 +414,9 @@ export class MarvelQuery<E extends Endpoint>
       const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
         items,
         endpoint,
-        query: (params: Parameters<TEndpoint>): InitializedQuery<TEndpoint> =>
+        query: (
+          params: Parameters<TEndpoint>
+        ): MarvelQueryInterface<TEndpoint> =>
           new MarvelQuery<TEndpoint>({ endpoint, params }),
       };
 
@@ -562,12 +568,12 @@ export class MarvelQuery<E extends Endpoint>
     return query.results[0];
   }
 }
-export type Comic = ExtendResult<["comics"]>;
-export type Character = ExtendResult<["characters"]>;
-export type Creator = ExtendResult<["creators"]>;
-export type Event = ExtendResult<["events"]>;
-export type Series = ExtendResult<["series"]>;
-export type Story = ExtendResult<["stories"]>;
+export type Comic = ReturnType<"comics">;
+export type Character = ReturnType<"characters">;
+export type Creator = ReturnType<"creators">;
+export type Event = ReturnType<"events">;
+export type Series = ReturnType<"series">;
+export type Story = ReturnType<"stories">;
 
 export default MarvelQuery;
 export * as Query from "./definitions/types";

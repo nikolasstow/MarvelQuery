@@ -262,16 +262,10 @@ export async function latest(): Promise<Comic[]> {
 }
 
 export async function comicsWithCharacter(name: string): Promise<Comic[]> {
-  const character = await createQuery(["characters"], { name })
+  return createQuery(["characters"], { name })
     .fetchSingle()
-    // .then((character) => character.comics.query({ format: "comic" }).fetch())
-    // .then((comics) => comics.results);
-
-    const comics = await character.comics.query({ format: "comic" }).fetch();
-
-    const results = comics.results;
-
-    return results;
+    .then((character) => character.comics.query({ format: "comic" }).fetch())
+    .then((comics) => comics.results);
 }
 
 /**

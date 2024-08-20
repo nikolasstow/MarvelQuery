@@ -8,11 +8,15 @@ import {
   ResultMap,
 } from "./utility-types";
 import {
+  BaseEndpoint,
   DistinctEndpointType,
   Endpoint,
   EndpointType,
+  EndpointTyped,
+  ExtendedQueryResult,
   Extendpoint,
   KeyEndpointMap,
+  ResourceEndpoint,
 } from "./endpoint-types";
 import { MarvelQueryInterface } from "./interface";
 
@@ -62,7 +66,7 @@ export type ExtendedResource<
   K extends keyof Result<E>
 > = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
   ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
-    ? ExtendResource<[EndpointValues<E>[K], number], Result<E>[K]> // Add properties to the resource
+    ? ExtendResource<Extendpoint<E, EndpointValues<E>[K]>, Result<E>[K]> // Add properties to the resource
     : Result<E>[K]
   : Result<E>[K];
 
@@ -72,22 +76,22 @@ type ExtendedCollection<
   V extends List
 > = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
   ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
-    ? ExtendCollection<[E[0], number, EndpointValues<E>[K]], V> // Add properties to the collection
+    ? ExtendCollection<Extendpoint<E, EndpointValues<E>[K]>, V> // Add properties to the collection
     : ["ExtendedCollection", "Not an endpoint", EndpointValues<E>[K]] // Result<E>[K]
   : ["ExtendedCollection", "No endpoint found", K]; // Result<E>[K]
 
-export type ExtendResource<E, V> = E extends Endpoint
-  ? V & ExtendResourceProperties<E>
-  : ["ExtendResource", "Not an endpoint"]; // Add additional properties to the resource
+export type ExtendResource<E extends Endpoint, V> = V &
+  ExtendResourceProperties<E>;
 
-export type ExtendCollection<E, V extends List> = E extends Endpoint
-  ? V & ExtendCollectionProperties<E, V>
-  : ["ExtendCollection", "Not an endpoint", E];
+["ExtendResource", "Not an endpoint"];
 
-export type ExtendResourceList<E, V extends List> = ExtendResource<
-  E,
-  V["items"][number]
->[];
+export type ExtendCollection<E extends Endpoint, V extends List> = V &
+  ExtendCollectionProperties<E, V>;
+
+export type ExtendResourceList<
+  E extends Endpoint,
+  V extends List
+> = ExtendResource<E, V["items"][number]>[];
 
 // New properties for resource
 export type ExtendResourceProperties<E extends Endpoint> = {
@@ -98,13 +102,20 @@ export type ExtendResourceProperties<E extends Endpoint> = {
 
 // New properties for collection
 export type ExtendCollectionProperties<E extends Endpoint, V extends List> = {
-  items: ExtendResourceList<[E[2], number], V>;
+  items: ExtendResourceList<ResourceEndpoint<E>, V>;
   endpoint: E;
   query: QueryCollection<E>;
 };
 
-export type ExtendResult<E extends Endpoint> = E[2] extends EndpointType
-  ? ExtendResource<[E[2]], ExtendType<[E[2]]>>
-  : E[0] extends EndpointType
-  ? ExtendResource<[E[0]], ExtendType<[E[0]]>>
-  : ["ExtendResult", "Not an endpoint"]; // Add new properties to the result item
+// This logic below looks strange but done this way to assure that the return type is correct
+export type ExtendResult<E extends Endpoint> = ExtendType<E> &
+  ExtendResourceProperties<E>;
+
+// export type ReturnType<E extends Endpoint> = ExtendType<[DataType<E>]> &
+// ExtendResourceProperties<TypeToEndpoint<DataType<E>>>;
+
+// type TypeToEndpoint<E extends EndpointType> = [E] extends Endpoint ? [E] : never;
+
+export type ReturnType<T extends EndpointType> =
+  | ExtendResult<EndpointTyped<T>>
+  | ExtendResult<ExtendedQueryResult<T>>;

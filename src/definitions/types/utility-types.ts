@@ -7,7 +7,12 @@ import {
   MarvelStory,
   MarvelSeries,
 } from "./data-types";
-import { Endpoint, EndpointType, NoSameEndpointType, Extendpoint } from "./endpoint-types";
+import {
+  Endpoint,
+  EndpointType,
+  NoSameEndpointType,
+  Extendpoint,
+} from "./endpoint-types";
 import { MarvelQueryInterface } from "./interface";
 import {
   ComicParams,
@@ -48,16 +53,13 @@ export type InitQuery<E extends Endpoint> = {
  * It works by checking the endpoint and looking for the last data type in the endpoint.
  * If the last element is a type, use it. If it's a number, use the type in the first element.
  */
-export type DataType<E extends readonly unknown[]> = E extends [
-  ...infer _,
-  infer LastElement extends EndpointType
-]
-  ? LastElement extends number
-    ? E extends [infer FirstElement, ...unknown[]]
-      ? FirstElement
-      : never
-    : LastElement
-  : never;
+export type DataType<E> = E extends Endpoint
+  ? E[2] extends EndpointType
+    ? E[2]
+    : E[0] extends EndpointType
+    ? E[0]
+    : ["Error, could not determine data type", E]
+  : ["Error, not a valid endpoint", E];
 
 /** Utility type that gets the parameters from the endpoint. */
 export type Parameters<E extends readonly unknown[]> = E extends [
@@ -115,10 +117,16 @@ export type ExtendQuery<TEndpoint extends Endpoint> = <
 >(
   type: TType,
   params: Parameters<Extendpoint<TEndpoint, TType>>
-) => InitializedQuery<Extendpoint<TEndpoint, TType>>;
+) => MarvelQueryInterface<
+  Extendpoint<TEndpoint, TType>>;
 
 export type QueryCollection<E extends Endpoint> = (
   params: Parameters<E>
-) => InitializedQuery<E>;
+) => MarvelQueryInterface<E>;
 
-export type InitializedQuery<E> = E extends Endpoint ? MarvelQueryInterface<E> : ["utility-types.ts InitializedQuery", "Cannot initialize query."];
+export type InitializedQuery<E> = E extends Endpoint
+  ? MarvelQueryInterface<E>
+  : ["utility-types.ts InitializedQuery", "Cannot initialize query."];
+
+
+export type ValidEndpoint<E> = E extends Endpoint ? E : never;
