@@ -1,18 +1,18 @@
-import {
-  List,
-} from "./data-types";
+import { List } from "./data-types";
 import {
   AnyType,
   DataType,
   ExtendQuery,
   QueryCollection,
   Result,
-	ResultMap,
+  ResultMap,
 } from "./utility-types";
 import {
   DistinctEndpointType,
   Endpoint,
-  EndpointType, Extendpoint, KeyEndpointMap
+  EndpointType,
+  Extendpoint,
+  KeyEndpointMap,
 } from "./endpoint-types";
 import { MarvelQueryInterface } from "./interface";
 
@@ -21,24 +21,30 @@ import { endpointMap } from "../endpoints";
 export type EndpointValues<E extends Endpoint> = EndpointValueMap[DataType<E>];
 
 type UniqueEndpointType<T> = {
-	[K in keyof T]: T[K] extends EndpointType ? T[K] : ["Error: Not a valid EndpointType", T[K]];
+  [K in keyof T]: T[K] extends EndpointType
+    ? T[K]
+    : ["UniqueEndpointType", "Error: Not a valid EndpointType", T[K]];
 };
 
 export type EndpointValueMap = {
-	[K in keyof ResultMap]: UniqueEndpointType<typeof endpointMap[K]>
-}
+  [K in keyof ResultMap]: UniqueEndpointType<(typeof endpointMap)[K]>;
+};
 
 export type ValuesExtend<T> = T extends EndpointType ? [T, number] : Endpoint;
 
-export type EndpointId<T extends EndpointType> = DistinctEndpointType<[T, number]>;
+export type EndpointId<T extends EndpointType> = DistinctEndpointType<
+  [T, number]
+>;
 
-export type ExtendType<E extends Endpoint> = {
-  [K in keyof Result<E>]: HasResourceURI<Result<E>[K]> extends true // Does the key include 'resourceURI'
-    ? ExtendedResource<E, K> // Add properties to the resource
-    : Result<E>[K] extends List // Is the value a list
-    ? ExtendedCollection<E, K, Result<E>[K]> // Add properties to the collection
-    : Result<E>[K];
-};
+export type ExtendType<E> = E extends Endpoint
+  ? {
+      [K in keyof Result<E>]: HasResourceURI<Result<E>[K]> extends true // Does the key include 'resourceURI'
+        ? ExtendedResource<E, K> // Add properties to the resource
+        : Result<E>[K] extends List // Is the value a list
+        ? ExtendedCollection<E, K, Result<E>[K]> // Add properties to the collection
+        : Result<E>[K];
+    }
+  : ["utility-types.ts ExtendType", "Cannot extend type"];
 
 // Helper type to check if a type includes 'resourceURI'
 export type HasResourceURI<T> = T extends { resourceURI: string }
@@ -67,19 +73,21 @@ type ExtendedCollection<
 > = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
   ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
     ? ExtendCollection<[E[0], number, EndpointValues<E>[K]], V> // Add properties to the collection
-    : ["Not an endpoint"] // Result<E>[K]
-  : ["No endpoint found"] // Result<E>[K]
+    : ["ExtendedCollection", "Not an endpoint", EndpointValues<E>[K]] // Result<E>[K]
+  : ["ExtendedCollection", "No endpoint found", K]; // Result<E>[K]
 
-export type ExtendResource<E, V> = E extends Endpoint ? V &
-  ExtendResourceProperties<E> : ["Not an endpoint"]; // Add additional properties to the resource
+export type ExtendResource<E, V> = E extends Endpoint
+  ? V & ExtendResourceProperties<E>
+  : ["ExtendResource", "Not an endpoint"]; // Add additional properties to the resource
 
-export type ExtendCollection<E, V extends List> = E extends Endpoint ? V &
-ExtendCollectionProperties<E, V> : ["Not an endpoint"];
+export type ExtendCollection<E, V extends List> = E extends Endpoint
+  ? V & ExtendCollectionProperties<E, V>
+  : ["ExtendCollection", "Not an endpoint", E];
 
-export type ExtendResourceList<
+export type ExtendResourceList<E, V extends List> = ExtendResource<
   E,
-  V extends List
-> = ExtendResource<E, V["items"][number]>[];
+  V["items"][number]
+>[];
 
 // New properties for resource
 export type ExtendResourceProperties<E extends Endpoint> = {
@@ -95,4 +103,8 @@ export type ExtendCollectionProperties<E extends Endpoint, V extends List> = {
   query: QueryCollection<E>;
 };
 
-export type ExtendResult<E extends Endpoint> = ExtendResource<E, ExtendType<E>> // Add new properties to the result item
+export type ExtendResult<E extends Endpoint> = E[2] extends EndpointType
+  ? ExtendResource<[E[2]], ExtendType<[E[2]]>>
+  : E[0] extends EndpointType
+  ? ExtendResource<[E[0]], ExtendType<[E[0]]>>
+  : ["ExtendResult", "Not an endpoint"]; // Add new properties to the result item

@@ -59,7 +59,7 @@ const creators = createEndpointMap({
 	events: "events",
 });
 
-const characters = ({
+const characters = createEndpointMap({
 	comics: "comics",
 	stories: "stories",
 	events: "events",

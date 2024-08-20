@@ -6,17 +6,8 @@ import {
   MarvelEvent,
   MarvelStory,
   MarvelSeries,
-  List,
-  ComicList,
-  CharacterList,
-  CreatorList,
-  EventList,
-  StoryList,
-  SeriesList,
-  Summary,
 } from "./data-types";
 import { Endpoint, EndpointType, NoSameEndpointType, Extendpoint } from "./endpoint-types";
-import { ExtendResourceProperties } from "./extended-types";
 import { MarvelQueryInterface } from "./interface";
 import {
   ComicParams,
@@ -130,4 +121,4 @@ export type QueryCollection<E extends Endpoint> = (
   params: Parameters<E>
 ) => InitializedQuery<E>;
 
-export type InitializedQuery<E> = E extends Endpoint ? MarvelQueryInterface<E> : ["Cannot initialize query."];
+export type InitializedQuery<E> = E extends Endpoint ? MarvelQueryInterface<E> : ["utility-types.ts InitializedQuery", "Cannot initialize query."];

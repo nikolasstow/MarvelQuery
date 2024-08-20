@@ -34,7 +34,7 @@ export type DistinctEndpointType<
 > = E extends [infer First, number?, EndpointType?]
   ? First extends EndpointType
     ? [First, number?, ExcludeEndpointType<First>?]
-    : ["Error: First type must be a valid EndpointType", First]
+    : ["endpoint-types.ts DistinctEndpointType", "Error: First type must be a valid EndpointType", First]
   : never;
 // Preferable
 
@@ -50,8 +50,8 @@ export type Extendpoint<
 > = E extends Endpoint
   ? T extends EndpointType
     ? [E[0], number, T]
-    : ["Error, could not extend endpoint with type: ", T]
-  : ["Error, could not extend endpoint with base endpoint", E];
+    : ["endpoint-types.ts Extendpoint", "Error, could not extend endpoint with type: ", T]
+  : ["endpoint-types.ts Extendpoint", "Error, could not extend endpoint with base endpoint", E];
 // export type UniqueEndpoint<B extends EndpointType, >
 
 export type NewEndpoint<T extends EndpointType> = [T, number];

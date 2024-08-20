@@ -35,14 +35,14 @@ async function spiderMan() {
 
   spiderManComics.results[0].query("events", {
     name: "Secret Wars",
-    title: "Secret Wars",
+    // title: "Secret Wars",
   });
 
   // Or you can do it like this
 
   spiderManComics.results[0].events.query({
     name: "Secret Wars",
-    title: "Secret Wars",
+    // title: "Secret Wars",
   })
 
   spiderManComics.results[0].events.items[0].query("characters", {
@@ -63,22 +63,22 @@ async function spiderMan() {
   // So I've added this new feature that lets you query a resource directly from another resource.
   // This way you can chain queries together like this:
 
-  for (const comic of comics.results.slice(0, 2)) {
-    console.log("Checking comic:", comic.title);
-    comic.characters.items[0].query("series", {
-      name: "Secret Wars",
-      title: "Secret Wars",
-    })
-    const character = await comic.characters.items[0].fetch();
-    const char = await comic.series.query("characters", {
+  // for (const comic of comics.results.slice(0, 2)) {
+  //   console.log("Checking comic:", comic.title);
+  //   comic.characters.items[0].query("series", {
+  //     name: "Secret Wars",
+  //     title: "Secret Wars",
+  //   })
+  //   const character = await comic.characters.items[0].fetch();
+  //   const char = await comic.series.query("characters", {
 
-    }).fetch()
-    // comic.collectedIssues
-    comic.query("characters", {
-      // format: "comic",
-      name: "Peter Parker",
-    });
-  }
+  //   }).fetch()
+  //   // comic.collectedIssues
+  //   comic.query("characters", {
+  //     // format: "comic",
+  //     name: "Peter Parker",
+  //   });
+  // }
 
   // const spiderMoan = await createQuery(["characters"], {
   //     name: "Peter Parker",
@@ -262,10 +262,16 @@ export async function latest(): Promise<Comic[]> {
 }
 
 export async function comicsWithCharacter(name: string): Promise<Comic[]> {
-  return createQuery(["characters"], { name })
+  const character = await createQuery(["characters"], { name })
     .fetchSingle()
-    .then((character) => character.comics.query({ format: "comic" }).fetch())
-    .then((comics) => comics.results);
+    // .then((character) => character.comics.query({ format: "comic" }).fetch())
+    // .then((comics) => comics.results);
+
+    const comics = await character.comics.query({ format: "comic" }).fetch();
+
+    const results = comics.results;
+
+    return results;
 }
 
 /**
