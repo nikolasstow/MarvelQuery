@@ -64,17 +64,17 @@ async function spiderMan() {
     dateDescriptor: "thisWeek",
   }).fetchSingle();
   
-  comics.series.query("comics", {
+  const story = await createQuery(["stories"], {
     
-  })
+  }).fetchSingle(); 
+
+  story.originalissue?.query("characters")
 
   const BloodHunt = await createQuery(["events"], {
     name: "Blood Hunt",
   }).fetchSingle().then((event) => {
     if (event.next) {
-      event.next.query("comics", {
-        title: "Secret Wars",
-      })
+      event.next.query("comics")
     }
   });
 

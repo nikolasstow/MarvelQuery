@@ -1,3 +1,4 @@
+import { off } from "process";
 import {
   MarvelResult,
   MarvelCharacter,
@@ -62,7 +63,12 @@ export type DataType<E> = E extends Endpoint
   : ["Error, not a valid endpoint", E];
 
 /** Utility type that gets the parameters from the endpoint. */
-export type Parameters<E extends readonly unknown[]> = E extends [
+export type Parameters<E extends readonly unknown[]> = ParameterType<E> | {
+  offset: number;
+  limit: number;
+}
+
+export type ParameterType<E extends readonly unknown[]> = E extends [
   infer First,
   infer Second,
   infer Third
@@ -116,9 +122,8 @@ export type ExtendQuery<TEndpoint extends Endpoint> = <
   TType extends NoSameEndpointType<TEndpoint>
 >(
   type: TType,
-  params: Parameters<Extendpoint<TEndpoint, TType>>
-) => MarvelQueryInterface<
-  Extendpoint<TEndpoint, TType>>;
+  params?: Parameters<Extendpoint<TEndpoint, TType>>
+) => MarvelQueryInterface<Extendpoint<TEndpoint, TType>>;
 
 export type QueryCollection<E extends Endpoint> = (
   params: Parameters<E>
@@ -127,6 +132,5 @@ export type QueryCollection<E extends Endpoint> = (
 export type InitializedQuery<E> = E extends Endpoint
   ? MarvelQueryInterface<E>
   : ["utility-types.ts InitializedQuery", "Cannot initialize query."];
-
 
 export type ValidEndpoint<E> = E extends Endpoint ? E : never;

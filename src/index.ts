@@ -381,7 +381,9 @@ export class MarvelQuery<E extends Endpoint>
         endpoint,
         query: <TType extends EndpointType>(
           type: TType,
-          params: Parameters<Extendpoint<TEndpoint, TType>>
+          params: Parameters<Extendpoint<TEndpoint, TType>> = {} as Parameters<
+            Extendpoint<TEndpoint, TType>
+          >
         ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
           return new MarvelQuery<Extendpoint<TEndpoint, TType>>({
             endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
@@ -421,7 +423,7 @@ export class MarvelQuery<E extends Endpoint>
         items,
         endpoint,
         query: (
-          params: Parameters<TEndpoint>
+          params: Parameters<TEndpoint> = {} as Parameters<TEndpoint>
         ): MarvelQueryInterface<TEndpoint> =>
           new MarvelQuery<TEndpoint>({ endpoint, params }),
       };
@@ -593,8 +595,8 @@ export default MarvelQuery;
 export * from "./definitions/types";
 
 function testfunction(type: Event) {
-  type.urls
-  if(type.next) {
-    type.next
+  type.urls;
+  if (type.next) {
+    type.next;
   }
 }
