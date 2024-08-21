@@ -43,9 +43,11 @@ export type EndpointId<T extends EndpointType> = DistinctEndpointType<
 export type ExtendType<E> = E extends Endpoint
   ? {
       [K in keyof Result<E>]: Result<E>[K] extends List // Is the value a list
-        ? ExtendedCollection<E, K, Result<E>[K]> // Add properties to the collection
-        : HasResourceURI<RequiredNonNullable<Result<E>>[K]> extends true // Does the key include 'resourceURI'
-        ? ExtendedResource<E, K>
+        ? ExtendedCollection<E, K, Result<E>[K]> // Extend the list
+        : RequiredNonNullable<Result<E>>[K] extends ResourceItem // Is the value a resource
+        ? ExtendedResource<E, K> // Extend the resource
+        : RequiredNonNullable<Result<E>>[K] extends Array<ResourceItem>
+        ? ExtendedResourceArray<E, K>
         : Result<E>[K];
     }
   : ["utility-types.ts ExtendType", "Cannot extend type"];
@@ -53,6 +55,8 @@ export type ExtendType<E> = E extends Endpoint
 type RequiredNonNullable<T> = {
   [P in keyof T]-?: NonNullable<T[P]>;
 };
+
+type ResourceItem = { resourceURI: string };
 
 // Helper type to check if a type includes 'resourceURI'
 export type HasResourceURI<T> = T extends { resourceURI: string }
@@ -74,6 +78,17 @@ export type ExtendedResource<
     : Result<E>[K]
   : Result<E>[K];
 
+export type ExtendedResourceArray<
+  E extends Endpoint,
+  K extends keyof Result<E>
+> = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
+  ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
+    ? Result<E>[K] extends Array<ResourceItem>
+      ? ExtendResourceArray<Extendpoint<E, EndpointValues<E>[K]>, Result<E>[K]>
+      : Result<E>[K]
+    : Result<E>[K]
+  : Result<E>[K];
+
 type ExtendedCollection<
   E extends Endpoint,
   K extends keyof Result<E>,
@@ -91,6 +106,11 @@ export type ExtendResourceList<
   E extends Endpoint,
   V extends List
 > = ExtendResource<E, V["items"][number]>[];
+
+export type ExtendResourceArray<
+  E extends Endpoint,
+  V extends Array<ResourceItem>
+> = ExtendResource<E, V[number]>[];
 
 // New properties for resource
 export type ExtendResourceProperties<E extends Endpoint> = {

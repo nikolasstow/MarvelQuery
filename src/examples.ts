@@ -63,6 +63,9 @@ async function spiderMan() {
   const comics = await createQuery(["comics"], {
     dateDescriptor: "thisWeek",
   }).fetchSingle();
+
+  const a = comics.variants[0].query("characters")
+
   
   const story = await createQuery(["stories"], {
     
