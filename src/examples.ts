@@ -1,11 +1,20 @@
 import MarvelQuery, {
-  Query,
   Comic,
   Character,
   Creator,
   Event,
   Series,
   Story,
+  DateDescriptor,
+  URL,
+  ComicSummary,
+  CharacterSummary,
+  CreatorSummary,
+  EventSummary,
+  SeriesSummary,
+  StorySummary,
+	ComicPrice,
+  Summary,
 } from ".";
 
 /**
@@ -222,7 +231,7 @@ export async function characters(name: string): Promise<Character[]> {
  * @returns A promise that resolves to an array of MarvelComic objects.
  */
 export async function catalog(
-  dateDescriptor: Query.DateDescriptor, // options: "lastWeek" | "thisWeek" | "nextWeek" | "thisMonth"
+  dateDescriptor: DateDescriptor, // options: "lastWeek" | "thisWeek" | "nextWeek" | "thisMonth"
   params?: Record<string, unknown>
 ): Promise<Comic[]> {
   const catalog = await createQuery(["comics"], {

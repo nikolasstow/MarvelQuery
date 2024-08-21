@@ -37,6 +37,7 @@ import {
   ResourceEndpoint,
   NewEndpoint,
   ExtendedQueryResult,
+  DateDescriptor,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
@@ -296,8 +297,13 @@ export class MarvelQuery<E extends Endpoint>
     const cleanedUrl = url.replace(/^.*\/public\//, "");
 
     // Split the remaining part of the URL by '/'
-    const [type, id] = cleanedUrl.split("/");
-    return [type, Number(id)] as Endpoint;
+    const [baseType, id, type] = cleanedUrl.split("/");
+
+    return [
+      baseType,
+      id ? Number(id) : undefined,
+      type ? type : undefined,
+    ] as Endpoint;
   }
 
   private extractIdFromURI(url: string): number {
@@ -400,6 +406,8 @@ export class MarvelQuery<E extends Endpoint>
   ) {
     const endpoint = this.createEndpointFromURI(value.collectionURI);
 
+    console.log("collection endpoint", endpoint);
+
     return (<TEndpoint extends Endpoint>(
       endpoint: TEndpoint
     ): ExtendCollection<TEndpoint, V> => {
@@ -453,13 +461,19 @@ export class MarvelQuery<E extends Endpoint>
       this.count = fetched;
       this.params.offset = fetched;
 
-      const complete = this.verify(remaining <= 0, "No more results found");
-      const duplicateResults = this.verify(
-        results.map((result) => result.id) ===
-          this.results.map((result) => result.id),
-        "Duplicate results"
-      );
       const noResults = this.verify(!results.length, "No results found");
+
+      const complete = this.verify(remaining <= 0, "No more results found");
+      const duplicateResults =
+        this.resultHistory.length > 0
+          ? this.verify(
+              results.map((result) => result.id) ===
+                this.results.map((result) => result.id),
+              "Duplicate results"
+            )
+          : false;
+
+      console.log("results", results);
 
       const formattedResults = results.map((result) =>
         this.extendResult(result)
@@ -576,5 +590,4 @@ export type Series = ReturnType<"series">;
 export type Story = ReturnType<"stories">;
 
 export default MarvelQuery;
-export * as Query from "./definitions/types";
-export { Config };
+export * from "./definitions/types";
