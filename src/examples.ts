@@ -34,6 +34,9 @@ async function spiderMan() {
   const spiderMan = await createQuery(["characters"], {
     name: "Peter Parker",
   }).fetchSingle();
+
+
+
   // Need more results? Just call fetch again
   // spiderMan.fetch("comics",{
   //   format: "comic",
@@ -42,10 +45,6 @@ async function spiderMan() {
     format: "comic",
   }).fetch();
 
-  spiderManComics.results[0].query("events", {
-    name: "Secret Wars",
-    // title: "Secret Wars",
-  });
 
   // Or you can do it like this
 
@@ -64,8 +63,15 @@ async function spiderMan() {
   const comics = await createQuery(["comics"], {
     dateDescriptor: "thisWeek",
   }).fetch();
+  
 
-  // comics.results[0].characters.items[0].
+  const BloodHunt = await createQuery(["events"], {
+    name: "Blood Hunt",
+  }).fetchSingle().then((event) => {
+    if (event.next) {
+      event.next
+    }
+  })
 
   // const test = await comics.result?.series.
 

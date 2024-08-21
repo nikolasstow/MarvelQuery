@@ -406,8 +406,6 @@ export class MarvelQuery<E extends Endpoint>
   ) {
     const endpoint = this.createEndpointFromURI(value.collectionURI);
 
-    console.log("collection endpoint", endpoint);
-
     return (<TEndpoint extends Endpoint>(
       endpoint: TEndpoint
     ): ExtendCollection<TEndpoint, V> => {
@@ -447,6 +445,8 @@ export class MarvelQuery<E extends Endpoint>
     if (this.url === url) {
       throw new Error("Duplicate request");
     }
+
+    this.url = url;
 
     try {
       /** Send the request and call the onResult function with the results of the request. */

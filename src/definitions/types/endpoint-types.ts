@@ -69,9 +69,9 @@ export type IDEndpoint<E> = [DataType<E>, number];
 export type ResourceEndpoint<E> = IDEndpoint<E> extends Endpoint
   ? IDEndpoint<E>
   : never;
-export type NoSameEndpointType<T extends Endpoint> = Exclude<
+export type NoSameEndpointType<E extends Endpoint> = Exclude<
   EndpointType,
-  T[0]
+  DataType<E>
 >;
 /** Create a map of any data type with the endpoint as the key. */
 
