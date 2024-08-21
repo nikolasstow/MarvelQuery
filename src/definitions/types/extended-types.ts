@@ -56,7 +56,7 @@ type RequiredNonNullable<T> = {
   [P in keyof T]-?: NonNullable<T[P]>;
 };
 
-type ResourceItem = { resourceURI: string };
+export type ResourceItem = { resourceURI: string };
 
 // Helper type to check if a type includes 'resourceURI'
 export type HasResourceURI<T> = T extends { resourceURI: string }

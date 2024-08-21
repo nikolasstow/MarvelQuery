@@ -38,6 +38,7 @@ import {
   NewEndpoint,
   ExtendedQueryResult,
   DateDescriptor,
+  ResourceItem,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
@@ -335,6 +336,9 @@ export class MarvelQuery<E extends Endpoint>
       } else if (this.hasCollectionURI(value)) {
         // ExtendedCollection<E, K, Result<E>[K]>
         acc[key] = this.extendCollection(value, keyEndpointType);
+      } else if (Array.isArray(value) && this.hasResourceURI(value[0])) {
+        // ExtendedResourceArray<E, K>
+        acc[key] = this.extendResourceArray(value, keyEndpointType);
       }
 
       return acc;
@@ -360,11 +364,11 @@ export class MarvelQuery<E extends Endpoint>
   }
 
   private hasResourceURI<T>(obj: T): obj is T & { resourceURI: string } {
-    return typeof (obj as any).resourceURI === "string";
+    return obj && (obj as any).resourceURI && typeof (obj as any).resourceURI === "string";
   }
 
   private hasCollectionURI<T>(obj: T): obj is T & { collectionURI: string } {
-    return typeof (obj as any).collectionURI === "string";
+    return obj && (obj as any).collectionURI && typeof (obj as any).collectionURI === "string";
   }
 
   private extendResource<
@@ -400,6 +404,14 @@ export class MarvelQuery<E extends Endpoint>
         ...additionalProps,
       };
     })(endpoint);
+  }
+
+  private extendResourceArray<V extends Array<ResourceItem>, T extends EndpointType>(
+    value: V,
+    baseType: T
+  ) {
+    if (!value) return value;
+    return value.map((item) => this.extendResource(item, baseType));
   }
 
   private extendCollection<V extends List, T extends EndpointType>(
