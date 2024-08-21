@@ -60,6 +60,10 @@ export type Extendpoint<
 > = DataType<E> extends EndpointType
   ? NewEndpoint<E, T> extends Endpoint
     ? NewEndpoint<E, T>
+    : DataType<E> extends T
+    ? IDEndpoint<E> extends Endpoint
+      ? IDEndpoint<E>
+      : never
     : never
   : never;
 // export type UniqueEndpoint<B extends EndpointType, >

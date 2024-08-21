@@ -42,13 +42,17 @@ export type EndpointId<T extends EndpointType> = DistinctEndpointType<
 
 export type ExtendType<E> = E extends Endpoint
   ? {
-      [K in keyof Result<E>]: HasResourceURI<Result<E>[K]> extends true // Does the key include 'resourceURI'
-        ? ExtendedResource<E, K> // Add properties to the resource
-        : Result<E>[K] extends List // Is the value a list
+      [K in keyof Result<E>]: Result<E>[K] extends List // Is the value a list
         ? ExtendedCollection<E, K, Result<E>[K]> // Add properties to the collection
+        : HasResourceURI<RequiredNonNullable<Result<E>>[K]> extends true // Does the key include 'resourceURI'
+        ? ExtendedResource<E, K>
         : Result<E>[K];
     }
   : ["utility-types.ts ExtendType", "Cannot extend type"];
+
+type RequiredNonNullable<T> = {
+  [P in keyof T]-?: NonNullable<T[P]>;
+};
 
 // Helper type to check if a type includes 'resourceURI'
 export type HasResourceURI<T> = T extends { resourceURI: string }
@@ -83,11 +87,6 @@ type ExtendedCollection<
 export type ExtendResource<E extends Endpoint, V> = V &
   ExtendResourceProperties<E>;
 
-["ExtendResource", "Not an endpoint"];
-
-export type ExtendCollection<E extends Endpoint, V extends List> = V &
-  ExtendCollectionProperties<E, V>;
-
 export type ExtendResourceList<
   E extends Endpoint,
   V extends List
@@ -99,6 +98,9 @@ export type ExtendResourceProperties<E extends Endpoint> = {
   query: ExtendQuery<E>;
   fetch?: () => Promise<MarvelQueryInterface<E>>;
 };
+
+export type ExtendCollection<E extends Endpoint, V extends List> = V &
+  ExtendCollectionProperties<E, V>;
 
 // New properties for collection
 export type ExtendCollectionProperties<E extends Endpoint, V extends List> = {

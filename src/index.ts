@@ -591,3 +591,10 @@ export type Story = ReturnType<"stories">;
 
 export default MarvelQuery;
 export * from "./definitions/types";
+
+function testfunction(type: Event) {
+  type.urls
+  if(type.next) {
+    type.next
+  }
+}

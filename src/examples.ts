@@ -62,16 +62,21 @@ async function spiderMan() {
 
   const comics = await createQuery(["comics"], {
     dateDescriptor: "thisWeek",
-  }).fetch();
+  }).fetchSingle();
   
+  comics.series.query("comics", {
+    
+  })
 
   const BloodHunt = await createQuery(["events"], {
     name: "Blood Hunt",
   }).fetchSingle().then((event) => {
     if (event.next) {
-      event.next
+      event.next.query("comics", {
+        title: "Secret Wars",
+      })
     }
-  })
+  });
 
   // const test = await comics.result?.series.
 
