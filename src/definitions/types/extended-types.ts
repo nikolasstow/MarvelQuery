@@ -93,9 +93,9 @@ type ExtendedCollection<
   E extends Endpoint,
   K extends keyof Result<E>,
   V extends List
-> = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
-  ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
-    ? ExtendCollection<Extendpoint<E, EndpointValues<E>[K]>, V> // Add properties to the collection
+> = K extends keyof EndpointValues<E> // Does the key exist in the endpoint type values
+  ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint type
+    ? ExtendCollection<Extendpoint<E, EndpointValues<E>[K]>, V> // Add properties to the collection with a new endpoint using the original and the new type
     : ["ExtendedCollection", "Not an endpoint", EndpointValues<E>[K]] // Result<E>[K]
   : ["ExtendedCollection", "No endpoint found", K]; // Result<E>[K]
 
@@ -116,7 +116,7 @@ export type ExtendResourceArray<
 export type ExtendResourceProperties<E extends Endpoint> = {
   endpoint: E;
   query: ExtendQuery<E>;
-  fetch?: () => Promise<MarvelQueryInterface<E>>;
+  fetch: () => Promise<MarvelQueryInterface<E>>;
 };
 
 export type ExtendCollection<E extends Endpoint, V extends List> = V &

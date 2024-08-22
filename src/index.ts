@@ -39,6 +39,7 @@ import {
   ExtendedQueryResult,
   DateDescriptor,
   ResourceItem,
+  ExtendResourceList,
 } from "./definitions/types";
 import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
 import { ValidateParams } from "./definitions/schemas/param-schemas";
@@ -332,13 +333,13 @@ export class MarvelQuery<E extends Endpoint>
 
       if (this.hasResourceURI(value)) {
         // ExtendedResource<E, K>
-        acc[key] = this.extendResource(value, keyEndpointType);
+        acc[key] = this.extendResource(value, [keyEndpointType]);
       } else if (this.hasCollectionURI(value)) {
         // ExtendedCollection<E, K, Result<E>[K]>
         acc[key] = this.extendCollection(value, keyEndpointType);
       } else if (Array.isArray(value) && this.hasResourceURI(value[0])) {
         // ExtendedResourceArray<E, K>
-        acc[key] = this.extendResourceArray(value, keyEndpointType);
+        acc[key] = this.extendResourceArray(value, [keyEndpointType]);
       }
 
       return acc;
@@ -346,6 +347,10 @@ export class MarvelQuery<E extends Endpoint>
 
     const resultExtendingProperties: ExtendResourceProperties<E> = {
       endpoint,
+      fetch: () => {
+        const query = new MarvelQuery<E>({ endpoint, params: {} as Parameters<E> });
+        return query.fetch();
+      },
       query: <TType extends NoSameEndpointType<E>>(
         type: TType,
         params: Parameters<Extendpoint<E, TType>>
@@ -364,25 +369,50 @@ export class MarvelQuery<E extends Endpoint>
   }
 
   private hasResourceURI<T>(obj: T): obj is T & { resourceURI: string } {
-    return obj && (obj as any).resourceURI && typeof (obj as any).resourceURI === "string";
+    return (
+      obj &&
+      (obj as any).resourceURI &&
+      typeof (obj as any).resourceURI === "string"
+    );
   }
 
   private hasCollectionURI<T>(obj: T): obj is T & { collectionURI: string } {
-    return obj && (obj as any).collectionURI && typeof (obj as any).collectionURI === "string";
+    return (
+      obj &&
+      (obj as any).collectionURI &&
+      typeof (obj as any).collectionURI === "string"
+    );
   }
 
-  private extendResource<
-    V extends { resourceURI: string },
-    T extends EndpointType
-  >(value: V, baseType: T) {
+  private typeFromEndpoint(endpoint: Endpoint): EndpointType {
+    return endpoint[2] ? endpoint[2] : endpoint[0];
+  }
+
+  private extendResource<V extends ResourceItem, BEndpoint extends Endpoint>(
+    value: V,
+    baseEndpoint: BEndpoint
+  ) {
     const id: number = this.extractIdFromURI(value.resourceURI);
-    const endpoint: Endpoint = [baseType, id];
+    const baseType = this.typeFromEndpoint(baseEndpoint);
+    const endpoint: ResourceEndpoint<BEndpoint> = [
+      baseType,
+      id,
+    ] as ResourceEndpoint<BEndpoint>;
 
     return (<TEndpoint extends Endpoint>(
       endpoint: TEndpoint
     ): ExtendResource<TEndpoint, V> => {
       const additionalProps: ExtendResourceProperties<TEndpoint> = {
         endpoint,
+        fetch: () => {
+          // Does this actually work?
+          const query = new MarvelQuery({
+            endpoint,
+            params: {} as Parameters<TEndpoint>,
+          });
+
+          return query.fetch();
+        },
         query: <TType extends EndpointType>(
           type: TType,
           params: Parameters<Extendpoint<TEndpoint, TType>> = {} as Parameters<
@@ -406,12 +436,12 @@ export class MarvelQuery<E extends Endpoint>
     })(endpoint);
   }
 
-  private extendResourceArray<V extends Array<ResourceItem>, T extends EndpointType>(
-    value: V,
-    baseType: T
-  ) {
+  private extendResourceArray<
+    V extends Array<ResourceItem>,
+    BEndpoint extends Endpoint
+  >(value: V, baseEndpoint: BEndpoint) {
     if (!value) return value;
-    return value.map((item) => this.extendResource(item, baseType));
+    return value.map((item) => this.extendResource(item, baseEndpoint));
   }
 
   private extendCollection<V extends List, T extends EndpointType>(
@@ -425,10 +455,10 @@ export class MarvelQuery<E extends Endpoint>
     ): ExtendCollection<TEndpoint, V> => {
       const items = value.items.map(
         (item) =>
-          this.extendResource(item, baseType) as ExtendResource<
+          this.extendResource(item, endpoint) as ExtendResourceList<
             ResourceEndpoint<TEndpoint>,
-            V["items"][number]
-          >
+            V
+          >[number]
       );
 
       const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
@@ -578,7 +608,10 @@ export class MarvelQuery<E extends Endpoint>
     /** Validate the response data with the result schema. */
     const result = resultSchema.safeParse(results);
     if (!result.success) {
-      console.error("Error validating results:", result.error);
+      console.error(
+        "Error validating results:",
+        JSON.stringify(result.error, null, 2)
+      );
     }
 
     MarvelQuery.log("Validated results");

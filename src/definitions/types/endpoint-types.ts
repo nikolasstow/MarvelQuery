@@ -99,3 +99,5 @@ export type ExtendedQueryResult<T extends EndpointType> = NewEndpoint<
 > extends Endpoint
   ? NewEndpoint<BaseEndpointOptions<T>, T>
   : never;
+
+export type IsEndpoint<T> = T extends Endpoint ? T : never;

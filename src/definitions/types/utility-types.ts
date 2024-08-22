@@ -126,7 +126,7 @@ export type ExtendQuery<TEndpoint extends Endpoint> = <
 ) => MarvelQueryInterface<Extendpoint<TEndpoint, TType>>;
 
 export type QueryCollection<E extends Endpoint> = (
-  params: Parameters<E>
+  params?: Parameters<E>
 ) => MarvelQueryInterface<E>;
 
 export type InitializedQuery<E> = E extends Endpoint

@@ -125,6 +125,7 @@ export const Formats = [
   "Digital Comic",
   "Infinite Comic",
   "Digital Vertical Comic",
+  "",
 ] as const;
 
 export const FormatSchema = z.enum(Formats); // Schema for a single format
