@@ -117,6 +117,7 @@ export type ExtendResourceProperties<E extends Endpoint> = {
   endpoint: E;
   query: ExtendQuery<E>;
   fetch: () => Promise<MarvelQueryInterface<E>>;
+  fetchSingle: () => Promise<ExtendResult<E>>;
 };
 
 export type ExtendCollection<E extends Endpoint, V extends List> = V &

@@ -67,7 +67,6 @@ export type Extendpoint<
     : never
   : never;
 // export type UniqueEndpoint<B extends EndpointType, >
-
 export type NewEndpoint<E, T> = [DataType<E>, number, T];
 export type IDEndpoint<E> = [DataType<E>, number];
 export type ResourceEndpoint<E> = IDEndpoint<E> extends Endpoint

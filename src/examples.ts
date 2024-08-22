@@ -13,7 +13,7 @@ import MarvelQuery, {
   EventSummary,
   SeriesSummary,
   StorySummary,
-	ComicPrice,
+  ComicPrice,
   Summary,
 } from ".";
 
@@ -35,8 +35,6 @@ async function spiderMan() {
     name: "Peter Parker",
   }).fetchSingle();
 
-
-
   // Need more results? Just call fetch again
   // spiderMan.fetch("comics",{
   //   format: "comic",
@@ -45,47 +43,48 @@ async function spiderMan() {
     format: "comic",
   }).fetch();
 
-
   // Or you can do it like this
 
   spiderManComics.results[0].events.query({
     name: "Secret Wars",
     // title: "Secret Wars",
-  })
+  });
 
   spiderManComics.results[0].events.items[0].query("characters", {
     name: "Peter Parker",
-  })
+  });
   // Notes for tomorrow:
   // - Return from fetch on a chained query is the wrong data type. Showing first result type from the previous query.
   // - The conditional type for extending the results need to be different from collectionURI and resourceURI.
 
-  const comics = await createQuery(["comics"], {
+  createQuery(["comics"], {
     dateDescriptor: "thisWeek",
-  }).fetchSingle();
-
-  const a = comics.characters.items[0].fetch().then((character) => {
-    const b = character.results[0]
   })
+    .fetchSingle() // Can't use fetch on an array because it is not a collection
+    .then(comic => comic.collections.forEach(collection => collection.fetch())) // But you can do this instead
+    // .then((comic) => comic.series.fetchSingle())
+    // .then((series) =>
+    //   series.characters
+    //     .query({
+    //       nameStartsWith: "Peter",
+    //     })
+    //     .fetch()
+    // )
+    // .then((characters) =>
+    //   console.log(characters.results.map((character) => character.name))
+    // );
 
-  comics.series.fetch().then((series) => {
-    
-  })
-
-  
-  const story = await createQuery(["stories"], {
-    
-  }).fetchSingle(); 
-
-  story.originalissue?.query("characters")
+  // Need more results? Just call fetch again
 
   const BloodHunt = await createQuery(["events"], {
     name: "Blood Hunt",
-  }).fetchSingle().then((event) => {
-    if (event.next) {
-      event.next.query("comics")
-    }
-  });
+  })
+    .fetchSingle()
+    .then((event) => {
+      if (event.next) {
+        event.next.query("comics");
+      }
+    });
 
   // const test = await comics.result?.series.
 

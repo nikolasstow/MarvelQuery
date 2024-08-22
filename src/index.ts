@@ -351,6 +351,10 @@ export class MarvelQuery<E extends Endpoint>
         const query = new MarvelQuery<E>({ endpoint, params: {} as Parameters<E> });
         return query.fetch();
       },
+      fetchSingle: () => {
+        const query = new MarvelQuery<E>({ endpoint, params: {} as Parameters<E> });
+        return query.fetchSingle();
+      },
       query: <TType extends NoSameEndpointType<E>>(
         type: TType,
         params: Parameters<Extendpoint<E, TType>>
@@ -412,6 +416,15 @@ export class MarvelQuery<E extends Endpoint>
           });
 
           return query.fetch();
+        },
+        fetchSingle: () => {
+          // Does this actually work?
+          const query = new MarvelQuery({
+            endpoint,
+            params: {} as Parameters<TEndpoint>,
+          });
+
+          return query.fetchSingle();
         },
         query: <TType extends EndpointType>(
           type: TType,
@@ -516,8 +529,6 @@ export class MarvelQuery<E extends Endpoint>
               "Duplicate results"
             )
           : false;
-
-      console.log("results", results);
 
       const formattedResults = results.map((result) =>
         this.extendResult(result)
