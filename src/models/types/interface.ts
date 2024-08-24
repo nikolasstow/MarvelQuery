@@ -2,6 +2,7 @@ import { Metadata, APIResponseData, APIWrapper } from "./data-types";
 import { ExtendResult } from "./extended-types";
 import { Result, Parameters } from "./utility-types";
 import { Endpoint, EndpointType } from "./endpoint-types";
+import { EndpointDescriptor } from "./config";
 
 // export type StateTypes<E extends Endpoint> = keyof StateMap<E>;
 
@@ -13,7 +14,7 @@ export type MarvelQueryInterface<
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes ["characters", 1009491, "comics"]
    */
-  endpoint: E;
+  endpoint: EndpointDescriptor<E>;
   /** Parameters of the query */
   params: Parameters<E>;
   /** The data type of the results of the query */
@@ -56,8 +57,6 @@ export type MarvelQueryInterface<
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
   fetch(): Promise<MarvelQueryInterface<E>>;
-  /** Build the URL of the query with the parameters, timestamp and hash. */
-  buildURL(): string;
   /** Send the request to the API, and validate the response. */
   request(url: string): Promise<APIWrapper<Result<E>>>;
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */

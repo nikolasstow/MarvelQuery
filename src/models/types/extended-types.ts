@@ -20,7 +20,7 @@ import {
 } from "./endpoint-types";
 import { MarvelQueryInterface } from "./interface";
 
-import { endpointMap } from "../endpoints";
+import { ENDPOINT_MAP } from "../endpoints";
 
 export type EndpointValues<E extends Endpoint> = EndpointValueMap[DataType<E>];
 
@@ -31,7 +31,7 @@ type UniqueEndpointType<T> = {
 };
 
 export type EndpointValueMap = {
-  [K in keyof ResultMap]: UniqueEndpointType<(typeof endpointMap)[K]>;
+  [K in keyof ResultMap]: UniqueEndpointType<(typeof ENDPOINT_MAP)[K]>;
 };
 
 export type ValuesExtend<T> = T extends EndpointType ? [T, number] : Endpoint;

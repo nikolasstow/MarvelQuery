@@ -40,129 +40,72 @@ import {
   DateDescriptor,
   ResourceItem,
   ExtendResourceList,
-} from "./definitions/types";
-import { ResultSchemaMap } from "./definitions/schemas/data-schemas";
-import { ValidateParams } from "./definitions/schemas/param-schemas";
-import { endpointMap } from "./definitions/endpoints";
+  AsEndpoint,
+  EndpointDescriptor,
+  CreateQueryFunction,
+} from "./models/types";
+import { ResultSchemaMap } from "./models/schemas/data-schemas";
+import { ValidateParams } from "./models/schemas/param-schemas";
+import { ENDPOINT_MAP, VALID_ENDPOINTS } from "./models/endpoints";
+import {
+  validateEndpoint,
+  validateGlobalParams,
+  validateParams,
+  validateResults,
+} from "./utils/validate";
+import { initializeEndpoint, initializeParams } from "./utils/initialize";
+import { buildURL, createEndpointFromURI, extractIdFromURI, hasCollectionURI, hasResourceURI, typeFromEndpoint } from "./utils/functions";
+import { verify } from "./utils/validate";
+import { ExtendQuery } from "./utils/ExtendQuery";
 
 export class MarvelQuery<E extends Endpoint>
   implements MarvelQueryInterface<E>
 {
   /** ********* Static Properties ********* */
-  /** Endpoint types that can be queried */
-  private static validEndpoints: Set<EndpointType> = new Set([
-    "comics",
-    "characters",
-    "creators",
-    "events",
-    "series",
-    "stories",
-  ]);
 
-  /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
-  private static publicKey: string;
-  /** Marvel API private key. Don't have one? Get one at https://developer.marvel.com/ */
-  private static privateKey: string;
-  // Configuration Options
-  /** Global parameters to be applied to all queries, or all queries of a specific type.
-   * @example ```globalParams: {
-   * all: { limit: 10 },
-   * comics: { noVariants: true }
-   * }```
-   */
-  static globalParams?: GlobalParams;
-  /** Remove undefined parameters from the query */
-  static omitUndefined?: boolean = true;
-  /** Enable verbose logging. */
-  private static verbose?: boolean = false;
-  // Functions
-  /** An optional function that will be called before the request is sent.
-   * You can use it to log the request or track the number of requests to the API. */
-  static onRequest?: OnRequestFunction;
-  /** Add custom functions to be called when a request of a specific type is complete.
-   * @example ```onResult: {
-   * comics: (items) => {
-   *   items.map((comic) => {
-   *     console.log("Saving comic:", comic.title);
-   *   });
-   * }
-   * }```
-   */
-  static onResult?: OnResultMap;
-  /** Replace the default fetch function (axios) with your own http client */
-  private static httpClient: HTTPClient = (url) =>
-    axios.get(url).then((response) => response.data);
-  /** Function to create an instance of the MarvelQuery class */
-  private static createQuery = <T extends Endpoint>(
-    endpoint: T,
-    params: Parameters<T> = {} as Parameters<T>
-  ): MarvelQuery<T> => {
-    /** Validate the endpoint. */
-    if (!endpoint) {
-      throw new Error("Missing endpoint");
-    }
-    /** Validate the public and private keys. */
-    if (!MarvelQuery.publicKey || !MarvelQuery.privateKey) {
-      throw new Error("Missing public or private keys");
-    }
-    /** Create a new query with the MarvelQuery class. */
-    return new MarvelQuery<T>({ endpoint, params });
+  static apiKeys: APIKeys;
+
+  /** Configurable properties | Defaults */
+  static config: Config = {
+    globalParams: {},
+    omitUndefined: true,
+    verbose: false,
+    httpClient: (url) => axios.get(url).then((response) => response.data),
   };
-  /** Initialize the API library with your public and private keys and other options.
-   * @param keys.publicKey - Marvel API public key.
-   * @param keys.privateKey - Marvel API private key.
-   *
-   ** Don't have keys? Get them at https://developer.marvel.com/
-   * @param config.omitUndefined - Remove undefined parameters from the query
-   * @param config.globalParams - Global parameters to be applied to all queries, or all queries of a specific type.
-   * @param config.onRequest - An optional function that will be called before the request is sent.
-   * @param config.onResult - Add custom functions to be called when a request of a specific type is complete.
-   * @param config.httpClient - Replace the default fetch function (axios) with your own http client.
-   ** For more information, visit https://github.com/nikolasstow/MarvelQuery
-   */
-  static init(keys: APIKeys, config: Config = {}) {
-    MarvelQuery.log("Initializing MarvelQuery");
-    /** Validate the global parameters. */
+
+  /** Function to create an instance of the MarvelQuery class */
+  private static createQuery = <T extends Endpoint | EndpointType>(
+    endpoint: T,
+    params: Parameters<AsEndpoint<T>> = {} as Parameters<AsEndpoint<T>>
+  ): MarvelQueryInterface<AsEndpoint<T>> =>
+    new MarvelQuery<AsEndpoint<T>>({
+      endpoint: (Array.isArray(endpoint)
+        ? endpoint
+        : [endpoint]) as AsEndpoint<T>,
+      params,
+    });
+
+  static init(
+    apiKeys: APIKeys,
+    config: Partial<Config> = {}
+  ): CreateQueryFunction {
+    MarvelQuery.log("Initializing MarvelQuery...");
+
+    MarvelQuery.apiKeys = apiKeys;
+
+    Object.assign(MarvelQuery.config, config);
+
     if (config.globalParams) {
-      this.validateGlobalParams(config.globalParams);
+      validateGlobalParams(config.globalParams);
     }
-    /** Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. */
-    Object.assign(MarvelQuery, { ...keys, ...config }); // You're probably wonder why keys and config are separate arguments when the get combined anyway... it's because it looks cleaner. Don't judge me.
-    /** Pass the createQuery function once the library is initialized. */
+
+    MarvelQuery.log("Initialization complete.");
+
     return MarvelQuery.createQuery;
   }
 
-  /** Validate the global parameters. */
-  private static validateGlobalParams(globalParams: GlobalParams): void {
-    MarvelQuery.log("Validating global parameters");
-    const types = Object.keys(globalParams) as EndpointType[]; // get the keys of the globalParams object
-    for (const type of types) {
-      if (this.validEndpoints.has(type)) {
-        // check if the endpoint type is valid
-        this.validateParams(type as EndpointType, globalParams[type]); // validate the parameters of the query for the endpoint type
-      }
-    }
-  }
-
-  /** Validate the parameters of the query. */
-  private static validateParams(type: EndpointType, params: AnyParams): void {
-    try {
-      // Confirm there's a validation function for the endpoint type
-      if (!ValidateParams[type]) {
-        throw new Error(
-          `Could not find validation schema for Endpoint: ${type}`
-        );
-      }
-      // Validate the parameters for the endpoint type
-      ValidateParams[type].parse(params);
-    } catch (error) {
-      console.error("Parameter validation error:", error);
-      throw new Error("Invalid parameters");
-    }
-  }
-
   private static log(message: string) {
-    if (this.verbose) {
+    if (MarvelQuery.config.verbose) {
       console.log(message);
     }
   }
@@ -173,7 +116,7 @@ export class MarvelQuery<E extends Endpoint>
     | AnyResultFunction;
 
   /** Endpoint of the query */
-  endpoint: E;
+  endpoint: EndpointDescriptor<E>;
   /** Parameters of the query */
   params: Parameters<E>;
   /** The data type of the results of the query */
@@ -198,297 +141,184 @@ export class MarvelQuery<E extends Endpoint>
   /** The query is complete when all results have been fetched. */
   isComplete: boolean = false;
 
+  /** Extend the query with additional properties. */
+  extendQuery: ExtendQuery<E>;
+
   /** Create a new query with the MarvelQuery class. Validate the endpoint and parameters, and insert default parameters if not provided. */
-  private constructor({ endpoint, params }: InitQuery<E>) {
-    this.initializeEndpoint(endpoint);
-    this.initializeParams(params);
-    this.initializeResultHandler();
-  }
+  constructor({ endpoint, params }: InitQuery<E>) {
+    this.endpoint = initializeEndpoint(endpoint);
+    this.params = initializeParams(params, MarvelQuery.config, this.endpoint);
 
-  /** Validate the endpoint and set the data type of the query. */
-  private initializeEndpoint(endpoint: E): void {
-    /** Validate the endpoint. */
-    this.endpoint = this.validateEndpoint(endpoint);
-    /** Determine the data type of the query from the endpoint. */
-    this.type = (
-      endpoint.length === 3 ? endpoint[2] : endpoint[0]
-    ) as EndpointType;
-  }
+    this.extendQuery = new ExtendQuery(MarvelQuery, this.endpoint);
 
-  /** Validate the endpoint */
-  private validateEndpoint(endpoint: E): E {
-    MarvelQuery.log(`Validating endpoint: ${endpoint.join("/")}`);
-    /** Validate the endpoint. */
-    if (!endpoint) {
-      throw new Error("Endpoint is required");
-    }
-
-    // Validation methods for endpoint parts
-    const validate = {
-      type: (element?: EndpointType) => {
-        if (element && !MarvelQuery.validEndpoints.has(element)) {
-          throw new Error(`Unknown endpoint type: ${element}`);
-        }
-      },
-      id: (element?: number) => {
-        if (element && typeof element !== "number") {
-          throw new Error(`Invalid endpoint id: ${element}`);
-        }
-      },
-    };
-
-    const [first, second, third] = endpoint;
-
-    validate.type(first);
-    validate.id(second);
-    validate.type(third);
-
-    /** Validate that the first and third elements of the endpoint are not the same. */
-    if (first && third && first === third) {
-      throw new Error(
-        `Invalid endpoint: ${endpoint[0]} and ${endpoint[2]} cannot be the same type`
-      );
-    }
-
-    return endpoint;
-  }
-
-  /** Clean, validate, and set the parameters. */
-  private initializeParams(params: Parameters<E>): void {
-    MarvelQuery.log("Validating parameters");
-    /** Remove undefined parameters unless 'omitUndefined' is false. */
-    const cleanParams = MarvelQuery.omitUndefined
-      ? this.omitUndefined(params)
-      : params;
-
-    /** Validate the parameters. */
-    MarvelQuery.validateParams(this.type, cleanParams);
-
-    this.params = {
-      // Default parameters
-      offset: 0,
-      limit: 50,
-      // Global parameters
-      ...MarvelQuery.globalParams?.all,
-      ...MarvelQuery.globalParams?.[this.type],
-      // Specific parameters
-      ...params,
-    };
-  }
-
-  /** Remove undefined parameters. */
-  private omitUndefined(params: Parameters<E>): Parameters<E> {
-    return Object.fromEntries(
-      Object.entries(params).filter(([, value]) => value !== undefined)
-    ) as Parameters<E>;
-  }
-
-  /** Set the onResult function for the specific type, or the 'any' type if not provided. */
-  private initializeResultHandler(): void {
     /** Set the onResult function for the specific type, or the 'any' type if not provided. */
-    if (MarvelQuery.onResult) {
-      const typeSpecificOnResult = MarvelQuery.onResult[this.type];
+    if (MarvelQuery.config.onResult) {
+      const typeSpecificOnResult =
+        MarvelQuery.config.onResult[this.endpoint.type];
       this.onResult = typeSpecificOnResult
         ? typeSpecificOnResult
-        : MarvelQuery.onResult.any;
+        : MarvelQuery.config.onResult.any;
     }
   }
 
-  private createEndpointFromURI(url: string): Endpoint {
-    // Remove everything from 'http' to '/public/'
-    const cleanedUrl = url.replace(/^.*\/public\//, "");
+  // private extendResult(result: Result<E>): ExtendResult<E> {
+  //   const endpoint = this.endpoint.path;
+  //   const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
+  //     ExtendType<E>
+  //   >((acc, key) => {
+  //     const value = result[key];
+  //     const keyEndpointType: EndpointType | undefined =
+  //       ENDPOINT_MAP[this.endpoint.type][key];
 
-    // Split the remaining part of the URL by '/'
-    const [baseType, id, type] = cleanedUrl.split("/");
+  //     if (!keyEndpointType) {
+  //       acc[key] = value;
+  //       return acc;
+  //     }
 
-    return [
-      baseType,
-      id ? Number(id) : undefined,
-      type ? type : undefined,
-    ] as Endpoint;
-  }
+  //     if (hasResourceURI(value)) {
+  //       // ExtendedResource<E, K>
+  //       acc[key] = this.extendResource(value, [keyEndpointType]);
+  //     } else if (hasCollectionURI(value)) {
+  //       // ExtendedCollection<E, K, Result<E>[K]>
+  //       acc[key] = this.extendCollection(value, keyEndpointType);
+  //     } else if (Array.isArray(value) && hasResourceURI(value[0])) {
+  //       // ExtendedResourceArray<E, K>
+  //       acc[key] = this.extendResourceArray(value, [keyEndpointType]);
+  //     }
 
-  private extractIdFromURI(url: string): number {
-    // Remove everything from 'http' to '/public/'
-    const cleanedUrl = url.replace(/^.*\/public\//, "");
+  //     return acc;
+  //   }, {} as ExtendType<E>);
 
-    // Split the remaining part of the URL by '/'
-    const [type, id] = cleanedUrl.split("/");
-    return Number(id);
-  }
+  //   const resultExtendingProperties: ExtendResourceProperties<E> = {
+  //     endpoint,
+  //     fetch: () => {
+  //       const query = new MarvelQuery<E>({
+  //         endpoint,
+  //         params: {} as Parameters<E>,
+  //       });
+  //       return query.fetch();
+  //     },
+  //     fetchSingle: () => {
+  //       const query = new MarvelQuery<E>({
+  //         endpoint,
+  //         params: {} as Parameters<E>,
+  //       });
+  //       return query.fetchSingle();
+  //     },
+  //     query: <TType extends NoSameEndpointType<E>>(
+  //       type: TType,
+  //       params: Parameters<Extendpoint<E, TType>>
+  //     ): MarvelQueryInterface<Extendpoint<E, TType>> => {
+  //       return new MarvelQuery<Extendpoint<E, TType>>({
+  //         endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<E, TType>,
+  //         params,
+  //       });
+  //     },
+  //   };
 
-  private extendResult(result: Result<E>): ExtendResult<E> {
-    const endpoint = this.endpoint;
-    const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
-      ExtendType<E>
-    >((acc, key) => {
-      const value = result[key];
-      const keyEndpointType: EndpointType | undefined =
-        endpointMap[this.type][key];
+  //   return {
+  //     ...propertiesExtended,
+  //     ...resultExtendingProperties,
+  //   };
+  // }
 
-      if (!keyEndpointType) {
-        acc[key] = value;
-        return acc;
-      }
+  // private extendResource<V extends ResourceItem, BEndpoint extends Endpoint>(
+  //   value: V,
+  //   baseEndpoint: BEndpoint
+  // ) {
+  //   const id: number = extractIdFromURI(value.resourceURI);
+  //   const baseType = typeFromEndpoint(baseEndpoint);
+  //   const endpoint: ResourceEndpoint<BEndpoint> = [
+  //     baseType,
+  //     id,
+  //   ] as ResourceEndpoint<BEndpoint>;
 
-      if (this.hasResourceURI(value)) {
-        // ExtendedResource<E, K>
-        acc[key] = this.extendResource(value, [keyEndpointType]);
-      } else if (this.hasCollectionURI(value)) {
-        // ExtendedCollection<E, K, Result<E>[K]>
-        acc[key] = this.extendCollection(value, keyEndpointType);
-      } else if (Array.isArray(value) && this.hasResourceURI(value[0])) {
-        // ExtendedResourceArray<E, K>
-        acc[key] = this.extendResourceArray(value, [keyEndpointType]);
-      }
+  //   return (<TEndpoint extends Endpoint>(
+  //     endpoint: TEndpoint
+  //   ): ExtendResource<TEndpoint, V> => {
+  //     const additionalProps: ExtendResourceProperties<TEndpoint> = {
+  //       endpoint,
+  //       fetch: () => {
+  //         // Does this actually work?
+  //         const query = new MarvelQuery({
+  //           endpoint,
+  //           params: {} as Parameters<TEndpoint>,
+  //         });
 
-      return acc;
-    }, {} as ExtendType<E>);
+  //         return query.fetch();
+  //       },
+  //       fetchSingle: () => {
+  //         // Does this actually work?
+  //         const query = new MarvelQuery({
+  //           endpoint,
+  //           params: {} as Parameters<TEndpoint>,
+  //         });
 
-    const resultExtendingProperties: ExtendResourceProperties<E> = {
-      endpoint,
-      fetch: () => {
-        const query = new MarvelQuery<E>({ endpoint, params: {} as Parameters<E> });
-        return query.fetch();
-      },
-      fetchSingle: () => {
-        const query = new MarvelQuery<E>({ endpoint, params: {} as Parameters<E> });
-        return query.fetchSingle();
-      },
-      query: <TType extends NoSameEndpointType<E>>(
-        type: TType,
-        params: Parameters<Extendpoint<E, TType>>
-      ): MarvelQueryInterface<Extendpoint<E, TType>> => {
-        return new MarvelQuery<Extendpoint<E, TType>>({
-          endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<E, TType>,
-          params,
-        });
-      },
-    };
+  //         return query.fetchSingle();
+  //       },
+  //       query: <TType extends EndpointType>(
+  //         type: TType,
+  //         params: Parameters<Extendpoint<TEndpoint, TType>> = {} as Parameters<
+  //           Extendpoint<TEndpoint, TType>
+  //         >
+  //       ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
+  //         return new MarvelQuery<Extendpoint<TEndpoint, TType>>({
+  //           endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
+  //             TEndpoint,
+  //             TType
+  //           >,
+  //           params,
+  //         });
+  //       },
+  //     };
 
-    return {
-      ...propertiesExtended,
-      ...resultExtendingProperties,
-    };
-  }
+  //     return {
+  //       ...value,
+  //       ...additionalProps,
+  //     };
+  //   })(endpoint);
+  // }
 
-  private hasResourceURI<T>(obj: T): obj is T & { resourceURI: string } {
-    return (
-      obj &&
-      (obj as any).resourceURI &&
-      typeof (obj as any).resourceURI === "string"
-    );
-  }
+  // private extendResourceArray<
+  //   V extends Array<ResourceItem>,
+  //   BEndpoint extends Endpoint
+  // >(value: V, baseEndpoint: BEndpoint) {
+  //   if (!value) return value;
+  //   return value.map((item) => this.extendResource(item, baseEndpoint));
+  // }
 
-  private hasCollectionURI<T>(obj: T): obj is T & { collectionURI: string } {
-    return (
-      obj &&
-      (obj as any).collectionURI &&
-      typeof (obj as any).collectionURI === "string"
-    );
-  }
+  // private extendCollection<V extends List, T extends EndpointType>(
+  //   value: V,
+  //   baseType: T
+  // ) {
+  //   const endpoint = createEndpointFromURI(value.collectionURI);
 
-  private typeFromEndpoint(endpoint: Endpoint): EndpointType {
-    return endpoint[2] ? endpoint[2] : endpoint[0];
-  }
+  //   return (<TEndpoint extends Endpoint>(
+  //     endpoint: TEndpoint
+  //   ): ExtendCollection<TEndpoint, V> => {
+  //     const items = value.items.map(
+  //       (item) =>
+  //         this.extendResource(item, endpoint) as ExtendResourceList<
+  //           ResourceEndpoint<TEndpoint>,
+  //           V
+  //         >[number]
+  //     );
 
-  private extendResource<V extends ResourceItem, BEndpoint extends Endpoint>(
-    value: V,
-    baseEndpoint: BEndpoint
-  ) {
-    const id: number = this.extractIdFromURI(value.resourceURI);
-    const baseType = this.typeFromEndpoint(baseEndpoint);
-    const endpoint: ResourceEndpoint<BEndpoint> = [
-      baseType,
-      id,
-    ] as ResourceEndpoint<BEndpoint>;
+  //     const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
+  //       items,
+  //       endpoint,
+  //       query: (
+  //         params: Parameters<TEndpoint> = {} as Parameters<TEndpoint>
+  //       ): MarvelQueryInterface<TEndpoint> =>
+  //         new MarvelQuery<TEndpoint>({ endpoint, params }),
+  //     };
 
-    return (<TEndpoint extends Endpoint>(
-      endpoint: TEndpoint
-    ): ExtendResource<TEndpoint, V> => {
-      const additionalProps: ExtendResourceProperties<TEndpoint> = {
-        endpoint,
-        fetch: () => {
-          // Does this actually work?
-          const query = new MarvelQuery({
-            endpoint,
-            params: {} as Parameters<TEndpoint>,
-          });
-
-          return query.fetch();
-        },
-        fetchSingle: () => {
-          // Does this actually work?
-          const query = new MarvelQuery({
-            endpoint,
-            params: {} as Parameters<TEndpoint>,
-          });
-
-          return query.fetchSingle();
-        },
-        query: <TType extends EndpointType>(
-          type: TType,
-          params: Parameters<Extendpoint<TEndpoint, TType>> = {} as Parameters<
-            Extendpoint<TEndpoint, TType>
-          >
-        ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
-          return new MarvelQuery<Extendpoint<TEndpoint, TType>>({
-            endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
-              TEndpoint,
-              TType
-            >,
-            params,
-          });
-        },
-      };
-
-      return {
-        ...value,
-        ...additionalProps,
-      };
-    })(endpoint);
-  }
-
-  private extendResourceArray<
-    V extends Array<ResourceItem>,
-    BEndpoint extends Endpoint
-  >(value: V, baseEndpoint: BEndpoint) {
-    if (!value) return value;
-    return value.map((item) => this.extendResource(item, baseEndpoint));
-  }
-
-  private extendCollection<V extends List, T extends EndpointType>(
-    value: V,
-    baseType: T
-  ) {
-    const endpoint = this.createEndpointFromURI(value.collectionURI);
-
-    return (<TEndpoint extends Endpoint>(
-      endpoint: TEndpoint
-    ): ExtendCollection<TEndpoint, V> => {
-      const items = value.items.map(
-        (item) =>
-          this.extendResource(item, endpoint) as ExtendResourceList<
-            ResourceEndpoint<TEndpoint>,
-            V
-          >[number]
-      );
-
-      const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
-        items,
-        endpoint,
-        query: (
-          params: Parameters<TEndpoint> = {} as Parameters<TEndpoint>
-        ): MarvelQueryInterface<TEndpoint> =>
-          new MarvelQuery<TEndpoint>({ endpoint, params }),
-      };
-
-      return {
-        ...value,
-        ...additionalProps,
-      };
-    })(endpoint);
-  }
+  //     return {
+  //       ...value,
+  //       ...additionalProps,
+  //     };
+  //   })(endpoint);
+  // }
 
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
@@ -497,7 +327,7 @@ export class MarvelQuery<E extends Endpoint>
   async fetch(): Promise<MarvelQuery<E>> {
     MarvelQuery.log("Fetching results");
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
-    const url = this.buildURL();
+    const url = buildURL(MarvelQuery.apiKeys, this.endpoint, this.params);
 
     if (this.url === url) {
       throw new Error("Duplicate request");
@@ -518,12 +348,12 @@ export class MarvelQuery<E extends Endpoint>
       this.count = fetched;
       this.params.offset = fetched;
 
-      const noResults = this.verify(!results.length, "No results found");
+      const noResults = verify(!results.length, "No results found");
 
-      const complete = this.verify(remaining <= 0, "No more results found");
+      const complete = verify(remaining <= 0, "No more results found");
       const duplicateResults =
         this.resultHistory.length > 0
-          ? this.verify(
+          ? verify(
               results.map((result) => result.id) ===
                 this.results.map((result) => result.id),
               "Duplicate results"
@@ -531,7 +361,7 @@ export class MarvelQuery<E extends Endpoint>
           : false;
 
       const formattedResults = results.map((result) =>
-        this.extendResult(result)
+        this.extendQuery.extendResult(result)
       );
 
       this.isComplete = complete || duplicateResults || noResults;
@@ -552,52 +382,20 @@ export class MarvelQuery<E extends Endpoint>
     }
   }
 
-  /** Verify that the condition is true, and if not, throw a warning. */
-  private verify(logic: boolean, message: string): boolean {
-    if (logic) {
-      console.warn(message);
-    }
-
-    return logic;
-  }
-
-  /** Build the URL of the query with the parameters, timestamp and hash. */
-  buildURL(): string {
-    const baseURL = "https://gateway.marvel.com/v1/public";
-    const endpoint = this.endpoint.join("/");
-    const timestamp = Number(new Date());
-    /** Extract the public and private keys from the library initialization. */
-    const { privateKey, publicKey } = MarvelQuery;
-    /** Create an MD5 hash with the timestamp, private key and public key. */
-    const hash = privateKey
-      ? CryptoJS.MD5(timestamp + privateKey + publicKey).toString()
-      : "";
-
-    /** Build the URL of the query with the parameters, keys, timestamp and hash. */
-    const queryParams = new URLSearchParams({
-      apikey: publicKey,
-      ts: timestamp.toString(),
-      hash,
-      ...(this.params as Record<string, unknown>),
-    });
-
-    return `${baseURL}/${endpoint}?${queryParams.toString()}`;
-  }
-
   /** Send the request to the API, and validate the response. */
   async request(url: string): Promise<APIWrapper<Result<E>>> {
     MarvelQuery.log(`Requesting: ${url}`);
     try {
       /** Call the onRequest function if it is defined. */
-      if (MarvelQuery.onRequest) {
-        MarvelQuery.onRequest(url, this.endpoint, this.params);
+      if (MarvelQuery.config.onRequest) {
+        MarvelQuery.config.onRequest(url, this.endpoint.path, this.params);
       }
 
-      const response = await MarvelQuery.httpClient<E>(url);
+      const response = await MarvelQuery.config.httpClient<E>(url);
 
       MarvelQuery.log("Recieved response");
 
-      this.validateResults(response.data.results);
+      validateResults(response.data.results, this.endpoint);
 
       /** Return the response data. */
       return response;
@@ -605,27 +403,6 @@ export class MarvelQuery<E extends Endpoint>
       console.error("Error fetching data from API:", error);
       throw new Error("Failed to fetch data from Marvel API");
     }
-  }
-
-  /** Validate the results of the query. */
-  private validateResults(results: Result<E>[]) {
-    /** Determine expected result schema */
-    const resultSchema = ResultSchemaMap[this.type];
-    if (!resultSchema) {
-      // throw new Error(`Invalid result schema, ${this.type}`);
-      console.warn(`Invalid result schema, ${this.type}`);
-    }
-
-    /** Validate the response data with the result schema. */
-    const result = resultSchema.safeParse(results);
-    if (!result.success) {
-      console.error(
-        "Error validating results:",
-        JSON.stringify(result.error, null, 2)
-      );
-    }
-
-    MarvelQuery.log("Validated results");
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
@@ -640,19 +417,5 @@ export class MarvelQuery<E extends Endpoint>
     return query.results[0];
   }
 }
-export type Comic = ReturnType<"comics">;
-export type Character = ReturnType<"characters">;
-export type Creator = ReturnType<"creators">;
-export type Event = ReturnType<"events">;
-export type Series = ReturnType<"series">;
-export type Story = ReturnType<"stories">;
-
 export default MarvelQuery;
-export * from "./definitions/types";
-
-function testfunction(type: Event) {
-  type.urls;
-  if (type.next) {
-    type.next;
-  }
-}
+export * from "./models/types";

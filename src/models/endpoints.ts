@@ -11,9 +11,15 @@ import {
 
 } from "./types";
 
-import {
-	MarvelComicSchema
-} from "./schemas/data-schemas";
+/** Endpoint types that can be queried */
+export const VALID_ENDPOINTS: Set<EndpointType> = new Set([
+	"comics",
+	"characters",
+	"creators",
+	"events",
+	"series",
+	"stories",
+]);
 
 // Utility function to help TypeScript infer exact types
 function createEndpointMap<T extends Record<string, EndpointType>>(map: T): T {
@@ -75,7 +81,7 @@ const stories = createEndpointMap({
 	originalissue: "comics",
 });
 
-export const endpointMap = {
+export const ENDPOINT_MAP = {
 	comics,
 	events,
 	series,

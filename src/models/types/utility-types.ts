@@ -13,6 +13,7 @@ import {
   EndpointType,
   NoSameEndpointType,
   Extendpoint,
+  AsEndpoint,
 } from "./endpoint-types";
 import { MarvelQueryInterface } from "./interface";
 import {
@@ -134,3 +135,8 @@ export type InitializedQuery<E> = E extends Endpoint
   : ["utility-types.ts InitializedQuery", "Cannot initialize query."];
 
 export type ValidEndpoint<E> = E extends Endpoint ? E : never;
+
+export type CreateQueryFunction = <T extends Endpoint | EndpointType>(
+  endpoint: T,
+  params: Parameters<AsEndpoint<T>>
+) => MarvelQueryInterface<AsEndpoint<T>>

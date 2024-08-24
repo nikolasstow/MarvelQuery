@@ -1,6 +1,13 @@
 import { APIWrapper } from "./data-types";
 import { APIBaseParams } from "./param-types";
-import { ParameterMap, AnyResultFunction, OnResultFunction, ResultMap, Result } from "./utility-types";
+import {
+  ParameterMap,
+  AnyResultFunction,
+  OnResultFunction,
+  ResultMap,
+  Result,
+  DataType,
+} from "./utility-types";
 import { Endpoint, EndpointType } from "./endpoint-types";
 
 /** Arguments for initialization of the API */
@@ -12,12 +19,12 @@ export interface Config {
    * comics: { noVariants: true }
    * }```
    */
-  globalParams?: GlobalParams;
+  globalParams: GlobalParams;
   /** Remove undefined parameters from the query */
-  omitUndefined?: boolean; // set to true (by default) this will remove undefined values from the query
+  omitUndefined: boolean; // set to true (by default) this will remove undefined values from the query
 
   /** Enable verbose logging. */
-  verbose?: boolean;
+  verbose: boolean;
   /** An optional function that will be called before the request is sent.
    * You can use it to log the request or track the number of requests to the API. */
   onRequest?: OnRequestFunction;
@@ -33,8 +40,9 @@ export interface Config {
    */
   onResult?: OnResultMap;
   /** Replace the default http client (axios) with your own http client.  */
-  httpClient?: HTTPClient;
-}/** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
+  httpClient: HTTPClient;
+}
+/** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
  * You can also apply global parameters to specific data types (comics, characters, events, etc.)
  */
 
@@ -66,3 +74,7 @@ export interface APIKeys {
   privateKey: string;
 }
 
+export interface EndpointDescriptor<E extends Endpoint> {
+  path: E;
+  type: DataType<E>;
+}
