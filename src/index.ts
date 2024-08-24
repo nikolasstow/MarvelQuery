@@ -1,60 +1,30 @@
-import * as CryptoJS from "crypto-js";
-import axios, { AxiosResponse } from "axios";
-
+import axios from "axios";
+import { logger } from "./utils/Logger";
 import {
   Endpoint,
   Parameters,
   Result,
   EndpointType,
-  OnResultMap,
   OnResultFunction,
   ResultMap,
   APIKeys,
   Config,
-  GlobalParams,
   AnyResultFunction,
-  AnyParams,
-  HTTPClient,
-  OnRequestFunction,
-  Extendpoint,
   MarvelQueryInterface,
   InitQuery,
-  InitializedQuery,
   // data types
-  List,
   APIWrapper,
   APIResponseData,
   Metadata,
   // extended types
-  ReturnType,
   ExtendResult,
-  ExtendType,
-  ExtendResource,
-  ExtendCollection,
-  ExtendResourceProperties,
-  ExtendCollectionProperties,
-  NoSameEndpointType,
-  ResourceEndpoint,
-  NewEndpoint,
-  ExtendedQueryResult,
-  DateDescriptor,
-  ResourceItem,
-  ExtendResourceList,
   AsEndpoint,
   EndpointDescriptor,
   CreateQueryFunction,
 } from "./models/types";
-import { ResultSchemaMap } from "./models/schemas/data-schemas";
-import { ValidateParams } from "./models/schemas/param-schemas";
-import { ENDPOINT_MAP, VALID_ENDPOINTS } from "./models/endpoints";
-import {
-  validateEndpoint,
-  validateGlobalParams,
-  validateParams,
-  validateResults,
-} from "./utils/validate";
+import { validateGlobalParams, validateResults } from "./utils/validate";
 import { initializeEndpoint, initializeParams } from "./utils/initialize";
-import { buildURL, createEndpointFromURI, extractIdFromURI, hasCollectionURI, hasResourceURI, typeFromEndpoint } from "./utils/functions";
+import { buildURL } from "./utils/functions";
 import { verify } from "./utils/validate";
 import { ExtendQuery } from "./utils/ExtendQuery";
 
@@ -89,27 +59,20 @@ export class MarvelQuery<E extends Endpoint>
     apiKeys: APIKeys,
     config: Partial<Config> = {}
   ): CreateQueryFunction {
-    MarvelQuery.log("Initializing MarvelQuery...");
+    logger.verboseLog("Initializing MarvelQuery. Setting up global config...");
 
     MarvelQuery.apiKeys = apiKeys;
-
     Object.assign(MarvelQuery.config, config);
+
+    logger.setVerbose(MarvelQuery.config.verbose);
+    
 
     if (config.globalParams) {
       validateGlobalParams(config.globalParams);
     }
 
-    MarvelQuery.log("Initialization complete.");
-
     return MarvelQuery.createQuery;
   }
-
-  private static log(message: string) {
-    if (MarvelQuery.config.verbose) {
-      console.log(message);
-    }
-  }
-
   /** Function that will be called when the query is finished. */
   private onResult?:
     | OnResultFunction<ResultMap[EndpointType]>
@@ -151,8 +114,11 @@ export class MarvelQuery<E extends Endpoint>
 
     this.extendQuery = new ExtendQuery(MarvelQuery, this.endpoint);
 
+    logger.verboseLog(`Created new query @ ${endpoint.join("/")}`);
+
     /** Set the onResult function for the specific type, or the 'any' type if not provided. */
     if (MarvelQuery.config.onResult) {
+      logger.verboseLog(`Setting onResult function for ${this.endpoint.type}`);
       const typeSpecificOnResult =
         MarvelQuery.config.onResult[this.endpoint.type];
       this.onResult = typeSpecificOnResult
@@ -161,171 +127,13 @@ export class MarvelQuery<E extends Endpoint>
     }
   }
 
-  // private extendResult(result: Result<E>): ExtendResult<E> {
-  //   const endpoint = this.endpoint.path;
-  //   const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
-  //     ExtendType<E>
-  //   >((acc, key) => {
-  //     const value = result[key];
-  //     const keyEndpointType: EndpointType | undefined =
-  //       ENDPOINT_MAP[this.endpoint.type][key];
-
-  //     if (!keyEndpointType) {
-  //       acc[key] = value;
-  //       return acc;
-  //     }
-
-  //     if (hasResourceURI(value)) {
-  //       // ExtendedResource<E, K>
-  //       acc[key] = this.extendResource(value, [keyEndpointType]);
-  //     } else if (hasCollectionURI(value)) {
-  //       // ExtendedCollection<E, K, Result<E>[K]>
-  //       acc[key] = this.extendCollection(value, keyEndpointType);
-  //     } else if (Array.isArray(value) && hasResourceURI(value[0])) {
-  //       // ExtendedResourceArray<E, K>
-  //       acc[key] = this.extendResourceArray(value, [keyEndpointType]);
-  //     }
-
-  //     return acc;
-  //   }, {} as ExtendType<E>);
-
-  //   const resultExtendingProperties: ExtendResourceProperties<E> = {
-  //     endpoint,
-  //     fetch: () => {
-  //       const query = new MarvelQuery<E>({
-  //         endpoint,
-  //         params: {} as Parameters<E>,
-  //       });
-  //       return query.fetch();
-  //     },
-  //     fetchSingle: () => {
-  //       const query = new MarvelQuery<E>({
-  //         endpoint,
-  //         params: {} as Parameters<E>,
-  //       });
-  //       return query.fetchSingle();
-  //     },
-  //     query: <TType extends NoSameEndpointType<E>>(
-  //       type: TType,
-  //       params: Parameters<Extendpoint<E, TType>>
-  //     ): MarvelQueryInterface<Extendpoint<E, TType>> => {
-  //       return new MarvelQuery<Extendpoint<E, TType>>({
-  //         endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<E, TType>,
-  //         params,
-  //       });
-  //     },
-  //   };
-
-  //   return {
-  //     ...propertiesExtended,
-  //     ...resultExtendingProperties,
-  //   };
-  // }
-
-  // private extendResource<V extends ResourceItem, BEndpoint extends Endpoint>(
-  //   value: V,
-  //   baseEndpoint: BEndpoint
-  // ) {
-  //   const id: number = extractIdFromURI(value.resourceURI);
-  //   const baseType = typeFromEndpoint(baseEndpoint);
-  //   const endpoint: ResourceEndpoint<BEndpoint> = [
-  //     baseType,
-  //     id,
-  //   ] as ResourceEndpoint<BEndpoint>;
-
-  //   return (<TEndpoint extends Endpoint>(
-  //     endpoint: TEndpoint
-  //   ): ExtendResource<TEndpoint, V> => {
-  //     const additionalProps: ExtendResourceProperties<TEndpoint> = {
-  //       endpoint,
-  //       fetch: () => {
-  //         // Does this actually work?
-  //         const query = new MarvelQuery({
-  //           endpoint,
-  //           params: {} as Parameters<TEndpoint>,
-  //         });
-
-  //         return query.fetch();
-  //       },
-  //       fetchSingle: () => {
-  //         // Does this actually work?
-  //         const query = new MarvelQuery({
-  //           endpoint,
-  //           params: {} as Parameters<TEndpoint>,
-  //         });
-
-  //         return query.fetchSingle();
-  //       },
-  //       query: <TType extends EndpointType>(
-  //         type: TType,
-  //         params: Parameters<Extendpoint<TEndpoint, TType>> = {} as Parameters<
-  //           Extendpoint<TEndpoint, TType>
-  //         >
-  //       ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
-  //         return new MarvelQuery<Extendpoint<TEndpoint, TType>>({
-  //           endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
-  //             TEndpoint,
-  //             TType
-  //           >,
-  //           params,
-  //         });
-  //       },
-  //     };
-
-  //     return {
-  //       ...value,
-  //       ...additionalProps,
-  //     };
-  //   })(endpoint);
-  // }
-
-  // private extendResourceArray<
-  //   V extends Array<ResourceItem>,
-  //   BEndpoint extends Endpoint
-  // >(value: V, baseEndpoint: BEndpoint) {
-  //   if (!value) return value;
-  //   return value.map((item) => this.extendResource(item, baseEndpoint));
-  // }
-
-  // private extendCollection<V extends List, T extends EndpointType>(
-  //   value: V,
-  //   baseType: T
-  // ) {
-  //   const endpoint = createEndpointFromURI(value.collectionURI);
-
-  //   return (<TEndpoint extends Endpoint>(
-  //     endpoint: TEndpoint
-  //   ): ExtendCollection<TEndpoint, V> => {
-  //     const items = value.items.map(
-  //       (item) =>
-  //         this.extendResource(item, endpoint) as ExtendResourceList<
-  //           ResourceEndpoint<TEndpoint>,
-  //           V
-  //         >[number]
-  //     );
-
-  //     const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
-  //       items,
-  //       endpoint,
-  //       query: (
-  //         params: Parameters<TEndpoint> = {} as Parameters<TEndpoint>
-  //       ): MarvelQueryInterface<TEndpoint> =>
-  //         new MarvelQuery<TEndpoint>({ endpoint, params }),
-  //     };
-
-  //     return {
-  //       ...value,
-  //       ...additionalProps,
-  //     };
-  //   })(endpoint);
-  // }
-
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
   async fetch(): Promise<MarvelQuery<E>> {
-    MarvelQuery.log("Fetching results");
+    logger.verboseLog(`Fetching results from ${this.endpoint.path.join("/")}`);
+    logger.verboseObject("Parameters:", this.params);
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
     const url = buildURL(MarvelQuery.apiKeys, this.endpoint, this.params);
 
@@ -384,7 +192,9 @@ export class MarvelQuery<E extends Endpoint>
 
   /** Send the request to the API, and validate the response. */
   async request(url: string): Promise<APIWrapper<Result<E>>> {
-    MarvelQuery.log(`Requesting: ${url}`);
+    const endpoint = this.endpoint.path.join("/");
+    logger.verboseLog(`Requesting: ${url}`);
+    logger.durationStart(endpoint);
     try {
       /** Call the onRequest function if it is defined. */
       if (MarvelQuery.config.onRequest) {
@@ -393,7 +203,8 @@ export class MarvelQuery<E extends Endpoint>
 
       const response = await MarvelQuery.config.httpClient<E>(url);
 
-      MarvelQuery.log("Recieved response");
+      logger.durationEnd(endpoint);
+      logger.verboseLog("Recieved response");
 
       validateResults(response.data.results, this.endpoint);
 
@@ -407,7 +218,7 @@ export class MarvelQuery<E extends Endpoint>
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
   async fetchSingle(): Promise<ExtendResult<E>> {
-    MarvelQuery.log("Fetching single result");
+    logger.verboseLog("Fetching single result");
     this.params.offset = 0;
     this.params.limit = 1;
     const query = await this.fetch();

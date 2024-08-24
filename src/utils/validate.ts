@@ -1,3 +1,4 @@
+import { logger } from "../utils/Logger";
 import {
   GlobalParams,
   EndpointType,
@@ -12,6 +13,7 @@ import { ResultSchemaMap } from "../models/schemas/data-schemas";
 
 /** Validate the global parameters. */
 export function validateGlobalParams(globalParams: GlobalParams): void {
+  logger.verboseLog("Validating global parameters");
   const types = Object.keys(globalParams) as EndpointType[]; // get the keys of the globalParams object
   for (const type of types) {
     if (VALID_ENDPOINTS.has(type)) {
@@ -23,12 +25,14 @@ export function validateGlobalParams(globalParams: GlobalParams): void {
 
 /** Validate the parameters of the query. */
 export function validateParams(type: EndpointType, params: AnyParams): void {
+  logger.verboseLog(`Validating parameters for endpoint type: ${type}`);
   try {
     // Confirm there's a validation function for the endpoint type
     if (!ValidateParams[type]) {
       throw new Error(`Could not find validation schema for Endpoint: ${type}`);
     }
     // Validate the parameters for the endpoint type
+    logger.verboseLog("Parsing parameters using validation schema");
     ValidateParams[type].parse(params);
   } catch (error) {
     console.error("Parameter validation error:", error);
@@ -38,6 +42,7 @@ export function validateParams(type: EndpointType, params: AnyParams): void {
 
 /** Validate the endpoint */
 export function validateEndpoint<E extends Endpoint>(endpoint: E): E {
+  logger.verboseLog("Validating endpoint");
   /** Validate the endpoint. */
   if (!endpoint) {
     throw new Error("Endpoint is required");
@@ -70,13 +75,14 @@ export function validateEndpoint<E extends Endpoint>(endpoint: E): E {
     );
   }
 
+  logger.verboseLog("Endpoint validation successful");
   return endpoint;
 }
 /** Verify that the condition is true, and if not, throw a warning. */
 
 export function verify(logic: boolean, message: string): boolean {
   if (logic) {
-    console.warn(message);
+    logger.warn(message);
   }
 
   return logic;
@@ -84,17 +90,18 @@ export function verify(logic: boolean, message: string): boolean {
 
 /** Validate the results of the query. */
 export function validateResults<E extends Endpoint>(results: Result<E>[], endpoint: EndpointDescriptor<E>) {
+  logger.verboseLog("Validating query results");
   /** Determine expected result schema */
   const resultSchema = ResultSchemaMap[endpoint.type];
   if (!resultSchema) {
-    console.warn(`Invalid result schema, ${endpoint.type}`);
+    logger.warn(`Invalid result schema, ${endpoint.type}`);
   }
 
   /** Validate the response data with the result schema. */
   const result = resultSchema.safeParse(results);
   if (!result.success) {
-    console.error(
-      "Error validating results:",
+    logger.warn(
+      "Error validating results:" + 
       JSON.stringify(result.error, null, 2)
     );
   }

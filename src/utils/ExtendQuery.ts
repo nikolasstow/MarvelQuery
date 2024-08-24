@@ -1,3 +1,4 @@
+import { logger } from "../utils/Logger";
 import {
   Endpoint,
   EndpointDescriptor,
@@ -45,8 +46,26 @@ export class ExtendQuery<E extends Endpoint> {
     this.endpoint = endpoint;
   }
 
+  findResourceName(resource: any): string {
+    return resource.name || resource.title || resource.fullName || "";
+  }
+
+  verboseLog(message: {
+    type: "result" | "collection" | "resource",
+    name: string,
+    endpoint: Endpoint,
+  }) {
+    const endpoint = message.endpoint.join("/");
+    logger.verboseLog(`Found ${message.type} [${endpoint}] ${message.name}`);
+  }
+
   extendResult(result: Result<E>): ExtendResult<E> {
     const endpoint = this.endpoint.path;
+    this.verboseLog({
+      type: "result",
+      name: this.findResourceName(result),
+      endpoint,
+    })
     const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
       ExtendType<E>
     >((acc, key) => {
@@ -117,6 +136,12 @@ export class ExtendQuery<E extends Endpoint> {
       id,
     ] as ResourceEndpoint<BEndpoint>;
 
+    this.verboseLog({
+      type: "resource",
+      name: this.findResourceName(value),
+      endpoint,
+    })
+
     return (<TEndpoint extends Endpoint>(
       endpoint: TEndpoint
     ): ExtendResource<TEndpoint, V> => {
@@ -176,6 +201,12 @@ export class ExtendQuery<E extends Endpoint> {
     baseType: T
   ) {
     const endpoint = createEndpointFromURI(value.collectionURI);
+
+    this.verboseLog({
+      type: "collection",
+      name: this.findResourceName(value),
+      endpoint,
+    })
 
     return (<TEndpoint extends Endpoint>(
       endpoint: TEndpoint
