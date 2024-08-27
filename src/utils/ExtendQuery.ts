@@ -1,4 +1,4 @@
-import { logger } from "../utils/Logger";
+import logger from "../utils/Logger";
 import {
   Endpoint,
   EndpointDescriptor,
@@ -16,7 +16,7 @@ import {
   ResourceEndpoint,
   ResourceItem,
   Result,
-	Parameters,
+  Parameters,
 } from "../models/types";
 import { InitQuery, MarvelQueryInterface } from "../models/types";
 import { ENDPOINT_MAP } from "../models/endpoints";
@@ -44,28 +44,31 @@ export class ExtendQuery<E extends Endpoint> {
   ) {
     this.createQuery = MarvelQueryClass;
     this.endpoint = endpoint;
+    logger.verbose(`ExtendQuery instance created for endpoint: ${endpoint.path.join("/")}`);
   }
 
   findResourceName(resource: any): string {
     return resource.name || resource.title || resource.fullName || "";
   }
 
-  verboseLog(message: {
+  logVerboseDetails(message: {
     type: "result" | "collection" | "resource",
     name: string,
     endpoint: Endpoint,
   }) {
     const endpoint = message.endpoint.join("/");
-    logger.verboseLog(`Found ${message.type} [${endpoint}] ${message.name}`);
+    logger.verbose(`Found ${message.type} [${endpoint}] ${message.name}`);
   }
 
   extendResult(result: Result<E>): ExtendResult<E> {
     const endpoint = this.endpoint.path;
-    this.verboseLog({
+    this.logVerboseDetails({
       type: "result",
       name: this.findResourceName(result),
       endpoint,
-    })
+    });
+    logger.verbose("Original result object:", result);
+
     const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
       ExtendType<E>
     >((acc, key) => {
@@ -136,11 +139,12 @@ export class ExtendQuery<E extends Endpoint> {
       id,
     ] as ResourceEndpoint<BEndpoint>;
 
-    this.verboseLog({
+    this.logVerboseDetails({
       type: "resource",
       name: this.findResourceName(value),
       endpoint,
-    })
+    });
+    logger.verbose("Original resource object:", value);
 
     return (<TEndpoint extends Endpoint>(
       endpoint: TEndpoint
@@ -148,7 +152,6 @@ export class ExtendQuery<E extends Endpoint> {
       const additionalProps: ExtendResourceProperties<TEndpoint> = {
         endpoint,
         fetch: () => {
-          // Does this actually work?
           const query = new this.createQuery({
             endpoint,
             params: {} as Parameters<TEndpoint>,
@@ -157,7 +160,6 @@ export class ExtendQuery<E extends Endpoint> {
           return query.fetch();
         },
         fetchSingle: () => {
-          // Does this actually work?
           const query = new this.createQuery({
             endpoint,
             params: {} as Parameters<TEndpoint>,
@@ -192,7 +194,11 @@ export class ExtendQuery<E extends Endpoint> {
     V extends Array<ResourceItem>,
     BEndpoint extends Endpoint
   >(value: V, baseEndpoint: BEndpoint) {
-    if (!value) return value;
+    if (!value.length) {
+      logger.verbose("No resources found in array, skipping extension.");
+      return value;
+    }
+
     return value.map((item) => this.extendResource(item, baseEndpoint));
   }
 
@@ -202,11 +208,12 @@ export class ExtendQuery<E extends Endpoint> {
   ) {
     const endpoint = createEndpointFromURI(value.collectionURI);
 
-    this.verboseLog({
+    this.logVerboseDetails({
       type: "collection",
       name: this.findResourceName(value),
       endpoint,
-    })
+    });
+    logger.verbose("Original collection object:", value);
 
     return (<TEndpoint extends Endpoint>(
       endpoint: TEndpoint

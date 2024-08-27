@@ -69,9 +69,10 @@ export const DateDescriptorSchema = z.enum([
 ]);
 
 export const ComicsSchema = APISchema.extend({
-  format: z.string().optional().describe(
-    "Filter by format (e.g. comic, digital comic, trade paperback)."
-  ),
+  format: z
+    .string()
+    .optional()
+    .describe("Filter by format (e.g. comic, digital comic, trade paperback)."),
   formatType: FormatTypeSchema.optional().describe(
     "Filter by the issue format type (comic or collection)."
   ),
@@ -320,11 +321,12 @@ export const ParameterSchema = z.union([
 ]);
 
 /** Validation schemas for each endpoint parameters */
-export const ValidateParams: EndpointMap<z.ZodType> = {
+export const ValidateParams: EndpointMap<z.ZodType> & { all: z.ZodType } = {
   characters: CharactersSchema,
   comics: ComicsSchema,
   creators: CreatorsSchema,
   events: EventsSchema,
   series: SeriesSchema,
   stories: StoriesSchema,
+  all: ParameterSchema,
 };

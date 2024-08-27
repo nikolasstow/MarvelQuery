@@ -1,14 +1,67 @@
-import { performance } from 'perf_hooks';
+import { performance } from "perf_hooks";
+import * as winston from "winston";
+import "winston-daily-rotate-file";
+
+// Define an interface for the performance object
+interface PerformanceTimer {
+  startTime: number;
+  stop: (message?: string) => number;
+}
+
+// Extend the Winston Logger to include the performance method
+interface CustomLogger extends winston.Logger {
+  performance: (message?: string) => PerformanceTimer;
+}
 
 class Logger {
   private static instance: Logger;
-  private verbose: boolean = false;
+  private static verboseStatus: boolean = false;
   private lastLoggedDate: string | null = null;
 
   private accumulator: { [key: string]: any } = {};
   private duration: { [key: string]: number } = {};
 
-  private constructor() {} // Private constructor to prevent direct instantiation
+  logger: CustomLogger;
+
+  private constructor() {
+
+    console.log("Creating logger...");
+
+    const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
+      filename: "logs/marvelquery-%DATE%.log",
+      datePattern: "YYYY-MM-DD",
+      maxSize: "20m",
+      maxFiles: "14d", // Keep logs for 14 days
+    });
+
+    const consoleTransport = new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(), // Colorize the output
+        winston.format.timestamp(),
+        winston.format.printf(({ level, message }) => {
+          const time = new Date().toLocaleTimeString(); // Only time (HH:MM:SS)
+          return `${time} [${level}] ${message}`;
+        })
+      ),
+    });
+
+    this.logger = winston.createLogger({
+      level: "info", // Default level
+      format: winston.format.combine(
+        winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        winston.format.printf(({ timestamp, level, message }) => {
+          return `${timestamp} [${level.toUpperCase()}] - ${message}`;
+        })
+      ),
+      transports: [
+        consoleTransport,
+        dailyRotateFileTransport,
+      ],
+    }) as CustomLogger;
+
+    // Attach the performance method to the logger instance
+    this.logger.performance = this.performance.bind(this);
+  }
 
   static getInstance(): Logger {
     if (!Logger.instance) {
@@ -17,105 +70,42 @@ class Logger {
     return Logger.instance;
   }
 
-  setVerbose(verbose: boolean) {
-    this.verbose = verbose;
+  static setVerbose(verbose: boolean) {
+    Logger.verboseStatus = verbose;
+    Logger.instance.logger.level = verbose ? "verbose" : "info";
   }
 
-  log(message: string): void {
-    this.checkDateChange();
-    console.log(`[LOG] ${this.getCurrentTime()} - ${message}`);
-  }
-
-  verboseLog(message: string): void {
-    this.checkDateChange();
-    if (this.verbose) {
-      console.log(`[VERBOSE] ${this.getCurrentTime()} - ${message}`);
+  // Custom performance method
+  private performance(message?: string): PerformanceTimer {
+    const startTime = performance.now();
+    if (message) {
+      this.logger.info(`Timer started: ${message}`);
     }
-  }
-
-  verboseObject(message: string, object: any): void {
-    this.checkDateChange();
-    if (this.verbose) {
-      console.log(`[VERBOSE] ${this.getCurrentTime()} - ${message}`);
-      console.log(object);
-    }
-  }
-
-  warn(message: string): void {
-    this.checkDateChange();
-    console.log(`[WARNING] ${this.getCurrentTime()} - ${message}`);
-  }
-
-  error(message: string): void {
-    this.checkDateChange();
-    console.log(`[ERROR] ${this.getCurrentTime()} - ${message}`);
-  }
-
-  durationStart(type: string) {
-    this.duration[type] = performance.now();
-  }
-
-  durationEnd(type: string) {
-    const startTime = this.duration[type];
-    if (startTime) {
-      const endTime = performance.now();
-      const duration = endTime - startTime;
-      const formattedDuration = this.formatDuration(duration);
-      this.log(`${type} completed in ${formattedDuration}`);
-      delete this.duration[type];
-    } else {
-      this.warn(`No start time found for ${type}`);
-    }
-  }
-
-  accumulate(type: string, message: any) {
-    this.accumulator[type] = message;
-  }
-
-  aggregateData(type: string) {
-    const data = this.accumulator[type];
-    this.accumulator[type] = null;
-    return data;
-  }
-
-  private checkDateChange() {
-    const currentDate = this.getCurrentDate();
-    if (this.lastLoggedDate !== currentDate) {
-      if (this.lastLoggedDate !== null) {
-        console.log(`\n[DATE CHANGE] ${currentDate}\n`);
+    return {
+      startTime,
+      stop: (stopMessage?: string): number => {
+        const duration = performance.now() - startTime;
+        if (stopMessage) {
+          this.logger.info(`Timer stopped: ${stopMessage}. Duration: ${this.formatDuration(duration)}`);
+        }
+        return duration;
       }
-      this.lastLoggedDate = currentDate;
-    }
+    };
   }
 
-  private getCurrentDate(): string {
-    const now = new Date();
-    return now.toDateString(); // Format: 'Wed Aug 24 2024'
-  }
-
-  private getCurrentTime(): string {
-    const now = new Date();
-    const timeString = now.toTimeString();
-    const timePart = timeString.split(' ')[0]; // Extract only the time part (HH:MM:SS)
-  
-    if (timePart) {
-      return timePart;
-    } else {
-      throw new Error("Failed to parse time from Date object.");
-    }
-  }
-
+  // Format duration into a readable string
   private formatDuration(duration: number): string {
     if (duration < 1000) {
-      return `${duration.toFixed(2)} ms`;
-    } else if (duration < 60000) {
-      return `${(duration / 1000).toFixed(2)} s`;
-    } else if (duration < 3600000) {
-      return `${(duration / 60000).toFixed(2)} min`;
+      return `${duration.toFixed(2)}ms`;
     } else {
-      return `${(duration / 3600000).toFixed(2)} h`;
+      return `${(duration / 1000).toFixed(2)}s`;
     }
   }
 }
 
-export const logger = Logger.getInstance();
+const instance = Logger.getInstance();
+
+const setVerbose = Logger.setVerbose
+
+export default instance.logger;
+export { setVerbose };

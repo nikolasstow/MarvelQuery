@@ -1,5 +1,5 @@
 import axios from "axios";
-import { logger } from "./utils/Logger";
+import logger, { setVerbose } from "./utils/Logger";
 import {
   Endpoint,
   Parameters,
@@ -12,11 +12,9 @@ import {
   AnyResultFunction,
   MarvelQueryInterface,
   InitQuery,
-  // data types
   APIWrapper,
   APIResponseData,
   Metadata,
-  // extended types
   ExtendResult,
   AsEndpoint,
   EndpointDescriptor,
@@ -59,20 +57,19 @@ export class MarvelQuery<E extends Endpoint>
     apiKeys: APIKeys,
     config: Partial<Config> = {}
   ): CreateQueryFunction {
-    logger.verboseLog("Initializing MarvelQuery. Setting up global config...");
+    setVerbose(MarvelQuery.config.verbose);
+    logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
     MarvelQuery.apiKeys = apiKeys;
     Object.assign(MarvelQuery.config, config);
-
-    logger.setVerbose(MarvelQuery.config.verbose);
     
-
     if (config.globalParams) {
       validateGlobalParams(config.globalParams);
     }
 
     return MarvelQuery.createQuery;
   }
+
   /** Function that will be called when the query is finished. */
   private onResult?:
     | OnResultFunction<ResultMap[EndpointType]>
@@ -91,8 +88,7 @@ export class MarvelQuery<E extends Endpoint>
   count: number = 0;
   /** The total number of results available for the query. */
   total: number = 0;
-  /** Metadata included in the API response.
-   */
+  /** Metadata included in the API response. */
   metadata: Metadata;
   /** Data for the API response. */
   responseData: APIResponseData;
@@ -114,11 +110,11 @@ export class MarvelQuery<E extends Endpoint>
 
     this.extendQuery = new ExtendQuery(MarvelQuery, this.endpoint);
 
-    logger.verboseLog(`Created new query @ ${endpoint.join("/")}`);
+    logger.verbose(`Created new query for endpoint: ${endpoint.join("/")}`);
 
     /** Set the onResult function for the specific type, or the 'any' type if not provided. */
     if (MarvelQuery.config.onResult) {
-      logger.verboseLog(`Setting onResult function for ${this.endpoint.type}`);
+      logger.verbose(`Setting onResult function for ${this.endpoint.type}`);
       const typeSpecificOnResult =
         MarvelQuery.config.onResult[this.endpoint.type];
       this.onResult = typeSpecificOnResult
@@ -132,12 +128,14 @@ export class MarvelQuery<E extends Endpoint>
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
   async fetch(): Promise<MarvelQuery<E>> {
-    logger.verboseLog(`Fetching results from ${this.endpoint.path.join("/")}`);
-    logger.verboseObject("Parameters:", this.params);
-    /** Build the URL of the query with the parameters, keys, timestamp and hash. */
+    logger.verbose(`Fetching results for endpoint: ${this.endpoint.path.join("/")}`);
+    logger.verbose("Parameters:", this.params);
+
+    /** Build the URL of the query with the parameters, keys, timestamp, and hash. */
     const url = buildURL(MarvelQuery.apiKeys, this.endpoint, this.params);
 
     if (this.url === url) {
+      logger.error("Duplicate request detected. Aborting fetch.");
       throw new Error("Duplicate request");
     }
 
@@ -145,6 +143,7 @@ export class MarvelQuery<E extends Endpoint>
 
     try {
       /** Send the request and call the onResult function with the results of the request. */
+      logger.verbose(`Sending request to URL: ${url}`);
       const { data, ...metadata } = await this.request(url);
       const { results, ...responseData } = data;
       const { total, count, offset } = responseData;
@@ -155,6 +154,8 @@ export class MarvelQuery<E extends Endpoint>
 
       this.count = fetched;
       this.params.offset = fetched;
+
+      logger.verbose(`Fetched ${count} results. Total fetched: ${fetched}/${total}. Remaining: ${remaining}.`);
 
       const noResults = verify(!results.length, "No results found");
 
@@ -178,55 +179,62 @@ export class MarvelQuery<E extends Endpoint>
       this.results = formattedResults;
       this.resultHistory = [...this.resultHistory, ...formattedResults];
 
+      logger.verbose("Results processed and extended.");
+
       /** Call the onResult function with the results of the request. */
       if (this.onResult) {
+        logger.verbose("Calling onResult function with the processed results.");
         this.onResult(results);
       }
 
       return this as MarvelQuery<E>;
     } catch (error) {
-      console.error("Request error:", error);
+      logger.error("An error occurred during fetch:", error);
       throw new Error("Request error");
     }
   }
 
   /** Send the request to the API, and validate the response. */
   async request(url: string): Promise<APIWrapper<Result<E>>> {
-    const endpoint = this.endpoint.path.join("/");
-    logger.verboseLog(`Requesting: ${url}`);
-    logger.durationStart(endpoint);
+    const timer = logger.performance(`Requesting data from: ${url}`)
+
     try {
       /** Call the onRequest function if it is defined. */
       if (MarvelQuery.config.onRequest) {
+        logger.verbose("Executing onRequest function...");
         MarvelQuery.config.onRequest(url, this.endpoint.path, this.params);
       }
 
       const response = await MarvelQuery.config.httpClient<E>(url);
 
-      logger.durationEnd(endpoint);
-      logger.verboseLog("Recieved response");
+      timer.stop("Received API response.");
 
       validateResults(response.data.results, this.endpoint);
 
       /** Return the response data. */
       return response;
     } catch (error) {
-      console.error("Error fetching data from API:", error);
+      logger.error("Error occurred during API request:", error);
       throw new Error("Failed to fetch data from Marvel API");
     }
   }
 
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
   async fetchSingle(): Promise<ExtendResult<E>> {
-    logger.verboseLog("Fetching single result");
+    logger.verbose("Fetching a single result.");
     this.params.offset = 0;
     this.params.limit = 1;
+
     const query = await this.fetch();
+
     if (!query.results[0]) {
+      logger.error("No result found for the single fetch request.");
       throw new Error("No result found.");
     }
+
     return query.results[0];
   }
 }
+
 export default MarvelQuery;
 export * from "./models/types";
