@@ -17,8 +17,6 @@ export type MarvelQueryInterface<
   endpoint: EndpointDescriptor<E>;
   /** Parameters of the query */
   params: Parameters<E>;
-  /** The data type of the results of the query */
-  type: EndpointType;
 
   /** The URL of the query
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```

@@ -16,7 +16,8 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "strictNullChecks": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "experimentalDecorators": true
   },
   "exclude": [
     "node_modules",

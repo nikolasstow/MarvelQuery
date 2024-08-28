@@ -98,3 +98,23 @@ export function omitUndefined<E extends Endpoint>(params: Parameters<E>): Parame
 
 	return filteredParams;
 }
+
+export function logPerformance(target: any, key: string, descriptor: TypedPropertyDescriptor<any>): void {
+  if (descriptor === undefined || typeof descriptor.value !== 'function') {
+    throw new Error(`logPerformance can only be used on methods, not on: ${key}`);
+  }
+
+  const originalMethod = descriptor.value;
+
+  descriptor.value = async function (...args: any[]) {
+    const timer = logger.performance(`Executing ${key}`);
+    try {
+      const result = await originalMethod.apply(this, args);
+      timer.stop(`Finished executing ${key}`);
+      return result;
+    } catch (error) {
+      timer.stop(`Error in ${key}`);
+      throw error;
+    }
+  };
+}	

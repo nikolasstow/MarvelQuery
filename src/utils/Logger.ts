@@ -16,17 +16,10 @@ interface CustomLogger extends winston.Logger {
 class Logger {
   private static instance: Logger;
   private static verboseStatus: boolean = false;
-  private lastLoggedDate: string | null = null;
-
-  private accumulator: { [key: string]: any } = {};
-  private duration: { [key: string]: number } = {};
 
   logger: CustomLogger;
 
   private constructor() {
-
-    console.log("Creating logger...");
-
     const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
       filename: "logs/marvelquery-%DATE%.log",
       datePattern: "YYYY-MM-DD",
@@ -53,10 +46,7 @@ class Logger {
           return `${timestamp} [${level.toUpperCase()}] - ${message}`;
         })
       ),
-      transports: [
-        consoleTransport,
-        dailyRotateFileTransport,
-      ],
+      transports: [consoleTransport, dailyRotateFileTransport],
     }) as CustomLogger;
 
     // Attach the performance method to the logger instance
@@ -86,10 +76,14 @@ class Logger {
       stop: (stopMessage?: string): number => {
         const duration = performance.now() - startTime;
         if (stopMessage) {
-          this.logger.info(`Timer stopped: ${stopMessage}. Duration: ${this.formatDuration(duration)}`);
+          this.logger.info(
+            `Timer stopped: ${stopMessage}. Duration: ${this.formatDuration(
+              duration
+            )}`
+          );
         }
         return duration;
-      }
+      },
     };
   }
 
@@ -105,7 +99,7 @@ class Logger {
 
 const instance = Logger.getInstance();
 
-const setVerbose = Logger.setVerbose
+const setVerbose = Logger.setVerbose;
 
 export default instance.logger;
 export { setVerbose };

@@ -1,4 +1,4 @@
-import logger from "../utils/Logger";
+import logger from "./Logger";
 import {
   Endpoint,
   EndpointDescriptor,
@@ -28,7 +28,8 @@ import {
   createEndpointFromURI,
 } from "./functions";
 
-export class ExtendQuery<E extends Endpoint> {
+/** Utility class for auto-query injection, finds URIs in data and injects query methods. */
+export class AutoQuery<E extends Endpoint> {
   createQuery: new <NewEndpoint extends Endpoint>({
     endpoint,
     params,
@@ -47,11 +48,15 @@ export class ExtendQuery<E extends Endpoint> {
     logger.verbose(`ExtendQuery instance created for endpoint: ${endpoint.path.join("/")}`);
   }
 
-  findResourceName(resource: any): string {
+  inject(results: Result<E>[]): ExtendResult<E>[] {
+    return results.map((result) => this.extendResult(result));
+  }
+
+  private findResourceName(resource: any): string {
     return resource.name || resource.title || resource.fullName || "";
   }
 
-  logVerboseDetails(message: {
+  private logVerboseDetails(message: {
     type: "result" | "collection" | "resource",
     name: string,
     endpoint: Endpoint,
