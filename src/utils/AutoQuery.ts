@@ -65,9 +65,7 @@ export class AutoQuery<E extends Endpoint> {
   ) {
     this.createQuery = MarvelQueryClass;
     this.endpoint = endpoint;
-    logger.verbose(
-      `ExtendQuery instance created for endpoint: ${endpoint.path.join("/")}`
-    );
+    logger.verbose(`Starting auto-query injection...`);
   }
 
   inject(results: Result<E>[]): ExtendResult<E>[] {
@@ -76,44 +74,53 @@ export class AutoQuery<E extends Endpoint> {
     // Log sumary of auto-query injection
     this.logAutoQueryInjectionSummary(this.resources, this.collections);
     this.logSortedCollectionsAndResources();
-    
+
     return extendedResults;
   }
 
   private logSortedCollectionsAndResources(): void {
     // Helper function to log content for a given collection or resource type
     const logContentForType = (
-        type: string,
-        endpoints: Endpoint[],
-        nameGetter: (endpoint: Endpoint) => string | undefined,
-        label: string
+      type: string,
+      endpoints: Endpoint[],
+      nameGetter: (endpoint: Endpoint) => string | undefined,
+      label: string
     ): void => {
-        if (!Array.isArray(endpoints) || endpoints.length === 0) {
-            logger.error(`Invalid or missing endpoints for type ${type}:`, endpoints);
-            return;
-        }
+      if (!Array.isArray(endpoints) || endpoints.length === 0) {
+        return;
+      }
 
-        const sortedEndpoints = this.sortEndpointsById(endpoints);
-        const formattedEndpoints = sortedEndpoints
-            .map((endpoint) => {
-                const name = nameGetter(endpoint) || "Unknown Name";
-                return `${endpoint.join("/")} - ${name}`;
-            })
-            .join("\n");
+      const sortedEndpoints = this.sortEndpointsById(endpoints);
+      const formattedEndpoints = sortedEndpoints
+        .map((endpoint) => {
+          const name = nameGetter(endpoint) || "Unknown Name";
+          return `${endpoint.join("/")} - ${name}`;
+        })
+        .join("\n");
 
-        logger.info(`${label} - ${type}:\n${formattedEndpoints}`);
+      logger.info(`${label} - ${type}:\n${formattedEndpoints}`);
     };
 
     // Log each collection type separately
     Object.entries(this.collections).forEach(([type, endpoints]) => {
-        logContentForType(type, endpoints, (endpoint) => this.collectionNames.get(endpoint), 'Collection');
+      logContentForType(
+        type,
+        endpoints,
+        (endpoint) => this.collectionNames.get(endpoint),
+        "Collection"
+      );
     });
 
     // Log each resource type separately
     Object.entries(this.resources).forEach(([type, endpoints]) => {
-        logContentForType(type, endpoints, (endpoint) => this.resourceNames.get(endpoint), 'Resource');
+      logContentForType(
+        type,
+        endpoints,
+        (endpoint) => this.resourceNames.get(endpoint),
+        "Resource"
+      );
     });
-}
+  }
 
   private logAutoQueryInjectionSummary(
     resources: Record<string, Endpoint[]>,
@@ -137,13 +144,13 @@ export class AutoQuery<E extends Endpoint> {
       .join(", ");
 
     logger.info("AutoQuery Injection Summary");
-    logger.info("===========================");
+    logger.info("==================================================");
     logger.info(`Total Collections Processed: ${totalCollections}`);
-    logger.info(`Collections Breakdown: ${collectionsSummary}`);
-    logger.info("---------------------------");
+    logger.info(collectionsSummary);
+    logger.info("--------------------------------------------------");
     logger.info(`Total Resources Processed: ${totalResources}`);
-    logger.info(`Resources Breakdown: ${resourcesSummary}`);
-    logger.info("===========================");
+    logger.info(resourcesSummary);
+    logger.info("==================================================");
   }
 
   private combinedArrayLengths(obj: Record<string, any[]>): number {
@@ -166,23 +173,17 @@ export class AutoQuery<E extends Endpoint> {
     return resource.name || resource.title || resource.fullName || "";
   }
 
-  private logVerboseDetails(message: {
-    type: "result" | "collection" | "resource";
-    name: string;
-    endpoint: Endpoint;
-  }) {
-    const endpoint = message.endpoint.join("/");
-    logger.verbose(`Found ${message.type} [${endpoint}] ${message.name}`);
-  }
+  // private logVerboseDetails(message: {
+  //   type: "result" | "collection" | "resource";
+  //   name: string;
+  //   endpoint: Endpoint;
+  // }) {
+  //   const endpoint = message.endpoint.join("/");
+  //   logger.verbose(`Found ${message.type} [${endpoint}] ${message.name}`);
+  // }
 
   extendResult(result: Result<E>): ExtendResult<E> {
     const endpoint = this.endpoint.path;
-    // this.logVerboseDetails({
-    //   type: "result",
-    //   name: this.findResourceName(result),
-    //   endpoint,
-    // });
-
     const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
       ExtendType<E>
     >((acc, key) => {
@@ -200,7 +201,11 @@ export class AutoQuery<E extends Endpoint> {
         acc[key] = this.extendResource(value, [keyEndpointType]);
       } else if (hasCollectionURI(value)) {
         // ExtendedCollection<E, K, Result<E>[K]>
-        acc[key] = this.extendCollection(value, keyEndpointType, this.findResourceName(result));
+        acc[key] = this.extendCollection(
+          value,
+          keyEndpointType,
+          this.findResourceName(result)
+        );
       } else if (Array.isArray(value) && hasResourceURI(value[0])) {
         // ExtendedResourceArray<E, K>
         acc[key] = this.extendResourceArray(value, [keyEndpointType]);
@@ -246,64 +251,64 @@ export class AutoQuery<E extends Endpoint> {
     value: V,
     baseEndpoint: BEndpoint
   ) {
-    const id: number = extractIdFromURI(value.resourceURI);
-    const baseType = typeFromEndpoint(baseEndpoint);
-    const endpoint: ResourceEndpoint<BEndpoint> = [
-      baseType,
-      id,
-    ] as ResourceEndpoint<BEndpoint>;
+    try {
+      const id: number = extractIdFromURI(value.resourceURI);
+      const baseType = typeFromEndpoint(baseEndpoint);
+      const endpoint: ResourceEndpoint<BEndpoint> = [
+        baseType,
+        id,
+      ] as ResourceEndpoint<BEndpoint>;
 
-    this.resources[baseType].push(endpoint);
-    this.resourceNames.set(endpoint, this.findResourceName(value));
+      this.resources[baseType].push(endpoint);
+      this.resourceNames.set(endpoint, this.findResourceName(value));
 
-    this.logVerboseDetails({
-      type: "resource",
-      name: this.findResourceName(value),
-      endpoint,
-    });
+      return (<TEndpoint extends Endpoint>(
+        endpoint: TEndpoint
+      ): ExtendResource<TEndpoint, V> => {
+        const additionalProps: ExtendResourceProperties<TEndpoint> = {
+          endpoint,
+          fetch: () => {
+            const query = new this.createQuery({
+              endpoint,
+              params: {} as Parameters<TEndpoint>,
+            });
 
-    return (<TEndpoint extends Endpoint>(
-      endpoint: TEndpoint
-    ): ExtendResource<TEndpoint, V> => {
-      const additionalProps: ExtendResourceProperties<TEndpoint> = {
-        endpoint,
-        fetch: () => {
-          const query = new this.createQuery({
-            endpoint,
-            params: {} as Parameters<TEndpoint>,
-          });
+            return query.fetch();
+          },
+          fetchSingle: () => {
+            const query = new this.createQuery({
+              endpoint,
+              params: {} as Parameters<TEndpoint>,
+            });
 
-          return query.fetch();
-        },
-        fetchSingle: () => {
-          const query = new this.createQuery({
-            endpoint,
-            params: {} as Parameters<TEndpoint>,
-          });
+            return query.fetchSingle();
+          },
+          query: <TType extends EndpointType>(
+            type: TType,
+            params: Parameters<
+              Extendpoint<TEndpoint, TType>
+            > = {} as Parameters<Extendpoint<TEndpoint, TType>>
+          ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
+            return new this.createQuery<Extendpoint<TEndpoint, TType>>({
+              endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
+                TEndpoint,
+                TType
+              >,
+              params,
+            });
+          },
+        };
 
-          return query.fetchSingle();
-        },
-        query: <TType extends EndpointType>(
-          type: TType,
-          params: Parameters<Extendpoint<TEndpoint, TType>> = {} as Parameters<
-            Extendpoint<TEndpoint, TType>
-          >
-        ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
-          return new this.createQuery<Extendpoint<TEndpoint, TType>>({
-            endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
-              TEndpoint,
-              TType
-            >,
-            params,
-          });
-        },
-      };
+        return {
+          ...value,
+          ...additionalProps,
+        };
+      })(endpoint);
+    } catch (error) {
+      logger.error(`Failed to determine resource endpoint: ${error}`);
 
-      return {
-        ...value,
-        ...additionalProps,
-      };
-    })(endpoint);
+      return value;
+    }
   }
 
   private extendResourceArray<
@@ -322,44 +327,44 @@ export class AutoQuery<E extends Endpoint> {
     baseType: T,
     parent?: string
   ) {
-    const endpoint = createEndpointFromURI(value.collectionURI);
-    this.collections[baseType].push(endpoint);
+    try {
+      const endpoint = createEndpointFromURI(value.collectionURI);
+      this.collections[baseType].push(endpoint);
 
-    // Set name of collection as the name of the parent resource
-    if (parent) {
-      this.collectionNames.set(endpoint, parent);
+      // Set name of collection as the name of the parent resource
+      if (parent) {
+        this.collectionNames.set(endpoint, parent);
+      }
+
+      return (<TEndpoint extends Endpoint>(
+        endpoint: TEndpoint
+      ): ExtendCollection<TEndpoint, V> => {
+        const items = value.items.map(
+          (item) =>
+            this.extendResource(item, endpoint) as ExtendResourceList<
+              ResourceEndpoint<TEndpoint>,
+              V
+            >[number]
+        );
+
+        const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
+          items,
+          endpoint,
+          query: (
+            params: Parameters<TEndpoint> = {} as Parameters<TEndpoint>
+          ): MarvelQueryInterface<TEndpoint> =>
+            new this.createQuery<TEndpoint>({ endpoint, params }),
+        };
+
+        return {
+          ...value,
+          ...additionalProps,
+        };
+      })(endpoint);
+    } catch (error) {
+      logger.error(`Failed to determine collection endpoint: ${error}`);
+
+      return value;
     }
-
-    this.logVerboseDetails({
-      type: "collection",
-      name: this.findResourceName(value),
-      endpoint,
-    });
-
-    return (<TEndpoint extends Endpoint>(
-      endpoint: TEndpoint
-    ): ExtendCollection<TEndpoint, V> => {
-      const items = value.items.map(
-        (item) =>
-          this.extendResource(item, endpoint) as ExtendResourceList<
-            ResourceEndpoint<TEndpoint>,
-            V
-          >[number]
-      );
-
-      const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
-        items,
-        endpoint,
-        query: (
-          params: Parameters<TEndpoint> = {} as Parameters<TEndpoint>
-        ): MarvelQueryInterface<TEndpoint> =>
-          new this.createQuery<TEndpoint>({ endpoint, params }),
-      };
-
-      return {
-        ...value,
-        ...additionalProps,
-      };
-    })(endpoint);
   }
 }

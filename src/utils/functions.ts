@@ -1,58 +1,76 @@
 import * as CryptoJS from "crypto-js";
 import { APIKeys, Endpoint, EndpointDescriptor, EndpointType, Parameters } from "../models/types";
 import logger from "../utils/Logger";
+import { VALID_ENDPOINTS } from "src/models/endpoints";
 
 export function createEndpointFromURI(url: string): Endpoint {
-  logger.verbose(`Creating endpoint from URI: ${url}`);
-  
   // Remove everything from 'http' to '/public/'
   const cleanedUrl = url.replace(/^.*\/public\//, "");
-  logger.verbose(`Cleaned URL: ${cleanedUrl}`);
 
   // Split the remaining part of the URL by '/'
-  const [baseType, id, type] = cleanedUrl.split("/");
+  const parts = cleanedUrl.split("/");
+
+  if (parts.length < 1) {
+    logger.error(`Invalid URL: ${url}`);
+    throw new Error(`Invalid URL: ${url}`);
+  }
+
+  const baseType = parts[0] as EndpointType;
+  if (!VALID_ENDPOINTS.has(baseType)) {
+    throw new Error(`Invalid endpoint: ${baseType}`);
+  }
+
+  const id = parts[1];
+  if (!id) {
+    throw new Error(`Missing ID in URL: ${url}`);
+  }
+
+  const type = parts[2];
 
   const endpoint = [
     baseType,
-    id ? Number(id) : undefined,
+    Number(id),
     type ? type : undefined,
   ] as Endpoint;
 
-  logger.verbose("Created endpoint:", endpoint);
   return endpoint;
 }
 
 export function extractIdFromURI(url: string): number {
-  logger.verbose(`Extracting ID from URI: ${url}`);
-  
-  // Remove everything from 'http' to '/public/'
   const cleanedUrl = url.replace(/^.*\/public\//, "");
-  logger.verbose(`Cleaned URL: ${cleanedUrl}`);
 
-  // Split the remaining part of the URL by '/'
-  const [type, id] = cleanedUrl.split("/");
+  const parts = cleanedUrl.split("/");
 
-  const numericId = Number(id);
-  logger.verbose(`Extracted ID: ${numericId}`);
-  return numericId;
+  if (parts.length < 2) {
+    logger.error(`Invalid URL: ${url}`);
+    throw new Error(`Invalid URL: ${url}`);
+  }
+
+  const id = parts[1];
+
+  if (id && !/^\d+$/.test(id)) {
+    logger.error(`Invalid ID: ${id}`);
+    throw new Error(`Invalid ID: ${id}`);
+  }
+
+  return Number(id);
 }
 
 export function hasResourceURI<T>(obj: T): obj is T & { resourceURI: string } {
-  const hasURI = obj && (obj as any).resourceURI && typeof (obj as any).resourceURI === "string";
-  logger.verbose(`Checking for resourceURI: ${hasURI}`, obj);
-  return hasURI;
+  return obj && (obj as any).resourceURI && typeof (obj as any).resourceURI === "string";
 }
 
 export function hasCollectionURI<T>(obj: T): obj is T & { collectionURI: string } {
-  const hasURI = obj && (obj as any).collectionURI && typeof (obj as any).collectionURI === "string";
-  logger.verbose(`Checking for collectionURI: ${hasURI}`, obj);
-  return hasURI;
+  return obj && (obj as any).collectionURI && typeof (obj as any).collectionURI === "string";
 }
 
 export function typeFromEndpoint(endpoint: Endpoint): EndpointType {
-  logger.verbose(`Extracting type from endpoint: ${endpoint}`);
   const type = endpoint[2] ? endpoint[2] : endpoint[0];
-  logger.verbose(`Extracted type: ${type}`);
+
+  if (!VALID_ENDPOINTS.has(type)) {
+    throw new Error(`Unable to determine type from endpoint: ${endpoint.join("/")}`);
+  }
+
   return type;
 }
 
@@ -98,23 +116,3 @@ export function omitUndefined<E extends Endpoint>(params: Parameters<E>): Parame
 
 	return filteredParams;
 }
-
-export function logPerformance(target: any, key: string, descriptor: TypedPropertyDescriptor<any>): void {
-  if (descriptor === undefined || typeof descriptor.value !== 'function') {
-    throw new Error(`logPerformance can only be used on methods, not on: ${key}`);
-  }
-
-  const originalMethod = descriptor.value;
-
-  descriptor.value = async function (...args: any[]) {
-    const timer = logger.performance(`Executing ${key}`);
-    try {
-      const result = await originalMethod.apply(this, args);
-      timer.stop(`Finished executing ${key}`);
-      return result;
-    } catch (error) {
-      timer.stop(`Error in ${key}`);
-      throw error;
-    }
-  };
-}	
