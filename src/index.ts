@@ -1,5 +1,5 @@
 import axios from "axios";
-import logger, { setVerbose } from "./utils/Logger";
+import logger from "./utils/Logger";
 import type {
   Endpoint,
   Parameters,
@@ -22,7 +22,7 @@ import type {
 } from "./models/types";
 import { validateGlobalParams, validateResults } from "./utils/validate";
 import { initializeEndpoint, initializeParams } from "./utils/initialize";
-import { buildURL, logPerformance } from "./utils/functions";
+import { buildURL } from "./utils/functions";
 import { verify } from "./utils/validate";
 import { AutoQuery } from "./utils/AutoQuery";
 
@@ -83,7 +83,7 @@ export class MarvelQuery<E extends Endpoint>
     config: Partial<Config> = {}
   ): CreateQueryFunction {
     // Set verbose logging based on the configuration
-    setVerbose(true);
+    logger.setVerbose(config.verbose || false);
     
     logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
@@ -255,7 +255,7 @@ export class MarvelQuery<E extends Endpoint>
    * @param url The URL to send the request to.
    * @returns A promise that resolves to the API response wrapped in an APIWrapper.
    */
-  @logPerformance
+  @logger.measurePerformance // Measure the duration of the request
   async request(url: string): Promise<APIWrapper<Result<E>>> {
     logger.verbose(`Sending request to URL: ${this.url}`);
 

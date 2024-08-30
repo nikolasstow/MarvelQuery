@@ -11,19 +11,27 @@ interface PerformanceTimer {
 
 // Extend the Winston Logger to include the performance method
 interface CustomLogger extends winston.Logger {
+  logFilePath: string;
   performance: (message?: string) => PerformanceTimer;
+  measurePerformance: (
+    target: any,
+    key: string,
+    descriptor: TypedPropertyDescriptor<any>
+  ) => void;
+  setVerbose: (verbose: boolean) => void;
+  verboseStatus: boolean;
 }
 
 class Logger {
   private static instance: Logger;
   private static verboseStatus: boolean = false;
-
+  recentLogs: Set<string> = new Set<string>();
   logger: CustomLogger;
 
   private constructor() {
-    const MAX_LINES = 15; // Set your desired max number of lines here
-    const MAX_CONSOLE_LENGTH = 500; // Optional: max length to avoid very long lines wrapping
-    const DATE_PATTERN = "yyyy-MM-dd"; // Same date pattern as used in DailyRotateFile
+    const MAX_LINES = 15;
+    const MAX_CONSOLE_LENGTH = 500;
+    const DATE_PATTERN = "yyyy-MM-dd";
 
     const logFilePath = `logs/marvelquery-${format(
       new Date(),
@@ -34,22 +42,22 @@ class Logger {
       filename: "logs/marvelquery-%DATE%.log",
       datePattern: "YYYY-MM-DD",
       maxSize: "20m",
-      maxFiles: "14d", // Keep logs for 14 days
+      maxFiles: "14d",
+      level: "verbose",
     });
 
     const consoleTransport = new winston.transports.Console({
+      // level: Logger.verboseStatus ? "verbose" : "info",
       format: winston.format.combine(
-        winston.format.colorize(), // Colorize the output
+        winston.format.colorize(),
         winston.format.timestamp(),
-        winston.format.printf(({ level, message }) => {
-          const time = new Date().toLocaleTimeString(); // Only time (HH:MM:SS)
+        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+          const time = new Date().toLocaleTimeString();
           const metaString = Object.keys(meta).length
-            ? JSON.stringify(meta, null, 2) // Pretty-print JSON with 2 spaces indentation
+            ? JSON.stringify(meta, null, 2)
             : "";
 
           let logMessage = `${time} [ ${level} ] ${message} ${metaString}`;
-
-          // Truncate lines
           const lines = logMessage.split("\n");
           const truncatedLines: string[] = [];
 
@@ -57,7 +65,7 @@ class Logger {
           for (const line of lines) {
             const wrappedLineCount = Math.ceil(
               line.length / MAX_CONSOLE_LENGTH
-            ); // Estimate wrapped lines
+            );
             if (currentLineCount + wrappedLineCount > MAX_LINES) {
               truncatedLines.push(line.slice(0, MAX_CONSOLE_LENGTH) + "...");
               truncatedLines.push(
@@ -81,27 +89,24 @@ class Logger {
     });
 
     this.logger = winston.createLogger({
-      level: "info", // Default level
+      level: "info", // Logger.verboseStatus ? "verbose" : "info",
       format: winston.format.combine(
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         winston.format.printf(({ timestamp, level, message, ...meta }) => {
-          // Clean up metadata to exclude unwanted fields like timestamp
           const { timestamp: _, level: __, message: ___, ...cleanMeta } = meta;
           const metaString = Object.keys(cleanMeta).length
-            ? JSON.stringify(cleanMeta, null, 2) // Pretty-print JSON with 2 spaces indentation
+            ? JSON.stringify(cleanMeta, null, 2)
             : "";
 
           let logMessage = `${timestamp} [${level.toUpperCase()}] - ${message}\n${metaString}`;
 
-          // Deduplication logic
           const deduplicationKey = `${level}:${message}:${metaString}`;
           if (this.recentLogs.has(deduplicationKey)) {
-            return ""; // Skip logging duplicate messages
+            return "";
           }
 
-          // Add to recent logs and set timeout to remove after 1 minute
           this.recentLogs.add(deduplicationKey);
-          setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000); // Clear after 1 minute
+          setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000);
 
           return logMessage;
         })
@@ -109,9 +114,11 @@ class Logger {
       transports: [consoleTransport, dailyRotateFileTransport],
     }) as CustomLogger;
 
-    // Attach additional methods and properties to the logger for measuring performance and checking verbosity
     this.logger.logFilePath = logFilePath;
     this.logger.performance = this.performance.bind(this);
+    this.logger.measurePerformance = this.measurePerformance.bind(this);
+    this.logger.setVerbose = Logger.setVerbose.bind(this);
+    this.logger.verboseStatus = Logger.verboseStatus;
   }
 
   static getInstance(): Logger {
@@ -124,6 +131,7 @@ class Logger {
   static setVerbose(verbose: boolean) {
     Logger.verboseStatus = verbose;
     Logger.instance.logger.level = verbose ? "verbose" : "info";
+    // Logger.instance = new Logger();
   }
 
   // Custom performance method
@@ -148,6 +156,33 @@ class Logger {
     };
   }
 
+  private measurePerformance(
+    target: any,
+    key: string,
+    descriptor: TypedPropertyDescriptor<any>
+  ): void {
+    if (descriptor === undefined || typeof descriptor.value !== "function") {
+      throw new Error(
+        `measurePerformance can only be used on methods, not on: ${key}`
+      );
+    }
+
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (...args: any[]) {
+      const instance = Logger.getInstance();
+      const timer = instance.logger.performance(`Executing ${key}`);
+      try {
+        const result = await originalMethod.apply(this, args);
+        timer.stop(`Finished executing ${key}`);
+        return result;
+      } catch (error) {
+        timer.stop(`Error in ${key}`);
+        throw error;
+      }
+    };
+  }
+
   // Format duration into a readable string
   private formatDuration(duration: number): string {
     if (duration < 1000) {
@@ -160,7 +195,4 @@ class Logger {
 
 const instance = Logger.getInstance();
 
-const setVerbose = Logger.setVerbose;
-
 export default instance.logger;
-export { setVerbose };
