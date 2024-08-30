@@ -39,6 +39,7 @@ export interface Config {
    * }```
    */
   onResult?: OnResultMap;
+  consoleCharLimit?: number; // Maximum number of characters to print in the console
   /** Replace the default http client (axios) with your own http client.  */
   httpClient: HTTPClient;
 }

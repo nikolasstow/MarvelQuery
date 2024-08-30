@@ -83,7 +83,8 @@ export class MarvelQuery<E extends Endpoint>
     config: Partial<Config> = {}
   ): CreateQueryFunction {
     // Set verbose logging based on the configuration
-    setVerbose(MarvelQuery.config.verbose);
+    setVerbose(true);
+    
     logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
     // Assign API keys and merge the provided config with the default config
