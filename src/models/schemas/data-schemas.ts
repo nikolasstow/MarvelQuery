@@ -141,7 +141,7 @@ export const MarvelResultSchema = z.object({
   id: z.number().describe("The unique ID of the resource."),
   modified: z
     .string()
-    .datetime({ offset: true })
+    // .datetime({ offset: true }) // Marvel for some reason defaults to November 30th, 1 BC and that fails validation because it's essentially a negative date. Seriously? Marvel?
     .describe("The date the resource was most recently modified."),
   resourceURI: z
     .string()
@@ -452,28 +452,6 @@ export const MarvelStorySchema = MarvelResultSchema.extend({
       "A summary representation of the issue in which this story was originally published."
     ),
 });
-
-// export const MarvelResultsSchema = z
-//   .array(MarvelResultSchema)
-//   .describe("An array of results returned by the API.");
-// export const MarvelComicsSchema = z
-//   .array(MarvelComicSchema)
-//   .describe("An array of Comics returned by the API.");
-// export const MarvelEventsSchema = z
-//   .array(MarvelEventSchema)
-//   .describe("An array of Events returned by the API.");
-// export const MarvelSeriesListSchema = z
-//   .array(MarvelSeriesSchema)
-//   .describe("An array of Series returned by the API.");
-// export const MarvelCreatorsSchema = z
-//   .array(MarvelCreatorSchema)
-//   .describe("An array of Creators returned by the API.");
-// export const MarvelCharactersSchema = z
-//   .array(MarvelCharacterSchema)
-//   .describe("An array of Characters returned by the API.");
-// export const MarvelStoriesSchema = z
-//   .array(MarvelStorySchema)
-//   .describe("An array of Stories returned by the API.");
 
 /** Schema Map for results, keyed by type */
 export const ResultSchemaMap: EndpointMap<z.ZodType> = {

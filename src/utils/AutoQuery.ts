@@ -163,9 +163,19 @@ export class AutoQuery<E extends Endpoint> {
   }
 
   private sortEndpointsById(endpoints: Array<Endpoint>): Array<Endpoint> {
-    return endpoints.sort((a, b) => {
-      const idA = a[1] ?? 0; // Default to 0 if the second element is undefined
-      const idB = b[1] ?? 0; // Default to 0 if the second element is undefined
+    const uniqueEndpoints = new Map<string, Endpoint>();
+  
+    endpoints.forEach(endpoint => {
+      const id = endpoint[1] ?? 0; // Default to 0 if the second element is undefined
+      const key = `${endpoint[0]}/${id}`; // Create a unique key based on the endpoint type and ID
+      if (!uniqueEndpoints.has(key)) {
+        uniqueEndpoints.set(key, endpoint);
+      }
+    });
+  
+    return Array.from(uniqueEndpoints.values()).sort((a, b) => {
+      const idA = a[1] ?? 0;
+      const idB = b[1] ?? 0;
       return idA - idB;
     });
   }
