@@ -98,7 +98,7 @@ export class AutoQuery<E extends Endpoint> {
         })
         .join("\n");
 
-      logger.info(`${label} - ${type}:\n${formattedEndpoints}`);
+      logger.verbose(`${label} - ${type}:\n${formattedEndpoints}`);
     };
 
     // Log each collection type separately
@@ -143,14 +143,14 @@ export class AutoQuery<E extends Endpoint> {
       .map(([type, items]) => `${type}: ${items.length}`)
       .join(", ");
 
-    logger.info("AutoQuery Injection Summary");
-    logger.info("==================================================");
-    logger.info(`Total Collections Processed: ${totalCollections}`);
-    logger.info(collectionsSummary);
-    logger.info("--------------------------------------------------");
-    logger.info(`Total Resources Processed: ${totalResources}`);
-    logger.info(resourcesSummary);
-    logger.info("==================================================");
+    logger.verbose("AutoQuery Injection Summary");
+    logger.verbose("==================================================");
+    logger.verbose(`Total Collections Processed: ${totalCollections}`);
+    logger.verbose(collectionsSummary);
+    logger.verbose("--------------------------------------------------");
+    logger.verbose(`Total Resources Processed: ${totalResources}`);
+    logger.verbose(resourcesSummary);
+    logger.verbose("==================================================");
   }
 
   private combinedArrayLengths(obj: Record<string, any[]>): number {

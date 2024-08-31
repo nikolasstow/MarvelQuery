@@ -10,6 +10,7 @@ import {
 import { VALID_ENDPOINTS } from "../models/endpoints";
 import { ValidateParams } from "../models/schemas/param-schemas";
 import { ResultSchemaMap } from "../models/schemas/data-schemas";
+import { ZodError } from "zod";
 
 /** Validate the global parameters. */
 export function validateGlobalParams(globalParams: GlobalParams): void {
@@ -17,7 +18,7 @@ export function validateGlobalParams(globalParams: GlobalParams): void {
   const types = Object.keys(globalParams) as EndpointType[]; // Get the keys of the globalParams object
 
   for (const type of types) {
-    if (!VALID_ENDPOINTS.has(type) && type !== "all" as EndpointType) {
+    if (!VALID_ENDPOINTS.has(type) && type !== ("all" as EndpointType)) {
       logger.warn(`Invalid endpoint type in global parameters: ${type}`);
       continue;
     }
@@ -100,25 +101,126 @@ export function verify(logic: boolean, message: string): boolean {
   return logic;
 }
 
-/** Validate the results of the query. */
+function groupConsecutiveIndices(indices: number[]): string[] {
+  if (indices.length === 0) return [];
+
+  const groups: string[] = [];
+
+  // TypeScript now knows indices has at least one element, so indices[0] is not undefined
+  let start: number = indices[0]!;
+  let end: number = indices[0]!;
+
+  for (let i = 1; i < indices.length; i++) {
+    if (indices[i] === end + 1) {
+      end = indices[i]!;
+    } else {
+      if (start === end) {
+        groups.push(`${start}`);
+      } else {
+        groups.push(`${start}-${end}`);
+      }
+      start = indices[i]!;
+      end = indices[i]!;
+    }
+  }
+
+  if (start === end) {
+    groups.push(`${start}`);
+  } else {
+    groups.push(`${start}-${end}`);
+  }
+
+  return groups;
+}
+
+function logValidationErrors(
+  errorMap: Map<string, number[]>,
+  totalResults: number
+) {
+  if (errorMap.size === 0) {
+    logger.verbose("All results validated successfully");
+    return;
+  }
+
+  let allFailed = true;
+
+  errorMap.forEach((indices, error) => {
+    if (indices.length !== totalResults) {
+      allFailed = false;
+    }
+
+    const groupedIndices = groupConsecutiveIndices(indices);
+
+    if (groupedIndices.length > 1) {
+      logger.warn(
+        `Validation failed for results at indices ${groupedIndices.join(
+          ", "
+        )}:`,
+        JSON.parse(error)
+      );
+    } else {
+      logger.warn(
+        `Validation failed for result at index ${groupedIndices[0]}:`,
+        JSON.parse(error)
+      );
+    }
+  });
+
+  if (allFailed) {
+    logger.error("All results failed validation.");
+  } else if (!logger.verboseStatus) {
+    logger.warn(
+      `Some results failed validation. See log for details: ${logger.logFilePath}`
+    );
+  }
+}
+
 export function validateResults<E extends Endpoint>(
   results: Result<E>[],
   endpoint: EndpointDescriptor<E>
 ) {
   logger.verbose("Validating query results");
-  /** Determine expected result schema */
-  const resultSchema = ResultSchemaMap[endpoint.type];
-  if (!resultSchema) {
-    logger.warn(`Invalid result schema for endpoint type: ${endpoint.type}`);
-  } else {
-    /** Validate the response data with the result schema. */
-    const result = resultSchema.safeParse(results);
-    if (!result.success) {
-      logger.warn(
-        "Error validating results: " + JSON.stringify(result.error, null, 2)
+
+  try {
+    const resultSchema = ResultSchemaMap[endpoint.type];
+
+    if (!resultSchema) {
+      throw new Error(
+        `Could not find validation schema for endpoint type: ${endpoint.type}`
       );
+    }
+
+    const errorMap = new Map<string, number[]>();
+    let allValid = true;
+
+    results.forEach((item, index) => {
+      const result = resultSchema.safeParse(item);
+
+      if (!result.success) {
+        allValid = false;
+
+        // Get detailed error information
+        const detailedError = result.error.errors.map((e) => ({
+          path: e.path.join("."),
+          message: e.message,
+        }));
+
+        const currentError = JSON.stringify(detailedError);
+
+        if (errorMap.has(currentError)) {
+          errorMap.get(currentError)!.push(index);
+        } else {
+          errorMap.set(currentError, [index]);
+        }
+      }
+    });
+
+    logValidationErrors(errorMap, results.length);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      logger.error("Validation Error:", error.errors);
     } else {
-      logger.verbose("Result validation successful");
+      logger.error("Unexpected Error:", error);
     }
   }
 }
