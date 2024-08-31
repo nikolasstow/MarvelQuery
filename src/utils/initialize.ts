@@ -5,7 +5,7 @@ import logger from "../utils/Logger";
 
 /** Validate the endpoint and set the data type of the query. */
 export function initializeEndpoint<E extends Endpoint>(endpoint: E): EndpointDescriptor<E> {
-  logger.verbose(`Initializing endpoint: ${endpoint.join("/")}`);
+  
 
   /** Validate the endpoint. */
   const path: E = validateEndpoint(endpoint);
@@ -15,7 +15,7 @@ export function initializeEndpoint<E extends Endpoint>(endpoint: E): EndpointDes
     endpoint.length === 3 ? endpoint[2] : endpoint[0]
   ) as DataType<E>;
 
-  logger.verbose(`Determined data type: ${type}`);
+  logger.verbose(`Initializing endpoint: ${endpoint.join("/")} with data type: ${type}`);
   return { path, type };
 }
 
@@ -25,15 +25,18 @@ export function initializeParams<E extends Endpoint>(
   config: Config,
   endpoint: EndpointDescriptor<E>,
 ): Parameters<E> {
-  logger.verbose(`Initializing parameters for endpoint: ${endpoint.path.join("/")}`);
-  logger.verbose("Original parameters:", params);
 
   /** Remove undefined parameters unless 'omitUndefined' is false. */
   const cleanParams = config.omitUndefined
     ? omitUndefined(params)
     : params;
 
-  logger.verbose("Cleaned parameters:", cleanParams);
+  const numberOfParamsRemoved = Object.keys(params).length - Object.keys(cleanParams).length;
+
+    // Log amount of parameters removed
+  if (numberOfParamsRemoved > 0) {
+    logger.verbose(`Removed ${numberOfParamsRemoved} undefined parameters from query`);
+  }
 
   /** Validate the parameters. */
   validateParams(endpoint.type, cleanParams);
@@ -49,6 +52,5 @@ export function initializeParams<E extends Endpoint>(
     ...params,
   };
 
-  logger.verbose("Final parameters after merging defaults and global settings:", finalParams);
   return finalParams;
 }

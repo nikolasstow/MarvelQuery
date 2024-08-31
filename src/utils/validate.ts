@@ -94,9 +94,9 @@ export function validateEndpoint<E extends Endpoint>(endpoint: E): E {
 }
 
 /** Verify that the condition is true, and if not, throw a warning. */
-export function verify(logic: boolean, message: string): boolean {
+export function verify(logic: boolean, action: () => void): boolean {
   if (logic) {
-    logger.warn(message);
+    action();
   }
   return logic;
 }

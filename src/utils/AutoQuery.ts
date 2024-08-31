@@ -182,16 +182,7 @@ export class AutoQuery<E extends Endpoint> {
   private findResourceName(resource: any): string {
     return resource.name || resource.title || resource.fullName || "";
   }
-
-  // private logVerboseDetails(message: {
-  //   type: "result" | "collection" | "resource";
-  //   name: string;
-  //   endpoint: Endpoint;
-  // }) {
-  //   const endpoint = message.endpoint.join("/");
-  //   logger.verbose(`Found ${message.type} [${endpoint}] ${message.name}`);
-  // }
-
+  
   extendResult(result: Result<E>): ExtendResult<E> {
     const endpoint = this.endpoint.path;
     const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<

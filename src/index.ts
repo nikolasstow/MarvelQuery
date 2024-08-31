@@ -140,11 +140,11 @@ export class MarvelQuery<E extends Endpoint>
    * @param initQuery An object containing the endpoint and parameters for the query.
    */
   constructor({ endpoint, params }: InitQuery<E>) {
+    logger.verbose(`Created new query for endpoint: ${endpoint.join("/")}`);
+    logger.verbose("With parameters:", params);
     // Initialize the endpoint and parameters for the query
     this.endpoint = initializeEndpoint(endpoint);
     this.params = initializeParams(params, MarvelQuery.config, this.endpoint);
-
-    logger.verbose(`Created new query for endpoint: ${endpoint.join("/")}`);
 
     /** Set the onResult function for the specific type, or the 'any' type if not provided. */
     if (MarvelQuery.config.onResult) {
@@ -203,10 +203,10 @@ export class MarvelQuery<E extends Endpoint>
     );
 
     // Check if no results were returned
-    const noResults = verify(!results.length, "No results found");
+    const noResults = verify(!results.length, () => logger.warn("No results found"));
 
     // Check if all results have been fetched for this query
-    const complete = verify(remaining <= 0, "No more results found");
+    const complete = verify(remaining <= 0, () => logger.verbose("No more results found"));
 
     // Check for duplicate results by comparing IDs with the previous results
     const duplicateResults =
@@ -214,7 +214,7 @@ export class MarvelQuery<E extends Endpoint>
         ? verify(
             results.map((result) => result.id) ===
               this.results.map((result) => result.id),
-            "Duplicate results"
+            () => logger.warn("Duplicate results found")
           )
         : false;
 
