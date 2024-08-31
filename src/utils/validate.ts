@@ -105,7 +105,7 @@ function groupConsecutiveIndices(indices: number[]): string[] {
   if (indices.length === 0) return [];
 
   const groups: string[] = [];
-
+  
   // TypeScript now knows indices has at least one element, so indices[0] is not undefined
   let start: number = indices[0]!;
   let end: number = indices[0]!;
@@ -133,10 +133,7 @@ function groupConsecutiveIndices(indices: number[]): string[] {
   return groups;
 }
 
-function logValidationErrors(
-  errorMap: Map<string, number[]>,
-  totalResults: number
-) {
+function logValidationErrors(errorMap: Map<string, number[]>, totalResults: number) {
   if (errorMap.size === 0) {
     logger.verbose("All results validated successfully");
     return;
@@ -152,14 +149,12 @@ function logValidationErrors(
     const groupedIndices = groupConsecutiveIndices(indices);
 
     if (groupedIndices.length > 1) {
-      logger.warn(
-        `Validation failed for results at indices ${groupedIndices.join(
-          ", "
-        )}:`,
+      logger.verbose(
+        `Validation failed for results at indices ${groupedIndices.join(', ')}:`,
         JSON.parse(error)
       );
     } else {
-      logger.warn(
+      logger.verbose(
         `Validation failed for result at index ${groupedIndices[0]}:`,
         JSON.parse(error)
       );
@@ -167,7 +162,7 @@ function logValidationErrors(
   });
 
   if (allFailed) {
-    logger.error("All results failed validation.");
+    logger.warn("All results failed validation.");
   } else if (!logger.verboseStatus) {
     logger.warn(
       `Some results failed validation. See log for details: ${logger.logFilePath}`
@@ -176,7 +171,7 @@ function logValidationErrors(
 }
 
 export function validateResults<E extends Endpoint>(
-  results: Result<E>[],
+  results: Result<E>[], 
   endpoint: EndpointDescriptor<E>
 ) {
   logger.verbose("Validating query results");
@@ -193,29 +188,37 @@ export function validateResults<E extends Endpoint>(
     const errorMap = new Map<string, number[]>();
     let allValid = true;
 
+    // Array to collect log messages for failed result items
+    const failedItemsLogs: string[] = [];
+
     results.forEach((item, index) => {
       const result = resultSchema.safeParse(item);
 
       if (!result.success) {
         allValid = false;
-
-        // Get detailed error information
-        const detailedError = result.error.errors.map((e) => ({
-          path: e.path.join("."),
-          message: e.message,
-        }));
-
-        const currentError = JSON.stringify(detailedError);
+        const currentError = JSON.stringify(result.error.format());
 
         if (errorMap.has(currentError)) {
           errorMap.get(currentError)!.push(index);
         } else {
           errorMap.set(currentError, [index]);
         }
+
+        // Collect the failed result item log message
+        const formattedItem = JSON.stringify(item, null, 2); // Pretty-print JSON with 2-space indentation
+        const separatorLine = `\n----- Failed Result at Index ${index} -----\n`;
+        failedItemsLogs.push(`${separatorLine}${formattedItem}`);
       }
     });
 
+    // Log the validation summary before logging the individual failed items
     logValidationErrors(errorMap, results.length);
+
+    // Now log each failed result item to the file
+    failedItemsLogs.forEach(logMessage => {
+      logger.fileOnly(logMessage);
+    });
+
   } catch (error) {
     if (error instanceof ZodError) {
       logger.error("Validation Error:", error.errors);

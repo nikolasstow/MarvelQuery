@@ -20,6 +20,7 @@ interface CustomLogger extends winston.Logger {
   ) => void;
   setVerbose: (verbose: boolean) => void;
   verboseStatus: boolean;
+  fileOnly: (message: string) => void;
 }
 
 class Logger {
@@ -47,7 +48,6 @@ class Logger {
     });
 
     const consoleTransport = new winston.transports.Console({
-      // level: Logger.verboseStatus ? "verbose" : "info",
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp(),
@@ -89,7 +89,7 @@ class Logger {
     });
 
     this.logger = winston.createLogger({
-      level: "info", // Logger.verboseStatus ? "verbose" : "info",
+      level: "info",
       format: winston.format.combine(
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         winston.format.printf(({ timestamp, level, message, ...meta }) => {
@@ -119,7 +119,17 @@ class Logger {
     this.logger.measurePerformance = this.measurePerformance.bind(this);
     this.logger.setVerbose = Logger.setVerbose.bind(this);
     this.logger.verboseStatus = Logger.verboseStatus;
+
+    // Add the new fileOnly method, always using "verbose" level
+    this.logger.fileOnly = (message: string) => {
+      this.logger.log({
+        level: "verbose",
+        message: message,
+        // silent: true, // prevent the message from being logged to the console
+      });
+    };
   }
+
 
   static getInstance(): Logger {
     if (!Logger.instance) {
@@ -138,14 +148,14 @@ class Logger {
   private performance(message?: string): PerformanceTimer {
     const startTime = performance.now();
     if (message) {
-      this.logger.info(`Timer started: ${message}`);
+      this.logger.verbose(`Timer started: ${message}`);
     }
     return {
       startTime,
       stop: (stopMessage?: string): number => {
         const duration = performance.now() - startTime;
         if (stopMessage) {
-          this.logger.info(
+          this.logger.verbose(
             `Timer stopped: ${stopMessage}. Duration: ${this.formatDuration(
               duration
             )}`
