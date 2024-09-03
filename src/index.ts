@@ -20,11 +20,14 @@ import type {
   EndpointDescriptor,
   CreateQueryFunction,
 } from "./models/types";
-import { validateGlobalParams, validateResults } from "./utils/validate";
-import { initializeEndpoint, initializeParams } from "./utils/initialize";
-import { buildURL } from "./utils/functions";
+import { validateResults } from "./utils/validate";
+// import { initializeParams } from "./utils/initialize";
+import { buildURL, printEndpoint } from "./utils/functions";
 import { verify } from "./utils/validate";
 import { AutoQuery } from "./utils/AutoQuery";
+import { EndpointBuilder } from "./utils/EndpointBuilder";
+import { ParameterManager } from "./utils/ParameterManager";
+import { ResultValidator } from "./utils/ResultValidator";
 
 /**
  * The MarvelQuery class is responsible for handling requests to the Marvel API.
@@ -39,7 +42,8 @@ export class MarvelQuery<E extends Endpoint>
   /** ********* Static Properties ********* */
   /** Stores the API keys used for authentication with the Marvel API */
   static apiKeys: APIKeys;
-
+  /** Validates and combines query parameters with globalParams */
+  static parameters: ParameterManager;
   /**
    * Configuration settings for the MarvelQuery class.
    * These include global parameters, verbosity, HTTP client, and more.
@@ -85,16 +89,14 @@ export class MarvelQuery<E extends Endpoint>
     // Set verbose logging based on the configuration
     logger.setVerbose(config.verbose || false);
     
+    logger.doubleLine();
     logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
     // Assign API keys and merge the provided config with the default config
     MarvelQuery.apiKeys = apiKeys;
     MarvelQuery.config = { ...MarvelQuery.config, ...config };
 
-    // Validate global parameters if provided
-    if (config.globalParams) {
-      validateGlobalParams(config.globalParams);
-    }
+    this.parameters = new ParameterManager(config);
 
     return MarvelQuery.createQuery;
   }
@@ -140,11 +142,10 @@ export class MarvelQuery<E extends Endpoint>
    * @param initQuery An object containing the endpoint and parameters for the query.
    */
   constructor({ endpoint, params }: InitQuery<E>) {
-    logger.verbose(`Created new query for endpoint: ${endpoint.join("/")}`);
-    logger.verbose("With parameters:", params);
+    logger.verbose(`Created new query for endpoint: ${printEndpoint(endpoint)}`, params);
     // Initialize the endpoint and parameters for the query
-    this.endpoint = initializeEndpoint(endpoint);
-    this.params = initializeParams(params, MarvelQuery.config, this.endpoint);
+    this.endpoint = new EndpointBuilder(endpoint);
+    this.params = MarvelQuery.parameters.query(this.endpoint, params);
 
     /** Set the onResult function for the specific type, or the 'any' type if not provided. */
     if (MarvelQuery.config.onResult) {
@@ -214,7 +215,7 @@ export class MarvelQuery<E extends Endpoint>
         ? verify(
             results.map((result) => result.id) ===
               this.results.map((result) => result.id),
-            () => logger.warn("Duplicate results found")
+            () => logger.warn("Duplicate results found") // Add more context
           )
         : false;
 
@@ -271,6 +272,8 @@ export class MarvelQuery<E extends Endpoint>
 
       // Validate the results in the response
       validateResults(response.data.results, this.endpoint);
+
+      new ResultValidator(response.data.results, this.endpoint);
 
       // Return the validated response data
       return response;

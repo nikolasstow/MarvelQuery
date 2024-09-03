@@ -76,7 +76,7 @@ export function typeFromEndpoint(endpoint: Endpoint): EndpointType {
 
 /** Build the URL of the query with the parameters, timestamp and hash. */
 export function buildURL<E extends Endpoint>(apiKeys: APIKeys, endpoint: EndpointDescriptor<E>, params: Parameters<E>): string {
-  logger.verbose(`Building URL for endpoint: /${endpoint.path.join("/")} with parameters:`, params);
+  logger.verbose(`Building URL for ${printEndpoint(endpoint.path)} with parameters:`, params);
 
   const baseURL = "https://gateway.marvel.com/v1/public";
   const endpointPath = endpoint.path.join("/");
@@ -105,14 +105,11 @@ export function buildURL<E extends Endpoint>(apiKeys: APIKeys, endpoint: Endpoin
   
   return finalURL;
 }
-/** Remove undefined parameters. */
-export function omitUndefined<E extends Endpoint>(params: Parameters<E>): Parameters<E> {
-  const filteredParams = Object.fromEntries(
-    Object.entries(params).filter(([, value]) => value !== undefined)
-  ) as Parameters<E>;
 
-	const omitions = Object.keys(params).length - Object.keys(filteredParams).length;
-	logger.verbose(`Omitted ${omitions} undefined parameters.`);
+export function printEndpoint(endpoint: Endpoint): string {
+  return `/${endpoint.join("/")}/`;
+}
 
-	return filteredParams;
+export function capitalizeFirstLetter(string: string): string {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }

@@ -65,10 +65,11 @@ export class AutoQuery<E extends Endpoint> {
   ) {
     this.createQuery = MarvelQueryClass;
     this.endpoint = endpoint;
-    logger.verbose(`Starting auto-query injection...`);
   }
 
   inject(results: Result<E>[]): ExtendResult<E>[] {
+    logger.verbose(`Starting auto-query injection...`);
+
     const extendedResults = results.map((result) => this.extendResult(result));
 
     // Log sumary of auto-query injection
@@ -151,15 +152,6 @@ export class AutoQuery<E extends Endpoint> {
     logger.verbose(`Total Resources Processed: ${totalResources}`);
     logger.verbose(resourcesSummary);
     logger.verbose("==================================================");
-  }
-
-  private combinedArrayLengths(obj: Record<string, any[]>): number {
-    return Object.values(obj).reduce((totalLength, array) => {
-      if (Array.isArray(array)) {
-        return totalLength + array.length;
-      }
-      return totalLength;
-    }, 0);
   }
 
   private sortEndpointsById(endpoints: Array<Endpoint>): Array<Endpoint> {

@@ -10,7 +10,7 @@ interface PerformanceTimer {
 }
 
 // Extend the Winston Logger to include the performance method
-interface CustomLogger extends winston.Logger {
+export interface CustomLogger extends winston.Logger {
   logFilePath: string;
   performance: (message?: string) => PerformanceTimer;
   measurePerformance: (
@@ -21,6 +21,8 @@ interface CustomLogger extends winston.Logger {
   setVerbose: (verbose: boolean) => void;
   verboseStatus: boolean;
   fileOnly: (message: string) => void;
+  line: () => void;
+  doubleLine: () => void;
 }
 
 class Logger {
@@ -119,6 +121,8 @@ class Logger {
     this.logger.measurePerformance = this.measurePerformance.bind(this);
     this.logger.setVerbose = Logger.setVerbose.bind(this);
     this.logger.verboseStatus = Logger.verboseStatus;
+    this.logger.line = this.line.bind(this);
+    this.logger.doubleLine = this.doubleLine.bind(this);
 
     // Add the new fileOnly method, always using "verbose" level
     this.logger.fileOnly = (message: string) => {
@@ -142,6 +146,14 @@ class Logger {
     Logger.verboseStatus = verbose;
     Logger.instance.logger.level = verbose ? "verbose" : "info";
     // Logger.instance = new Logger();
+  }
+
+  private line() {
+    this.logger.verbose(`\n──────────────────────────────────────────────────────────────────────────\n`);
+  }
+
+  private doubleLine() {
+    this.logger.verbose(`\n==========================================================================\n`);
   }
 
   // Custom performance method
