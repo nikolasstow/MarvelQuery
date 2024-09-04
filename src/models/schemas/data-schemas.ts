@@ -141,7 +141,7 @@ export const MarvelResultSchema = z.object({
   id: z.number().describe("The unique ID of the resource."),
   modified: z
     .string()
-    .datetime({ offset: true }) // Marvel for some reason defaults to November 30th, 1 BC and that fails validation because it's essentially a negative date. Seriously? Marvel?
+    // .datetime({ offset: true }) // Marvel for some reason defaults to November 30th, 1 BC and that fails validation because it's essentially a negative date. Seriously? Marvel?
     .describe("The date the resource was most recently modified."),
   resourceURI: z
     .string()

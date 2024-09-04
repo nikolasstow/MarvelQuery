@@ -21,17 +21,18 @@ export interface CustomLogger extends winston.Logger {
   setVerbose: (verbose: boolean) => void;
   verboseStatus: boolean;
   fileOnly: (message: string) => void;
-  line: () => void;
-  doubleLine: () => void;
+  // line: () => void;
+  // doubleLine: () => void;
+  identify: (id: string) => CustomLogger;
 }
 
-class Logger {
+export class Logger {
   private static instance: Logger;
   private static verboseStatus: boolean = false;
   recentLogs: Set<string> = new Set<string>();
   logger: CustomLogger;
 
-  private constructor() {
+  constructor(id?: string) {
     const MAX_LINES = 15;
     const MAX_CONSOLE_LENGTH = 500;
     const DATE_PATTERN = "yyyy-MM-dd";
@@ -49,17 +50,26 @@ class Logger {
       level: "verbose",
     });
 
+    // const identifier = id ? ` (${id})` : "";
+
     const consoleTransport = new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.timestamp(),
-        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+        winston.format.printf(({ timestamp, level, message, queryId, ...meta }) => {
           const time = new Date().toLocaleTimeString();
           const metaString = Object.keys(meta).length
             ? JSON.stringify(meta, null, 2)
             : "";
 
-          let logMessage = `${time} [ ${level} ] ${message} ${metaString}`;
+          // Create identifier string with unique background color
+          const identifier = queryId ? this.getColorFromId(queryId) : "";
+          // Strip away the ANSI escape codes from the level
+          const levelString = level.replace(/\x1B\[([0-9;]*[A-Za-z])/g, '');
+          // Remove level from console logs is it's verbose
+          const levelId = levelString == "verbose" ? "-" : `[${level}]`
+
+          let logMessage = `${time} ${levelId}${identifier} ${message} ${metaString}`;
           const lines = logMessage.split("\n");
           const truncatedLines: string[] = [];
 
@@ -94,13 +104,15 @@ class Logger {
       level: "info",
       format: winston.format.combine(
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-        winston.format.printf(({ timestamp, level, message, ...meta }) => {
+        winston.format.printf(({ timestamp, level, message, queryId, ...meta }) => {
           const { timestamp: _, level: __, message: ___, ...cleanMeta } = meta;
           const metaString = Object.keys(cleanMeta).length
             ? JSON.stringify(cleanMeta, null, 2)
             : "";
 
-          let logMessage = `${timestamp} [${level.toUpperCase()}] - ${message}\n${metaString}`;
+          const identifier = queryId ? ` (Q${queryId})` : "";
+
+          let logMessage = `${timestamp} [${level.toUpperCase()}]${identifier} - ${message}\n${metaString}`;
 
           const deduplicationKey = `${level}:${message}:${metaString}`;
           if (this.recentLogs.has(deduplicationKey)) {
@@ -121,8 +133,9 @@ class Logger {
     this.logger.measurePerformance = this.measurePerformance.bind(this);
     this.logger.setVerbose = Logger.setVerbose.bind(this);
     this.logger.verboseStatus = Logger.verboseStatus;
-    this.logger.line = this.line.bind(this);
-    this.logger.doubleLine = this.doubleLine.bind(this);
+    // this.logger.line = this.line.bind(this);
+    // this.logger.doubleLine = this.doubleLine.bind(this);
+    this.logger.identify = this.createLoggerWithId.bind(this);
 
     // Add the new fileOnly method, always using "verbose" level
     this.logger.fileOnly = (message: string) => {
@@ -134,6 +147,43 @@ class Logger {
     };
   }
 
+  private getColorFromId(id: string): string {
+    const standardBackgroundColors = [
+      40,  // Black background
+      41,  // Red background
+      42,  // Green background
+      43,  // Yellow background
+      44,  // Blue background
+      45,  // Magenta background
+      46,  // Cyan background
+      47,  // White background
+      100, // Bright black background (gray)
+      101, // Bright red background
+      102, // Bright green background
+      103, // Bright yellow background
+      104, // Bright blue background
+      105, // Bright magenta background
+      106, // Bright cyan background
+      107, // Bright white background
+    ];
+  
+    // Convert ID to an integer and map it to one of the 16 colors
+    const numericId = parseInt(id, 10);
+    const colorCode = standardBackgroundColors[numericId % standardBackgroundColors.length];
+  
+    // Return the ID string with the background color applied, and reset formatting after
+    return ` \x1b[${colorCode}m Q${id} \x1b[0m`;
+  }
+  
+
+  public createLoggerWithId(queryId: string) {
+    // const customInstance = new Logger(queryId);
+    // return customInstance.logger;
+    return this.logger.child({
+      queryId, // Add the query ID to the metadata
+    });
+    // return this.logger;
+  }
 
   static getInstance(): Logger {
     if (!Logger.instance) {
@@ -148,13 +198,17 @@ class Logger {
     // Logger.instance = new Logger();
   }
 
-  private line() {
-    this.logger.verbose(`\n──────────────────────────────────────────────────────────────────────────\n`);
-  }
+  // private line() {
+  //   this.logger.verbose(
+  //     `\n──────────────────────────────────────────────────────────────────────────\n`
+  //   );
+  // }
 
-  private doubleLine() {
-    this.logger.verbose(`\n==========================================================================\n`);
-  }
+  // private doubleLine() {
+  //   this.logger.verbose(
+  //     `\n==========================================================================\n`
+  //   );
+  // }
 
   // Custom performance method
   private performance(message?: string): PerformanceTimer {
@@ -218,3 +272,5 @@ class Logger {
 const instance = Logger.getInstance();
 
 export default instance.logger;
+
+// Duplicate instance, then change properties

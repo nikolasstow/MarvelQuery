@@ -1,12 +1,13 @@
 import { EndpointDescriptor, EndpointType } from "lib";
 import { VALID_ENDPOINTS } from "src/models/endpoints";
 import { DataType, Endpoint } from "src/models/types";
-import logger from "./Logger";
+import logger, { CustomLogger, Logger } from "./Logger";
 
 export class EndpointBuilder<E extends Endpoint> implements EndpointDescriptor<E> {
 	path: E;
 	type: DataType<E>
-	constructor(endpoint: E) {
+	constructor(endpoint: E, customLogger: CustomLogger) {
+		// logger = customLogger;
 		this.path = this.validatePath(endpoint);
 		 /** Determine the data type of the query from the endpoint. */
 		 this.type = (

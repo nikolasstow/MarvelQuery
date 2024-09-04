@@ -7,14 +7,14 @@ import {
   GlobalParams,
   EndpointDescriptor,
 } from "src/models/types";
+import logger from "./Logger";
 import { VALID_ENDPOINTS } from "src/models/endpoints";
 import { ValidateParams } from "src/models/schemas/param-schemas";
-import logger, { CustomLogger, Logger } from "./Logger";
 
 export class ParameterManager {
-  static config: Partial<Config>;
-  static setConfig(config: Partial<Config>) {
-    ParameterManager.config = config;
+  config: Partial<Config>;
+  constructor(config: Partial<Config>) {
+    this.config = config;
 
     if (config.globalParams) {
       logger.verbose("Validating global parameters");
@@ -27,16 +27,12 @@ export class ParameterManager {
           continue;
         }
 
-        ParameterManager.validate(type as EndpointType, globalParams[type]); // Validate the parameters of the query for the endpoint type
+        this.validate(type as EndpointType, globalParams[type]); // Validate the parameters of the query for the endpoint type
       }
     }
   }
 
-  constructor(customLogger: CustomLogger) {
-
-  }
-
-  static validate(type: EndpointType, params: AnyParams) {
+  validate(type: EndpointType, params: AnyParams) {
     logger.verbose(`Validating parameters for '${type}'`);
     try {
       // Confirm there's a validation function for the endpoint type
@@ -58,7 +54,7 @@ export class ParameterManager {
     params: Parameters<E>
   ) {
     // Remove undefined parameters unless 'omitUndefined' is false.
-    const cleanParams = ParameterManager.config.omitUndefined
+    const cleanParams = this.config.omitUndefined
       ? this.omitUndefined(params)
       : params;
 
@@ -72,15 +68,15 @@ export class ParameterManager {
       );
     }
 
-    ParameterManager.validate(endpoint.type, cleanParams);
+    this.validate(endpoint.type, cleanParams);
 
     const finalParams = {
       // Default parameters
       offset: 0,
       limit: 50,
       // Global parameters
-      ...ParameterManager.config.globalParams?.all,
-      ...ParameterManager.config.globalParams?.[endpoint.type],
+      ...this.config.globalParams?.all,
+      ...this.config.globalParams?.[endpoint.type],
       // Specific parameters
       ...params,
     };
@@ -102,3 +98,5 @@ export class ParameterManager {
     return filteredParams;
   }
 }
+
+// static function to

@@ -1,5 +1,5 @@
 import axios from "axios";
-import logger from "./utils/Logger";
+import logger, { CustomLogger, Logger } from "./utils/Logger";
 import type {
   Endpoint,
   Parameters,
@@ -21,7 +21,6 @@ import type {
   CreateQueryFunction,
 } from "./models/types";
 import { validateResults } from "./utils/validate";
-// import { initializeParams } from "./utils/initialize";
 import { buildURL, printEndpoint } from "./utils/functions";
 import { verify } from "./utils/validate";
 import { AutoQuery } from "./utils/AutoQuery";
@@ -42,8 +41,6 @@ export class MarvelQuery<E extends Endpoint>
   /** ********* Static Properties ********* */
   /** Stores the API keys used for authentication with the Marvel API */
   static apiKeys: APIKeys;
-  /** Validates and combines query parameters with globalParams */
-  static parameters: ParameterManager;
   /**
    * Configuration settings for the MarvelQuery class.
    * These include global parameters, verbosity, HTTP client, and more.
@@ -88,20 +85,20 @@ export class MarvelQuery<E extends Endpoint>
   ): CreateQueryFunction {
     // Set verbose logging based on the configuration
     logger.setVerbose(config.verbose || false);
-    
-    logger.doubleLine();
     logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
     // Assign API keys and merge the provided config with the default config
     MarvelQuery.apiKeys = apiKeys;
     MarvelQuery.config = { ...MarvelQuery.config, ...config };
 
-    this.parameters = new ParameterManager(config);
+    ParameterManager.setConfig(config);
 
     return MarvelQuery.createQuery;
   }
 
   /** ********* Instance Properties ********* */
+  logger: CustomLogger;
+  queryId: string;
   /**
    * A function to be called when the query is finished.
    * This can be specific to the endpoint type or a general function.
@@ -142,20 +139,36 @@ export class MarvelQuery<E extends Endpoint>
    * @param initQuery An object containing the endpoint and parameters for the query.
    */
   constructor({ endpoint, params }: InitQuery<E>) {
-    logger.verbose(`Created new query for endpoint: ${printEndpoint(endpoint)}`, params);
+    this.queryId = this.createUniqueId();
+    this.logger = logger.identify(this.queryId);
+    this.logger.verbose(
+      `Created new query for endpoint: ${printEndpoint(endpoint)}`,
+      params
+    );
+
     // Initialize the endpoint and parameters for the query
-    this.endpoint = new EndpointBuilder(endpoint);
-    this.params = MarvelQuery.parameters.query(this.endpoint, params);
+    this.endpoint = new EndpointBuilder(endpoint, this.logger);
+    this.params = new ParameterManager(this.logger).query(this.endpoint, params);
 
     /** Set the onResult function for the specific type, or the 'any' type if not provided. */
     if (MarvelQuery.config.onResult) {
-      logger.verbose(`Setting onResult function for ${this.endpoint.type}`);
+      this.logger.verbose(`Setting onResult function for ${this.endpoint.type}`);
       const typeSpecificOnResult =
         MarvelQuery.config.onResult[this.endpoint.type];
       this.onResult = typeSpecificOnResult
         ? typeSpecificOnResult
         : MarvelQuery.config.onResult.any;
     }
+  }
+
+  private createUniqueId(): string {
+    // Use current time (in milliseconds) to generate a unique ID
+    const now = Date.now(); // Current timestamp in milliseconds
+  
+    // Optionally, we can further modify the timestamp to create shorter or more human-readable IDs
+    const uniqueId = (now % 10000).toString(); // Take the last 4 digits for brevity
+  
+    return uniqueId;
   }
 
   /**
@@ -199,15 +212,19 @@ export class MarvelQuery<E extends Endpoint>
     this.count = fetched;
     this.params.offset = fetched;
 
-    logger.verbose(
+    this.logger.verbose(
       `Fetched ${count} results. Total fetched: ${fetched}/${total}. Remaining: ${remaining}.`
     );
 
     // Check if no results were returned
-    const noResults = verify(!results.length, () => logger.warn("No results found"));
+    const noResults = verify(!results.length, () =>
+      this.logger.warn("No results found")
+    );
 
     // Check if all results have been fetched for this query
-    const complete = verify(remaining <= 0, () => logger.verbose("No more results found"));
+    const complete = verify(remaining <= 0, () =>
+      this.logger.verbose("No more results found")
+    );
 
     // Check for duplicate results by comparing IDs with the previous results
     const duplicateResults =
@@ -215,7 +232,7 @@ export class MarvelQuery<E extends Endpoint>
         ? verify(
             results.map((result) => result.id) ===
               this.results.map((result) => result.id),
-            () => logger.warn("Duplicate results found") // Add more context
+            () => this.logger.warn("Duplicate results found") // Add more context
           )
         : false;
 
@@ -234,7 +251,7 @@ export class MarvelQuery<E extends Endpoint>
     this.results = formattedResults;
     this.resultHistory = [...this.resultHistory, ...formattedResults];
 
-    logger.verbose("Results processed and extended.");
+    this.logger.verbose("Results processed and extended.");
     return formattedResults;
   }
 
@@ -245,7 +262,7 @@ export class MarvelQuery<E extends Endpoint>
    */
   private callOnResult(results: ExtendResult<E>[]): void {
     if (this.onResult) {
-      logger.verbose("Calling onResult function with the processed results.");
+      this.logger.verbose("Calling onResult function with the processed results.");
       this.onResult(results);
     }
   }
@@ -258,12 +275,12 @@ export class MarvelQuery<E extends Endpoint>
    */
   @logger.measurePerformance // Measure the duration of the request
   async request(url: string): Promise<APIWrapper<Result<E>>> {
-    logger.verbose(`Sending request to URL: ${this.url}`);
+    this.logger.verbose(`Sending request to URL: ${this.url}`);
 
     try {
       // Execute the onRequest function if it is defined in the config
       if (MarvelQuery.config.onRequest) {
-        logger.verbose("Executing onRequest function...");
+        this.logger.verbose("Executing onRequest function...");
         MarvelQuery.config.onRequest(url, this.endpoint.path, this.params);
       }
 
@@ -278,7 +295,7 @@ export class MarvelQuery<E extends Endpoint>
       // Return the validated response data
       return response;
     } catch (error) {
-      logger.error("Error occurred during API request:", error);
+      this.logger.error("Error occurred during API request:", error);
       throw new Error("Failed to fetch data from Marvel API");
     }
   }
@@ -290,7 +307,7 @@ export class MarvelQuery<E extends Endpoint>
    * @returns A promise that resolves to a single extended result.
    */
   async fetchSingle(): Promise<ExtendResult<E>> {
-    logger.verbose("Fetching a single result.");
+    this.logger.verbose("Fetching a single result.");
 
     // Set parameters to fetch only a single result
     this.params.offset = 0;
@@ -300,7 +317,7 @@ export class MarvelQuery<E extends Endpoint>
     const query = await this.fetch();
 
     if (!query.results[0]) {
-      logger.error("No result found.");
+      this.logger.error("No result found.");
       throw new Error("No result found");
     }
 

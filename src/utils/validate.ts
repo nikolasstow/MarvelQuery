@@ -1,4 +1,4 @@
-import logger from "../utils/Logger";
+import logger, { Logger } from "../utils/Logger";
 import {
   Endpoint,
   Result,
