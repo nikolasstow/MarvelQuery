@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as CryptoJS from "crypto-js";
 import logger, { CustomLogger, Logger } from "./utils/Logger";
 import type {
   Endpoint,
@@ -20,9 +21,6 @@ import type {
   EndpointDescriptor,
   CreateQueryFunction,
 } from "./models/types";
-import { validateResults } from "./utils/validate";
-import { buildURL, printEndpoint } from "./utils/functions";
-import { verify } from "./utils/validate";
 import { AutoQuery } from "./utils/AutoQuery";
 import { EndpointBuilder } from "./utils/EndpointBuilder";
 import { ParameterManager } from "./utils/ParameterManager";
@@ -142,7 +140,7 @@ export class MarvelQuery<E extends Endpoint>
     this.queryId = this.createUniqueId();
     this.logger = logger.identify(this.queryId);
     this.logger.verbose(
-      `Created new query for endpoint: ${printEndpoint(endpoint)}`,
+      `Created new query for endpoint: ${endpoint.join("/")}`,
       params
     );
 
@@ -178,7 +176,7 @@ export class MarvelQuery<E extends Endpoint>
    */
   async fetch(): Promise<MarvelQuery<E>> {
     // Build the URL for the API request using the endpoint and parameters
-    this.url = buildURL(MarvelQuery.apiKeys, this.endpoint, this.params);
+    this.url = this.buildURL(MarvelQuery.apiKeys, this.endpoint, this.params);
 
     // Send the request and await the response
     const response = await this.request(this.url);
@@ -190,6 +188,37 @@ export class MarvelQuery<E extends Endpoint>
     this.callOnResult(processedResults);
     // Return the MarvelQuery instance for method chaining
     return this;
+  }
+
+  buildURL<E extends Endpoint>(apiKeys: APIKeys, endpoint: EndpointDescriptor<E>, params: Parameters<E>): string {
+    logger.verbose(`Building URL for ${endpoint.path.join("/")} with parameters:`, params);
+  
+    const baseURL = "https://gateway.marvel.com/v1/public";
+    const endpointPath = endpoint.path.join("/");
+    const timestamp = Number(new Date());
+    
+    /** Extract the public and private keys from the library initialization. */
+    const { privateKey, publicKey } = apiKeys;
+    
+    /** Create an MD5 hash with the timestamp, private key and public key. */
+    const hash = privateKey
+      ? CryptoJS.MD5(timestamp + privateKey + publicKey).toString()
+      : "";
+  
+    logger.verbose(`Generated hash: ${hash}`);
+  
+    /** Build the URL of the query with the parameters, keys, timestamp and hash. */
+    const queryParams = new URLSearchParams({
+      apikey: publicKey,
+      ts: timestamp.toString(),
+      hash,
+      ...(params as Record<string, unknown>),
+    });
+  
+    const finalURL = `${baseURL}/${endpointPath}?${queryParams.toString()}`;
+    logger.verbose(`Built URL: ${finalURL}`);
+    
+    return finalURL;
   }
 
   /**
@@ -217,19 +246,19 @@ export class MarvelQuery<E extends Endpoint>
     );
 
     // Check if no results were returned
-    const noResults = verify(!results.length, () =>
+    const noResults = this.verify(!results.length, () =>
       this.logger.warn("No results found")
     );
 
     // Check if all results have been fetched for this query
-    const complete = verify(remaining <= 0, () =>
+    const complete = this.verify(remaining <= 0, () =>
       this.logger.verbose("No more results found")
     );
 
     // Check for duplicate results by comparing IDs with the previous results
     const duplicateResults =
       this.resultHistory.length > 0
-        ? verify(
+        ? this.verify(
             results.map((result) => result.id) ===
               this.results.map((result) => result.id),
             () => this.logger.warn("Duplicate results found") // Add more context
@@ -241,7 +270,7 @@ export class MarvelQuery<E extends Endpoint>
      * Results are passed to the inject() method where they are processed and injected with properties
      * and a query method that returns an instance of the MarvelQuery class passed in the constructor.
      */
-    const autoQuery = new AutoQuery<E>(MarvelQuery, this.endpoint);
+    const autoQuery = new AutoQuery<E>(MarvelQuery, this.endpoint, this.logger);
     const formattedResults = autoQuery.inject(results);
 
     // Update the instance properties
@@ -253,6 +282,13 @@ export class MarvelQuery<E extends Endpoint>
 
     this.logger.verbose("Results processed and extended.");
     return formattedResults;
+  }
+
+  private verify(logic: boolean, action: () => void): boolean {
+    if (logic) {
+      action();
+    }
+    return logic;
   }
 
   /**
@@ -273,8 +309,9 @@ export class MarvelQuery<E extends Endpoint>
    * @param url The URL to send the request to.
    * @returns A promise that resolves to the API response wrapped in an APIWrapper.
    */
-  @logger.measurePerformance // Measure the duration of the request
+  // @logger.measurePerformance // Measure the duration of the request
   async request(url: string): Promise<APIWrapper<Result<E>>> {
+    const timer = this.logger.performance(this.endpoint.path.join("/"));
     this.logger.verbose(`Sending request to URL: ${this.url}`);
 
     try {
@@ -287,10 +324,10 @@ export class MarvelQuery<E extends Endpoint>
       // Send the HTTP request using the configured HTTP client and await the response
       const response = await MarvelQuery.config.httpClient<E>(url);
 
-      // Validate the results in the response
-      validateResults(response.data.results, this.endpoint);
+      timer.stop("API Request Complete")
 
-      new ResultValidator(response.data.results, this.endpoint);
+      // Validate the results in the response
+      new ResultValidator(response.data.results, this.endpoint, this.logger);
 
       // Return the validated response data
       return response;

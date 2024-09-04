@@ -258,7 +258,7 @@ export class Logger {
       }
     };
   }
-
+  
   // Format duration into a readable string
   private formatDuration(duration: number): string {
     if (duration < 1000) {

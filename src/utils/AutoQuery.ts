@@ -1,4 +1,4 @@
-import logger from "./Logger";
+import { CustomLogger } from "./Logger";
 import {
   Endpoint,
   EndpointDescriptor,
@@ -20,14 +20,14 @@ import {
   EndpointMap,
 } from "../models/types";
 import { InitQuery, MarvelQueryInterface } from "../models/types";
-import { ENDPOINT_MAP } from "../models/endpoints";
-import {
-  hasResourceURI,
-  hasCollectionURI,
-  extractIdFromURI,
-  typeFromEndpoint,
-  createEndpointFromURI,
-} from "./functions";
+import { ENDPOINT_MAP, VALID_ENDPOINTS } from "../models/endpoints";
+// import {
+//   hasResourceURI,
+//   hasCollectionURI,
+//   extractIdFromURI,
+//   typeFromEndpoint,
+//   createEndpointFromURI,
+// } from "./functions";
 
 /** Utility class for auto-query injection, finds URIs in data and injects query methods. */
 export class AutoQuery<E extends Endpoint> {
@@ -55,20 +55,23 @@ export class AutoQuery<E extends Endpoint> {
   };
   resourceNames: Map<Endpoint, string> = new Map();
   collectionNames: Map<Endpoint, string> = new Map();
+  logger: CustomLogger;
 
   constructor(
     MarvelQueryClass: new <NewEndpoint extends Endpoint>({
       endpoint,
       params,
     }: InitQuery<NewEndpoint>) => MarvelQueryInterface<NewEndpoint>,
-    endpoint: EndpointDescriptor<E>
+    endpoint: EndpointDescriptor<E>,
+    logger: CustomLogger,
   ) {
+    this.logger = logger;
     this.createQuery = MarvelQueryClass;
     this.endpoint = endpoint;
   }
 
   inject(results: Result<E>[]): ExtendResult<E>[] {
-    logger.verbose(`Starting auto-query injection...`);
+    this.logger.verbose(`Starting auto-query injection...`);
 
     const extendedResults = results.map((result) => this.extendResult(result));
 
@@ -99,7 +102,7 @@ export class AutoQuery<E extends Endpoint> {
         })
         .join("\n");
 
-      logger.verbose(`${label} - ${type}:\n${formattedEndpoints}`);
+        this.logger.verbose(`${label} - ${type}:\n${formattedEndpoints}`);
     };
 
     // Log each collection type separately
@@ -144,14 +147,14 @@ export class AutoQuery<E extends Endpoint> {
       .map(([type, items]) => `${type}: ${items.length}`)
       .join(", ");
 
-    logger.verbose("AutoQuery Injection Summary");
-    logger.verbose("==================================================");
-    logger.verbose(`Total Collections Processed: ${totalCollections}`);
-    logger.verbose(collectionsSummary);
-    logger.verbose("--------------------------------------------------");
-    logger.verbose(`Total Resources Processed: ${totalResources}`);
-    logger.verbose(resourcesSummary);
-    logger.verbose("==================================================");
+      this.logger.verbose("AutoQuery Injection Summary");
+      this.logger.verbose("==================================================");
+      this.logger.verbose(`Total Collections Processed: ${totalCollections}`);
+      this.logger.verbose(collectionsSummary);
+      this.logger.verbose("--------------------------------------------------");
+      this.logger.verbose(`Total Resources Processed: ${totalResources}`);
+      this.logger.verbose(resourcesSummary);
+      this.logger.verbose("==================================================");
   }
 
   private sortEndpointsById(endpoints: Array<Endpoint>): Array<Endpoint> {
@@ -189,17 +192,17 @@ export class AutoQuery<E extends Endpoint> {
         return acc;
       }
 
-      if (hasResourceURI(value)) {
+      if (this.hasResourceURI(value)) {
         // ExtendedResource<E, K>
         acc[key] = this.extendResource(value, [keyEndpointType]);
-      } else if (hasCollectionURI(value)) {
+      } else if (this.hasCollectionURI(value)) {
         // ExtendedCollection<E, K, Result<E>[K]>
         acc[key] = this.extendCollection(
           value,
           keyEndpointType,
           this.findResourceName(result)
         );
-      } else if (Array.isArray(value) && hasResourceURI(value[0])) {
+      } else if (Array.isArray(value) && this.hasResourceURI(value[0])) {
         // ExtendedResourceArray<E, K>
         acc[key] = this.extendResourceArray(value, [keyEndpointType]);
       }
@@ -245,8 +248,8 @@ export class AutoQuery<E extends Endpoint> {
     baseEndpoint: BEndpoint
   ) {
     try {
-      const id: number = extractIdFromURI(value.resourceURI);
-      const baseType = typeFromEndpoint(baseEndpoint);
+      const id: number = this.extractIdFromURI(value.resourceURI);
+      const baseType = this.typeFromEndpoint(baseEndpoint);
       const endpoint: ResourceEndpoint<BEndpoint> = [
         baseType,
         id,
@@ -298,7 +301,7 @@ export class AutoQuery<E extends Endpoint> {
         };
       })(endpoint);
     } catch (error) {
-      logger.error(`Failed to determine resource endpoint: ${error}`);
+      this.logger.error(`Failed to determine resource endpoint: ${error}`);
 
       return value;
     }
@@ -321,7 +324,7 @@ export class AutoQuery<E extends Endpoint> {
     parent?: string
   ) {
     try {
-      const endpoint = createEndpointFromURI(value.collectionURI);
+      const endpoint = this.createEndpointFromURI(value.collectionURI);
       this.collections[baseType].push(endpoint);
 
       // Set name of collection as the name of the parent resource
@@ -355,9 +358,81 @@ export class AutoQuery<E extends Endpoint> {
         };
       })(endpoint);
     } catch (error) {
-      logger.error(`Failed to determine collection endpoint: ${error}`);
+      this.logger.error(`Failed to determine collection endpoint: ${error}`);
 
       return value;
     }
   }
+
+  private createEndpointFromURI(url: string): Endpoint {
+    // Remove everything from 'http' to '/public/'
+    const cleanedUrl = url.replace(/^.*\/public\//, "");
+  
+    // Split the remaining part of the URL by '/'
+    const parts = cleanedUrl.split("/");
+  
+    if (parts.length < 1) {
+      this.logger.error(`Invalid URL: ${url}`);
+      throw new Error(`Invalid URL: ${url}`);
+    }
+  
+    const baseType = parts[0] as EndpointType;
+    if (!VALID_ENDPOINTS.has(baseType)) {
+      throw new Error(`Invalid endpoint: ${baseType}`);
+    }
+  
+    const id = parts[1];
+    if (!id) {
+      throw new Error(`Missing ID in URL: ${url}`);
+    }
+  
+    const type = parts[2];
+  
+    const endpoint = [
+      baseType,
+      Number(id),
+      type ? type : undefined,
+    ] as Endpoint;
+  
+    return endpoint;
+  }
+
+  private extractIdFromURI(url: string): number {
+    const cleanedUrl = url.replace(/^.*\/public\//, "");
+  
+    const parts = cleanedUrl.split("/");
+  
+    if (parts.length < 2) {
+      this.logger.error(`Invalid URL: ${url}`);
+      throw new Error(`Invalid URL: ${url}`);
+    }
+  
+    const id = parts[1];
+  
+    if (id && !/^\d+$/.test(id)) {
+      this.logger.error(`Invalid ID: ${id}`);
+      throw new Error(`Invalid ID: ${id}`);
+    }
+  
+    return Number(id);
+  }
+
+  private hasResourceURI<T>(obj: T): obj is T & { resourceURI: string } {
+    return obj && (obj as any).resourceURI && typeof (obj as any).resourceURI === "string";
+  }
+
+  private hasCollectionURI<T>(obj: T): obj is T & { collectionURI: string } {
+    return obj && (obj as any).collectionURI && typeof (obj as any).collectionURI === "string";
+  }
+
+  private typeFromEndpoint(endpoint: Endpoint): EndpointType {
+    const type = endpoint[2] ? endpoint[2] : endpoint[0];
+  
+    if (!VALID_ENDPOINTS.has(type)) {
+      throw new Error(`Unable to determine type from endpoint: ${endpoint.join("/")}`);
+    }
+  
+    return type;
+  }
+  
 }
