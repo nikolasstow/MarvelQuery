@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as CryptoJS from "crypto-js";
-import logger, { CustomLogger, Logger } from "./utils/Logger";
+import logger, { CustomLogger } from "./utils/Logger";
 import type {
   Endpoint,
   Parameters,
@@ -89,14 +89,17 @@ export class MarvelQuery<E extends Endpoint>
     MarvelQuery.apiKeys = apiKeys;
     MarvelQuery.config = { ...MarvelQuery.config, ...config };
 
+    // Set config as static property on ParameterManager class
     ParameterManager.setConfig(config);
 
     return MarvelQuery.createQuery;
   }
 
   /** ********* Instance Properties ********* */
-  logger: CustomLogger;
+  /** Query identifier for logging */
   queryId: string;
+  /** Modified logger instance with query identifier */
+  logger: CustomLogger;
   /**
    * A function to be called when the query is finished.
    * This can be specific to the endpoint type or a general function.
@@ -137,20 +140,28 @@ export class MarvelQuery<E extends Endpoint>
    * @param initQuery An object containing the endpoint and parameters for the query.
    */
   constructor({ endpoint, params }: InitQuery<E>) {
+    // Create a unique identifier for the query
     this.queryId = this.createUniqueId();
+    // Create a modified logger instance with the query identifier
     this.logger = logger.identify(this.queryId);
+
     this.logger.verbose(
       `Created new query for endpoint: ${endpoint.join("/")}`,
       params
     );
 
-    // Initialize the endpoint and parameters for the query
+    // Setup and Validate the endpoint and parameters
     this.endpoint = new EndpointBuilder(endpoint, this.logger);
-    this.params = new ParameterManager(this.logger).query(this.endpoint, params);
+    this.params = new ParameterManager(this.logger).query(
+      this.endpoint,
+      params
+    );
 
-    /** Set the onResult function for the specific type, or the 'any' type if not provided. */
+    // Set the onResult function for the specific type, or the 'any' type if not provided.
     if (MarvelQuery.config.onResult) {
-      this.logger.verbose(`Setting onResult function for ${this.endpoint.type}`);
+      this.logger.verbose(
+        `Setting onResult function for ${this.endpoint.type}`
+      );
       const typeSpecificOnResult =
         MarvelQuery.config.onResult[this.endpoint.type];
       this.onResult = typeSpecificOnResult
@@ -159,13 +170,18 @@ export class MarvelQuery<E extends Endpoint>
     }
   }
 
+  /**
+   * Creates a unique identifier for the query.
+   *
+   * @returns The unique identifier for the query.
+   */
   private createUniqueId(): string {
     // Use current time (in milliseconds) to generate a unique ID
     const now = Date.now(); // Current timestamp in milliseconds
-  
+
     // Optionally, we can further modify the timestamp to create shorter or more human-readable IDs
     const uniqueId = (now % 10000).toString(); // Take the last 4 digits for brevity
-  
+
     return uniqueId;
   }
 
@@ -176,7 +192,11 @@ export class MarvelQuery<E extends Endpoint>
    */
   async fetch(): Promise<MarvelQuery<E>> {
     // Build the URL for the API request using the endpoint and parameters
-    this.url = this.buildURL(MarvelQuery.apiKeys, this.endpoint, this.params);
+    this.url = this.buildURL(
+      MarvelQuery.apiKeys,
+      this.endpoint.path,
+      this.params
+    );
 
     // Send the request and await the response
     const response = await this.request(this.url);
@@ -190,34 +210,51 @@ export class MarvelQuery<E extends Endpoint>
     return this;
   }
 
-  buildURL<E extends Endpoint>(apiKeys: APIKeys, endpoint: EndpointDescriptor<E>, params: Parameters<E>): string {
-    this.logger.verbose(`Building URL for ${endpoint.path.join("/")} with parameters:`, params);
-  
+  /**
+   * Builds the URL for the API request using the endpoint and parameters.
+   * @param apiKeys Public and private keys for authentication.
+   * @param endpoint Endpoint path as an array.
+   * @param params Parameters of the query.
+   * @returns The URL of the query.
+   */
+  buildURL<E extends Endpoint>(
+    apiKeys: APIKeys,
+    endpoint: E,
+    params: Parameters<E>
+  ): string {
+    this.logger.verbose(
+      `Building URL for ${endpoint.join("/")} with parameters:`,
+      params
+    );
+
+    // Set the base URL and endpoint path for the query
     const baseURL = "https://gateway.marvel.com/v1/public";
-    const endpointPath = endpoint.path.join("/");
+    const endpointPath = endpoint.join("/");
     const timestamp = Number(new Date());
-    
-    /** Extract the public and private keys from the library initialization. */
+
+    // Destructure the API keys for public and private keys
     const { privateKey, publicKey } = apiKeys;
-    
-    /** Create an MD5 hash with the timestamp, private key and public key. */
+
+    // Create an MD5 hash with the timestamp, private key and public key
     const hash = privateKey
       ? CryptoJS.MD5(timestamp + privateKey + publicKey).toString()
       : "";
-  
+
     this.logger.verbose(`Generated hash: ${hash}`);
-  
-    /** Build the URL of the query with the parameters, keys, timestamp and hash. */
+
+    // Build the URL of the query with the parameters, keys, timestamp and hash.
     const queryParams = new URLSearchParams({
       apikey: publicKey,
       ts: timestamp.toString(),
       hash,
       ...(params as Record<string, unknown>),
     });
-  
+
+    // Combine the base URL and endpoint path with the query parameters
     const finalURL = `${baseURL}/${endpointPath}?${queryParams.toString()}`;
+
     this.logger.verbose(`Built URL: ${finalURL}`);
-    
+
     return finalURL;
   }
 
@@ -273,7 +310,7 @@ export class MarvelQuery<E extends Endpoint>
     const autoQuery = new AutoQuery<E>(MarvelQuery, this.endpoint, this.logger);
     const formattedResults = autoQuery.inject(results);
 
-    // Update the instance properties
+    // Update the MarvelQuery instance properties
     this.isComplete = complete || duplicateResults || noResults;
     this.metadata = metadata;
     this.responseData = responseData;
@@ -284,6 +321,12 @@ export class MarvelQuery<E extends Endpoint>
     return formattedResults;
   }
 
+  /**
+   * If logic is true, executes the action function.
+   * @param logic Boolean to check.
+   * @param action Method to execute if logic is true.
+   * @returns The value of logic.
+   */
   private verify(logic: boolean, action: () => void): boolean {
     if (logic) {
       action();
@@ -297,8 +340,11 @@ export class MarvelQuery<E extends Endpoint>
    * @param results The processed results to pass to the onResult function.
    */
   private callOnResult(results: ExtendResult<E>[]): void {
+    // Call the onResult function if it is defined
     if (this.onResult) {
-      this.logger.verbose("Calling onResult function with the processed results.");
+      this.logger.verbose(
+        "Calling onResult function with the processed results."
+      );
       this.onResult(results);
     }
   }
@@ -309,10 +355,12 @@ export class MarvelQuery<E extends Endpoint>
    * @param url The URL to send the request to.
    * @returns A promise that resolves to the API response wrapped in an APIWrapper.
    */
-  // @logger.measurePerformance // Measure the duration of the request
   async request(url: string): Promise<APIWrapper<Result<E>>> {
-    const timer = this.logger.performance(this.endpoint.path.join("/"));
-    this.logger.verbose(`Sending request to URL: ${this.url}`);
+    // Create a timer for the request to measure performance
+    const timer = logger.performance(
+      `Sending request to endpoint: ${this.endpoint.path.join("/")}`,
+      this.logger
+    );
 
     try {
       // Execute the onRequest function if it is defined in the config
@@ -324,7 +372,8 @@ export class MarvelQuery<E extends Endpoint>
       // Send the HTTP request using the configured HTTP client and await the response
       const response = await MarvelQuery.config.httpClient<E>(url);
 
-      timer.stop("API Request Complete")
+      // Stop the timer and log the request performance
+      timer.stop("API Request Complete");
 
       // Validate the results in the response
       new ResultValidator(response.data.results, this.endpoint, this.logger);

@@ -1,83 +1,72 @@
 import { format } from "date-fns";
 import { performance } from "perf_hooks";
+import { CustomLogger, PerformanceTimer } from "src/models/types/logger";
 import * as winston from "winston";
 import "winston-daily-rotate-file";
 
-// Define an interface for the performance object
-interface PerformanceTimer {
-  startTime: number;
-  stop: (message?: string) => number;
-}
-
-// Extend the Winston Logger to include the performance method
-export interface CustomLogger extends winston.Logger {
-  logFilePath: string;
-  performance: (message?: string) => PerformanceTimer;
-  measurePerformance: (
-    target: any,
-    key: string,
-    descriptor: TypedPropertyDescriptor<any>
-  ) => void;
-  setVerbose: (verbose: boolean) => void;
-  verboseStatus: boolean;
-  fileOnly: (message: string) => void;
-  // line: () => void;
-  // doubleLine: () => void;
-  identify: (id: string) => CustomLogger;
-}
-
+/**
+ * Logger class that provides custom logging features, including performance measurement,
+ * verbose mode control, and log message deduplication.
+ */
 export class Logger {
   private static instance: Logger;
   private static verboseStatus: boolean = false;
+  /** Set to store recent logs to prevent duplicate messages */
   recentLogs: Set<string> = new Set<string>();
+  /** The custom Winston logger instance */
   logger: CustomLogger;
 
+  /**
+   * Creates a new instance of the Logger class.
+   * If a query ID is provided, it's used to create unique log messages.
+   * @param id - Optional identifier for the logger (e.g., query ID).
+   */
   constructor(id?: string) {
-    const MAX_LINES = 30;
-    const MAX_CONSOLE_LENGTH = 2000;
-    const DATE_PATTERN = "yyyy-MM-dd";
+    const MAX_LINES = 23; // Maximum lines to display in the console before truncating.
+    const MAX_CONSOLE_LENGTH = 2000; // Maximum length of a log message in the console before truncating.
+    const DATE_PATTERN = "yyyy-MM-dd"; // Date format for log files.
 
     const logFilePath = `logs/marvelquery-${format(
       new Date(),
       DATE_PATTERN
     )}.log`;
 
+    // Transport for logging to rotating daily log files
     const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
       filename: "logs/marvelquery-%DATE%.log",
       datePattern: "YYYY-MM-DD",
       maxSize: "20m",
-      maxFiles: "14d",
-      level: "verbose",
+      maxFiles: "14d", // Keep logs for the last 14 days
+      level: "verbose", // Log level for file output
     });
 
-    // const identifier = id ? ` (${id})` : "";
-
+    // Transport for logging to the console
     const consoleTransport = new winston.transports.Console({
       format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.timestamp(),
+        winston.format.colorize(), // Colorize the log output
+        winston.format.timestamp(), // Add timestamp to the log
         winston.format.printf(({ timestamp, level, message, queryId, ...meta }) => {
           const time = new Date().toLocaleTimeString();
           const metaString = Object.keys(meta).length
             ? JSON.stringify(meta, null, 2)
             : "";
 
-          // Create identifier string with unique background color
+          // Create identifier string with a unique background color based on query ID
           const identifier = queryId ? this.getColorFromId(queryId) : "-";
-          // Strip away the ANSI escape codes from the level
-          const levelString = level.replace(/\x1B\[([0-9;]*[A-Za-z])/g, '');
-          // Remove level from console logs is it's verbose
-          const levelId = levelString == "verbose" ? "" : `[${level}]`
 
+          // Remove ANSI escape codes from the level (for cleaner output)
+          const levelString = level.replace(/\x1B\[([0-9;]*[A-Za-z])/g, "");
+          // Show level in logs unless it's verbose
+          const levelId = levelString === "verbose" ? "" : `[${level}]`;
+
+          // Format log message and truncate if it exceeds the line/length limits
           let logMessage = `${time} ${levelId}${identifier} ${message} ${metaString}`;
           const lines = logMessage.split("\n");
           const truncatedLines: string[] = [];
 
           let currentLineCount = 0;
           for (const line of lines) {
-            const wrappedLineCount = Math.ceil(
-              line.length / MAX_CONSOLE_LENGTH
-            );
+            const wrappedLineCount = Math.ceil(line.length / MAX_CONSOLE_LENGTH);
             if (currentLineCount + wrappedLineCount > MAX_LINES) {
               truncatedLines.push(line.slice(0, MAX_CONSOLE_LENGTH) + "...");
               truncatedLines.push(
@@ -94,12 +83,12 @@ export class Logger {
           }
 
           logMessage = truncatedLines.join("\n") + "\n";
-
           return logMessage;
         })
       ),
     });
 
+    // Create the logger with both file and console transports
     this.logger = winston.createLogger({
       level: "info",
       format: winston.format.combine(
@@ -112,15 +101,17 @@ export class Logger {
 
           const identifier = queryId ? ` (Q${queryId})` : "";
 
+          // Format log message with timestamp, level, message, and metadata
           let logMessage = `${timestamp} [${level.toUpperCase()}]${identifier} - ${message}\n${metaString}`;
 
+          // Deduplicate logs by storing the unique key in recentLogs set
           const deduplicationKey = `${level}:${message}:${metaString}`;
           if (this.recentLogs.has(deduplicationKey)) {
-            return "";
+            return ""; // Return empty if the message is a duplicate
           }
 
           this.recentLogs.add(deduplicationKey);
-          setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000);
+          setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000); // Remove after 1 minute
 
           return logMessage;
         })
@@ -128,6 +119,7 @@ export class Logger {
       transports: [consoleTransport, dailyRotateFileTransport],
     }) as CustomLogger;
 
+    // Bind additional methods to the winston logger
     this.logger.logFilePath = logFilePath;
     this.logger.performance = this.performance.bind(this);
     this.logger.measurePerformance = this.measurePerformance.bind(this);
@@ -135,54 +127,47 @@ export class Logger {
     this.logger.verboseStatus = Logger.verboseStatus;
     this.logger.identify = this.createLoggerWithId.bind(this);
 
-    // Add the new fileOnly method, always using "verbose" level
+    // Method for logging directly to file only
     this.logger.fileOnly = (message: string) => {
       this.logger.log({
         level: "verbose",
         message: message,
-        // silent: true, // prevent the message from being logged to the console
       });
     };
   }
 
+  /**
+   * Generates a background color based on the ID and returns the ID with the color applied.
+   * @param id - The unique ID to generate a color for.
+   * @returns A string with ANSI escape codes for background color.
+   */
   private getColorFromId(id: string): string {
     const standardBackgroundColors = [
-      40,  // Black background
-      41,  // Red background
-      42,  // Green background
-      43,  // Yellow background
-      44,  // Blue background
-      45,  // Magenta background
-      46,  // Cyan background
-      47,  // White background
-      100, // Bright black background (gray)
-      101, // Bright red background
-      102, // Bright green background
-      103, // Bright yellow background
-      104, // Bright blue background
-      105, // Bright magenta background
-      106, // Bright cyan background
-      107, // Bright white background
+      40, 41, 42, 43, 44, 45, 46, 47, // Standard colors
+      100, 101, 102, 103, 104, 105, 106, 107, // Bright colors
     ];
-  
-    // Convert ID to an integer and map it to one of the 16 colors
+
+    // Convert ID to an integer and map it to one of the colors
     const numericId = parseInt(id, 10);
     const colorCode = standardBackgroundColors[numericId % standardBackgroundColors.length];
-  
-    // Return the ID string with the background color applied, and reset formatting after
+
+    // Return the ID string with the background color applied
     return `\x1b[${colorCode}m Q${id} \x1b[0m`;
   }
-  
 
+  /**
+   * Creates a new logger instance with a query ID for tracking.
+   * @param queryId - The ID to associate with this logger.
+   * @returns A new logger instance with the query ID included.
+   */
   public createLoggerWithId(queryId: string) {
-    // const customInstance = new Logger(queryId);
-    // return customInstance.logger;
-    return this.logger.child({
-      queryId, // Add the query ID to the metadata
-    });
-    // return this.logger;
+    return this.logger.child({ queryId });
   }
 
+  /**
+   * Retrieves the singleton instance of the Logger class.
+   * @returns The singleton Logger instance.
+   */
   static getInstance(): Logger {
     if (!Logger.instance) {
       Logger.instance = new Logger();
@@ -190,43 +175,55 @@ export class Logger {
     return Logger.instance;
   }
 
+  /**
+   * Enables or disables verbose logging.
+   * @param verbose - A boolean to toggle verbose logging.
+   */
   static setVerbose(verbose: boolean) {
     Logger.verboseStatus = verbose;
     Logger.instance.logger.level = verbose ? "verbose" : "info";
-    // Logger.instance = new Logger();
   }
 
-  // Custom performance method
-  private performance(message?: string): PerformanceTimer {
+  /**
+   * Custom performance timer method to measure the duration of tasks.
+   * Logs the duration when the `stop` method is called.
+   * @param message - Optional message to log when starting the timer.
+   * @param customLogger - Optional custom logger to use for logging.
+   * @returns An object with `startTime` and a `stop` method.
+   */
+  private performance(message?: string, customLogger?: CustomLogger): PerformanceTimer {
+    const logger = customLogger ?? this.logger;
     const startTime = performance.now();
     if (message) {
-      this.logger.verbose(`Timer started: ${message}`);
+      logger.verbose(message);
     }
     return {
       startTime,
       stop: (stopMessage?: string): number => {
         const duration = performance.now() - startTime;
-        if (stopMessage) {
-          this.logger.verbose(
-            `Timer stopped: ${stopMessage}. Duration: ${this.formatDuration(
-              duration
-            )}`
-          );
-        }
+        const formattedMessage = stopMessage ? `${stopMessage}. ` : "";
+
+        // Log the duration of the task
+        logger.verbose(`${formattedMessage}Duration: ${this.formatDuration(duration)}`);
+
         return duration;
       },
     };
   }
 
+  /**
+   * A method decorator to measure the performance of an asynchronous function.
+   * @param target - The target object.
+   * @param key - The method name.
+   * @param descriptor - The property descriptor of the method.
+   */
   private measurePerformance(
     target: any,
     key: string,
     descriptor: TypedPropertyDescriptor<any>
   ): void {
     if (descriptor === undefined || typeof descriptor.value !== "function") {
-      throw new Error(
-        `measurePerformance can only be used on methods, not on: ${key}`
-      );
+      throw new Error(`measurePerformance can only be used on methods, not on: ${key}`);
     }
 
     const originalMethod = descriptor.value;
@@ -245,7 +242,11 @@ export class Logger {
     };
   }
 
-  // Format duration into a readable string
+  /**
+   * Formats the duration into a human-readable string (ms or s).
+   * @param duration - The duration in milliseconds.
+   * @returns A formatted string representing the duration.
+   */
   private formatDuration(duration: number): string {
     if (duration < 1000) {
       return `${duration.toFixed(2)}ms`;
@@ -255,8 +256,8 @@ export class Logger {
   }
 }
 
+// Singleton instance of the Logger class
 const instance = Logger.getInstance();
 
 export default instance.logger;
-
-// Duplicate instance, then change properties
+export { CustomLogger } from "../models/types/logger";
