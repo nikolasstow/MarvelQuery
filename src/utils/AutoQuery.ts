@@ -54,7 +54,7 @@ export class AutoQuery<E extends Endpoint> {
     creators: [],
   };
   resourceNames: Map<Endpoint, string> = new Map();
-  collectionNames: Map<Endpoint, string> = new Map();
+
   logger: CustomLogger;
 
   constructor(
@@ -63,7 +63,7 @@ export class AutoQuery<E extends Endpoint> {
       params,
     }: InitQuery<NewEndpoint>) => MarvelQueryInterface<NewEndpoint>,
     endpoint: EndpointDescriptor<E>,
-    logger: CustomLogger,
+    logger: CustomLogger
   ) {
     this.logger = logger;
     this.createQuery = MarvelQueryClass;
@@ -77,107 +77,11 @@ export class AutoQuery<E extends Endpoint> {
 
     // Log sumary of auto-query injection
     this.logAutoQueryInjectionSummary(this.resources, this.collections);
-    this.logSortedCollectionsAndResources();
+    this.logResourcesAndCollections();
 
     return extendedResults;
   }
 
-  private logSortedCollectionsAndResources(): void {
-    // Helper function to log content for a given collection or resource type
-    const logContentForType = (
-      type: string,
-      endpoints: Endpoint[],
-      nameGetter: (endpoint: Endpoint) => string | undefined,
-      label: string
-    ): void => {
-      if (!Array.isArray(endpoints) || endpoints.length === 0) {
-        return;
-      }
-
-      const sortedEndpoints = this.sortEndpointsById(endpoints);
-      const formattedEndpoints = sortedEndpoints
-        .map((endpoint) => {
-          const name = nameGetter(endpoint) || "Unknown Name";
-          return `${endpoint.join("/")} - ${name}`;
-        })
-        .join("\n");
-
-        this.logger.verbose(`${label} - ${type}:\n${formattedEndpoints}`);
-    };
-
-    // Log each collection type separately
-    Object.entries(this.collections).forEach(([type, endpoints]) => {
-      logContentForType(
-        type,
-        endpoints,
-        (endpoint) => this.collectionNames.get(endpoint),
-        "Collection"
-      );
-    });
-
-    // Log each resource type separately
-    Object.entries(this.resources).forEach(([type, endpoints]) => {
-      logContentForType(
-        type,
-        endpoints,
-        (endpoint) => this.resourceNames.get(endpoint),
-        "Resource"
-      );
-    });
-  }
-
-  private logAutoQueryInjectionSummary(
-    resources: Record<string, Endpoint[]>,
-    collections: Record<string, Endpoint[]>
-  ): void {
-    const totalCollections = Object.values(collections).reduce(
-      (sum, arr) => sum + arr.length,
-      0
-    );
-    const totalResources = Object.values(resources).reduce(
-      (sum, arr) => sum + arr.length,
-      0
-    );
-
-    const collectionsSummary = Object.entries(collections)
-      .map(([type, items]) => `${type}: ${items.length}`)
-      .join(", ");
-
-    const resourcesSummary = Object.entries(resources)
-      .map(([type, items]) => `${type}: ${items.length}`)
-      .join(", ");
-
-      this.logger.verbose("AutoQuery Injection Summary");
-      this.logger.verbose("==================================================");
-      this.logger.verbose(`Total Collections Processed: ${totalCollections}`);
-      this.logger.verbose(collectionsSummary);
-      this.logger.verbose("--------------------------------------------------");
-      this.logger.verbose(`Total Resources Processed: ${totalResources}`);
-      this.logger.verbose(resourcesSummary);
-      this.logger.verbose("==================================================");
-  }
-
-  private sortEndpointsById(endpoints: Array<Endpoint>): Array<Endpoint> {
-    const uniqueEndpoints = new Map<string, Endpoint>();
-  
-    endpoints.forEach(endpoint => {
-      const id = endpoint[1] ?? 0; // Default to 0 if the second element is undefined
-      const key = `${endpoint[0]}/${id}`; // Create a unique key based on the endpoint type and ID
-      if (!uniqueEndpoints.has(key)) {
-        uniqueEndpoints.set(key, endpoint);
-      }
-    });
-  
-    return Array.from(uniqueEndpoints.values()).sort((a, b) => {
-      const idA = a[1] ?? 0;
-      const idB = b[1] ?? 0;
-      return idA - idB;
-    });
-  }
-  private findResourceName(resource: any): string {
-    return resource.name || resource.title || resource.fullName || "";
-  }
-  
   extendResult(result: Result<E>): ExtendResult<E> {
     const endpoint = this.endpoint.path;
     const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
@@ -329,7 +233,7 @@ export class AutoQuery<E extends Endpoint> {
 
       // Set name of collection as the name of the parent resource
       if (parent) {
-        this.collectionNames.set(endpoint, parent);
+        this.resourceNames.set(endpoint, parent);
       }
 
       return (<TEndpoint extends Endpoint>(
@@ -367,72 +271,195 @@ export class AutoQuery<E extends Endpoint> {
   private createEndpointFromURI(url: string): Endpoint {
     // Remove everything from 'http' to '/public/'
     const cleanedUrl = url.replace(/^.*\/public\//, "");
-  
+
     // Split the remaining part of the URL by '/'
     const parts = cleanedUrl.split("/");
-  
+
     if (parts.length < 1) {
       this.logger.error(`Invalid URL: ${url}`);
       throw new Error(`Invalid URL: ${url}`);
     }
-  
+
     const baseType = parts[0] as EndpointType;
     if (!VALID_ENDPOINTS.has(baseType)) {
       throw new Error(`Invalid endpoint: ${baseType}`);
     }
-  
+
     const id = parts[1];
     if (!id) {
       throw new Error(`Missing ID in URL: ${url}`);
     }
-  
+
     const type = parts[2];
-  
+
     const endpoint = [
       baseType,
       Number(id),
       type ? type : undefined,
     ] as Endpoint;
-  
+
     return endpoint;
   }
 
   private extractIdFromURI(url: string): number {
     const cleanedUrl = url.replace(/^.*\/public\//, "");
-  
+
     const parts = cleanedUrl.split("/");
-  
+
     if (parts.length < 2) {
       this.logger.error(`Invalid URL: ${url}`);
       throw new Error(`Invalid URL: ${url}`);
     }
-  
+
     const id = parts[1];
-  
+
     if (id && !/^\d+$/.test(id)) {
       this.logger.error(`Invalid ID: ${id}`);
       throw new Error(`Invalid ID: ${id}`);
     }
-  
+
     return Number(id);
   }
 
   private hasResourceURI<T>(obj: T): obj is T & { resourceURI: string } {
-    return obj && (obj as any).resourceURI && typeof (obj as any).resourceURI === "string";
+    return (
+      obj &&
+      (obj as any).resourceURI &&
+      typeof (obj as any).resourceURI === "string"
+    );
   }
 
   private hasCollectionURI<T>(obj: T): obj is T & { collectionURI: string } {
-    return obj && (obj as any).collectionURI && typeof (obj as any).collectionURI === "string";
+    return (
+      obj &&
+      (obj as any).collectionURI &&
+      typeof (obj as any).collectionURI === "string"
+    );
   }
 
   private typeFromEndpoint(endpoint: Endpoint): EndpointType {
     const type = endpoint[2] ? endpoint[2] : endpoint[0];
-  
+
     if (!VALID_ENDPOINTS.has(type)) {
-      throw new Error(`Unable to determine type from endpoint: ${endpoint.join("/")}`);
+      throw new Error(
+        `Unable to determine type from endpoint: ${endpoint.join("/")}`
+      );
     }
-  
+
     return type;
   }
-  
+
+  private sortEndpoints(list: Record<EndpointType, Endpoint[]>): Endpoint[] {
+    // Combine all arrays from the list
+    const combinedArray = Object.values(list).flat();
+
+    // Use a Map to deduplicate based on all elements of the Endpoint array
+    const map = new Map<string, Endpoint>();
+
+    combinedArray.forEach((endpoint) => {
+      const key = `${endpoint[0]}-${endpoint[1] ?? ""}-${endpoint[2] ?? ""}`; // Create a unique key for each Endpoint
+      if (!map.has(key)) {
+        map.set(key, endpoint);
+      }
+    });
+
+    // Return the deduplicated array
+    const dedeupedArray = Array.from(map.values());
+
+    return dedeupedArray.sort((a, b) => {
+      // Compare first element alphabetically
+      if (a[0] < b[0]) return -1;
+      if (a[0] > b[0]) return 1;
+
+      // Compare second element numerically if both arrays have a second element
+      if (a[1] !== undefined && b[1] !== undefined) {
+        if (a[1] < b[1]) return -1;
+        if (a[1] > b[1]) return 1;
+      }
+
+      // If one has a second element and the other doesn't, prioritize the one with the second element
+      if (a[1] !== undefined && b[1] === undefined) return 1;
+      if (a[1] === undefined && b[1] !== undefined) return -1;
+
+      // Compare third element alphabetically if both arrays have a third element
+      if (a[2] && b[2]) {
+        if (a[2] < b[2]) return -1;
+        if (a[2] > b[2]) return 1;
+      }
+
+      // If one has a third element and the other doesn't, prioritize the one with the third element
+      if (a[2] && !b[2]) return 1;
+      if (!a[2] && b[2]) return -1;
+
+      // All elements are equal
+      return 0;
+    });
+  }
+
+  private logResourcesAndCollections(): void {
+    const resources = this.sortEndpoints(this.resources);
+    const resourceList = resources
+      .map((endpoint) => {
+        const name = this.resourceNames.get(endpoint) ?? "Unknown Resource";
+        return `${endpoint.join("/")} - ${name}`;
+      })
+      .join("\n");
+
+    this.logger.verbose(`Resources:\n\n${resourceList}`);
+
+    const collections = this.sortEndpoints(this.collections);
+    const collectionsList = collections
+      .map((endpoint) => {
+        const name = this.resourceNames.get(endpoint) ?? "Unknown Collection";
+        return `${endpoint.join("/")} - ${name}`;
+      })
+      .join("\n");
+
+    this.logger.verbose(`Collections:\n\n${collectionsList}`);
+  }
+
+  private logAutoQueryInjectionSummary(
+    resources: Record<string, Endpoint[]>,
+    collections: Record<string, Endpoint[]>
+  ): void {
+    const totalCollections = Object.values(collections).reduce(
+      (sum, arr) => sum + arr.length,
+      0
+    );
+    const totalResources = Object.values(resources).reduce(
+      (sum, arr) => sum + arr.length,
+      0
+    );
+
+    const count = (obj: Record<string, Endpoint[]>) =>
+      Object.entries(obj)
+        .filter(([, items]) => items.length > 0) // Filter out items with length 0
+        .map(([type, items]) => `${type}: ${items.length}`)
+        .join(", ");
+
+    const collectionsSummary = count(collections);
+
+    const resourcesSummary = count(resources);
+
+    const summary: string[] = ["AutoQuery Injection Summary"];
+    summary.push(
+      `=================================================================\n`
+    );
+    summary.push(` Total Collections Processed: ${totalCollections}`);
+    summary.push(` ${collectionsSummary}`);
+    summary.push(
+      `\n-----------------------------------------------------------------\n`
+    );
+    summary.push(` Total Resources Processed: ${totalResources}`);
+    summary.push(` ${resourcesSummary}`);
+    summary.push(
+      `\n=================================================================`
+    );
+
+    this.logger.verbose(summary.join(`\n`));
+  }
+
+  private findResourceName(resource: any): string {
+    return resource.name || resource.title || resource.fullName || "";
+  }
 }

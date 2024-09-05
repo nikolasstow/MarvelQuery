@@ -33,8 +33,8 @@ export class Logger {
   logger: CustomLogger;
 
   constructor(id?: string) {
-    const MAX_LINES = 15;
-    const MAX_CONSOLE_LENGTH = 500;
+    const MAX_LINES = 30;
+    const MAX_CONSOLE_LENGTH = 2000;
     const DATE_PATTERN = "yyyy-MM-dd";
 
     const logFilePath = `logs/marvelquery-${format(
@@ -63,11 +63,11 @@ export class Logger {
             : "";
 
           // Create identifier string with unique background color
-          const identifier = queryId ? this.getColorFromId(queryId) : "";
+          const identifier = queryId ? this.getColorFromId(queryId) : "-";
           // Strip away the ANSI escape codes from the level
           const levelString = level.replace(/\x1B\[([0-9;]*[A-Za-z])/g, '');
           // Remove level from console logs is it's verbose
-          const levelId = levelString == "verbose" ? "-" : `[${level}]`
+          const levelId = levelString == "verbose" ? "" : `[${level}]`
 
           let logMessage = `${time} ${levelId}${identifier} ${message} ${metaString}`;
           const lines = logMessage.split("\n");
@@ -133,8 +133,6 @@ export class Logger {
     this.logger.measurePerformance = this.measurePerformance.bind(this);
     this.logger.setVerbose = Logger.setVerbose.bind(this);
     this.logger.verboseStatus = Logger.verboseStatus;
-    // this.logger.line = this.line.bind(this);
-    // this.logger.doubleLine = this.doubleLine.bind(this);
     this.logger.identify = this.createLoggerWithId.bind(this);
 
     // Add the new fileOnly method, always using "verbose" level
@@ -172,7 +170,7 @@ export class Logger {
     const colorCode = standardBackgroundColors[numericId % standardBackgroundColors.length];
   
     // Return the ID string with the background color applied, and reset formatting after
-    return ` \x1b[${colorCode}m Q${id} \x1b[0m`;
+    return `\x1b[${colorCode}m Q${id} \x1b[0m`;
   }
   
 
@@ -197,18 +195,6 @@ export class Logger {
     Logger.instance.logger.level = verbose ? "verbose" : "info";
     // Logger.instance = new Logger();
   }
-
-  // private line() {
-  //   this.logger.verbose(
-  //     `\n──────────────────────────────────────────────────────────────────────────\n`
-  //   );
-  // }
-
-  // private doubleLine() {
-  //   this.logger.verbose(
-  //     `\n==========================================================================\n`
-  //   );
-  // }
 
   // Custom performance method
   private performance(message?: string): PerformanceTimer {
@@ -258,7 +244,7 @@ export class Logger {
       }
     };
   }
-  
+
   // Format duration into a readable string
   private formatDuration(duration: number): string {
     if (duration < 1000) {

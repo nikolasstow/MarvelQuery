@@ -191,7 +191,7 @@ export class MarvelQuery<E extends Endpoint>
   }
 
   buildURL<E extends Endpoint>(apiKeys: APIKeys, endpoint: EndpointDescriptor<E>, params: Parameters<E>): string {
-    logger.verbose(`Building URL for ${endpoint.path.join("/")} with parameters:`, params);
+    this.logger.verbose(`Building URL for ${endpoint.path.join("/")} with parameters:`, params);
   
     const baseURL = "https://gateway.marvel.com/v1/public";
     const endpointPath = endpoint.path.join("/");
@@ -205,7 +205,7 @@ export class MarvelQuery<E extends Endpoint>
       ? CryptoJS.MD5(timestamp + privateKey + publicKey).toString()
       : "";
   
-    logger.verbose(`Generated hash: ${hash}`);
+    this.logger.verbose(`Generated hash: ${hash}`);
   
     /** Build the URL of the query with the parameters, keys, timestamp and hash. */
     const queryParams = new URLSearchParams({
@@ -216,7 +216,7 @@ export class MarvelQuery<E extends Endpoint>
     });
   
     const finalURL = `${baseURL}/${endpointPath}?${queryParams.toString()}`;
-    logger.verbose(`Built URL: ${finalURL}`);
+    this.logger.verbose(`Built URL: ${finalURL}`);
     
     return finalURL;
   }
