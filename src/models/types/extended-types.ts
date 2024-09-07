@@ -17,7 +17,7 @@ import {
   Extendpoint,
   KeyEndpointMap,
   ResourceEndpoint,
-} from "./endpoint-types";
+} from "./endpoint";
 import { MarvelQueryInterface } from "./interface";
 
 import { ENDPOINT_MAP } from "../endpoints";
@@ -130,14 +130,8 @@ export type ExtendCollectionProperties<E extends Endpoint, V extends List> = {
   query: QueryCollection<E>;
 };
 
-// This logic below looks strange but done this way to assure that the return type is correct
 export type ExtendResult<E extends Endpoint> = ExtendType<E> &
   ExtendResourceProperties<E>;
-
-// export type ReturnType<E extends Endpoint> = ExtendType<[DataType<E>]> &
-// ExtendResourceProperties<TypeToEndpoint<DataType<E>>>;
-
-// type TypeToEndpoint<E extends EndpointType> = [E] extends Endpoint ? [E] : never;
 
 export type ReturnType<T extends EndpointType> =
   | ExtendResult<EndpointTyped<T>>

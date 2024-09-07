@@ -1,7 +1,7 @@
 import { Metadata, APIResponseData, APIWrapper } from "./data-types";
 import { ExtendResult } from "./extended-types";
 import { Result, Parameters } from "./utility-types";
-import { Endpoint, EndpointType } from "./endpoint-types";
+import { Endpoint, EndpointType } from "./endpoint";
 import { EndpointDescriptor } from "./config";
 
 // export type StateTypes<E extends Endpoint> = keyof StateMap<E>;

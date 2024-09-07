@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EndpointMap } from "../types/endpoint-types";
+import { EndpointMap } from "../types/endpoint";
 import { FormatSchema, YearSchema } from "./schema-utilities";
 
 // Use .nullable() to allow null values

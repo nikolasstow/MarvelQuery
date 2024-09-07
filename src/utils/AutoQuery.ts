@@ -18,9 +18,12 @@ import {
   Result,
   Parameters,
   EndpointMap,
+  DataType,
+  Summary,
 } from "../models/types";
 import { InitQuery, MarvelQueryInterface } from "../models/types";
-import { ENDPOINT_MAP, VALID_ENDPOINTS } from "../models/endpoints";
+import { ENDPOINT_MAP } from "../models/endpoints";
+import { EndpointBuilder } from "./EndpointBuilder";
 
 /**
  * Utility class for auto-query injection that finds URIs in data and injects query methods
@@ -146,14 +149,14 @@ export class AutoQuery<E extends Endpoint> {
       fetch: () => {
         const query = new this.createQuery<E>({
           endpoint,
-          params: {} as Parameters<E>,
+          params: {},
         });
         return query.fetch();
       },
       fetchSingle: () => {
         const query = new this.createQuery<E>({
           endpoint,
-          params: {} as Parameters<E>,
+          params: {},
         });
         return query.fetchSingle();
       },
@@ -188,10 +191,11 @@ export class AutoQuery<E extends Endpoint> {
     try {
       const id: number = this.extractIdFromURI(value.resourceURI);
       const baseType = this.typeFromEndpoint(baseEndpoint);
-      const endpoint: ResourceEndpoint<BEndpoint> = [
-        baseType,
-        id,
-      ] as ResourceEndpoint<BEndpoint>;
+      const endpoint = [baseType, id];
+
+      if (!EndpointBuilder.isEndpoint(endpoint)) {
+        throw new Error(`Invalid endpoint: ${endpoint.join("/")}`);
+      }
 
       // Add the resource to the resources map
       this.resources[baseType].push(endpoint);
@@ -206,7 +210,7 @@ export class AutoQuery<E extends Endpoint> {
           fetch: () => {
             const query = new this.createQuery({
               endpoint,
-              params: {} as Parameters<TEndpoint>,
+              params: {},
             });
 
             return query.fetch();
@@ -214,7 +218,7 @@ export class AutoQuery<E extends Endpoint> {
           fetchSingle: () => {
             const query = new this.createQuery({
               endpoint,
-              params: {} as Parameters<TEndpoint>,
+              params: {},
             });
 
             return query.fetchSingle();
@@ -223,7 +227,7 @@ export class AutoQuery<E extends Endpoint> {
             type: TType,
             params: Parameters<
               Extendpoint<TEndpoint, TType>
-            > = {} as Parameters<Extendpoint<TEndpoint, TType>>
+            > = {}
           ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
             return new this.createQuery<Extendpoint<TEndpoint, TType>>({
               endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
@@ -299,7 +303,7 @@ export class AutoQuery<E extends Endpoint> {
           items,
           endpoint,
           query: (
-            params: Parameters<TEndpoint> = {} as Parameters<TEndpoint>
+            params: Parameters<TEndpoint> = {}
           ): MarvelQueryInterface<TEndpoint> =>
             new this.createQuery<TEndpoint>({ endpoint, params }),
         };
@@ -420,30 +424,16 @@ export class AutoQuery<E extends Endpoint> {
    */
   private createEndpointFromURI(url: string): Endpoint {
     const cleanedUrl = url.replace(/^.*\/public\//, "");
-    const parts = cleanedUrl.split("/");
+    const endpoint = cleanedUrl.split("/");
 
-    if (parts.length < 1) {
+    if (endpoint.length < 1) {
       this.logger.error(`Invalid URL: ${url}`);
       throw new Error(`Invalid URL: ${url}`);
     }
 
-    const baseType = parts[0] as EndpointType;
-    if (!VALID_ENDPOINTS.has(baseType)) {
-      throw new Error(`Invalid endpoint: ${baseType}`);
+    if (!EndpointBuilder.isEndpoint(endpoint)) {
+      throw new Error(`Invalid endpoint: ${endpoint}`);
     }
-
-    const id = parts[1];
-    if (!id) {
-      throw new Error(`Missing ID in URL: ${url}`);
-    }
-
-    const type = parts[2];
-
-    const endpoint = [
-      baseType,
-      Number(id),
-      type ? type : undefined,
-    ] as Endpoint;
 
     return endpoint;
   }
@@ -453,12 +443,8 @@ export class AutoQuery<E extends Endpoint> {
    * @param obj - The object to check.
    * @returns True if the object has a `resourceURI`, false otherwise.
    */
-  private hasResourceURI<T>(obj: T): obj is T & { resourceURI: string } {
-    return (
-      obj &&
-      (obj as any).resourceURI &&
-      typeof (obj as any).resourceURI === "string"
-    );
+  private hasResourceURI(obj: any): obj is Summary {
+    return obj && obj.resourceURI && typeof obj.resourceURI === "string";
   }
 
   /**
@@ -466,12 +452,8 @@ export class AutoQuery<E extends Endpoint> {
    * @param obj - The object to check.
    * @returns True if the object has a `collectionURI`, false otherwise.
    */
-  private hasCollectionURI<T>(obj: T): obj is T & { collectionURI: string } {
-    return (
-      obj &&
-      (obj as any).collectionURI &&
-      typeof (obj as any).collectionURI === "string"
-    );
+  private hasCollectionURI(obj: any): obj is List {
+    return obj && obj.collectionURI && typeof obj.collectionURI === "string";
   }
 
   /**
@@ -480,16 +462,17 @@ export class AutoQuery<E extends Endpoint> {
    * @returns The extracted endpoint type.
    * @throws Will throw an error if the type is invalid.
    */
-  private typeFromEndpoint(endpoint: Endpoint): EndpointType {
-    const type = endpoint[2] ? endpoint[2] : endpoint[0];
+  private typeFromEndpoint<T extends Endpoint>(endpoint: T) {
+    if (endpoint[2] && EndpointBuilder.isEndpointType(endpoint[2]))
+      return endpoint[2];
 
-    if (!VALID_ENDPOINTS.has(type)) {
+    if (endpoint[0] && EndpointBuilder.isEndpointType(endpoint[0])) {
+      return endpoint[0];
+    } else {
       throw new Error(
         `Unable to determine type from endpoint: ${endpoint.join("/")}`
       );
     }
-
-    return type;
   }
 
   /**

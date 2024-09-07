@@ -4,12 +4,11 @@ import {
   EndpointType,
   Config,
   Parameters,
-  GlobalParams,
   EndpointDescriptor,
 } from "src/models/types";
-import { VALID_ENDPOINTS } from "src/models/endpoints";
 import { ValidateParams } from "src/models/schemas/param-schemas";
 import logger, { CustomLogger } from "./Logger";
+import { EndpointBuilder } from "./EndpointBuilder";
 
 /**
  * Class responsible for managing and validating query parameters, including global
@@ -30,16 +29,16 @@ export class ParameterManager {
     if (config.globalParams) {
       logger.verbose("Validating global parameters");
       const globalParams = config.globalParams;
-      const types = Object.keys(globalParams) as EndpointType[]; // Get the keys of the globalParams object
+      const types = Object.keys(globalParams); // Get the keys of the globalParams object
 
       for (const type of types) {
-        if (!VALID_ENDPOINTS.has(type) && type !== ("all" as EndpointType)) {
+        if (!EndpointBuilder.isEndpointType(type) && type !== ("all" as EndpointType)) {
           logger.warn(`Invalid endpoint type in global parameters: ${type}`);
           continue;
         }
 
         // Validate the parameters of the query for the endpoint type
-        ParameterManager.validate(type as EndpointType, globalParams[type]);
+        ParameterManager.validate(type, globalParams[type]);
       }
     }
   }
@@ -134,7 +133,7 @@ export class ParameterManager {
     // Create a new object by filtering out undefined values
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined)
-    ) as Parameters<E>;
+    );
 
     // Log how many undefined parameters were omitted
     const omissions =

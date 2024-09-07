@@ -11,16 +11,6 @@ import {
 
 } from "./types";
 
-/** Endpoint types that can be queried */
-export const VALID_ENDPOINTS: Set<EndpointType> = new Set([
-	"comics",
-	"characters",
-	"creators",
-	"events",
-	"series",
-	"stories",
-]);
-
 // Utility function to help TypeScript infer exact types
 function createEndpointMap<T extends Record<string, EndpointType>>(map: T): T {
 	return map;

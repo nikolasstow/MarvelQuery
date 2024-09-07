@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { performance } from "perf_hooks";
-import { CustomLogger, PerformanceTimer } from "src/models/types/logger";
+import { CustomLogger, PerformanceTimer } from "src/models/types/config";
 import * as winston from "winston";
 import "winston-daily-rotate-file";
 
@@ -260,4 +260,4 @@ export class Logger {
 const instance = Logger.getInstance();
 
 export default instance.logger;
-export { CustomLogger } from "../models/types/logger";
+export { CustomLogger } from "../models/types/config";

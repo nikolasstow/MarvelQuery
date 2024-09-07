@@ -61,12 +61,10 @@ export class MarvelQuery<E extends Endpoint>
    */
   private static createQuery = <T extends Endpoint | EndpointType>(
     endpoint: T,
-    params: Parameters<AsEndpoint<T>> = {} as Parameters<AsEndpoint<T>>
+    params: Parameters<AsEndpoint<T>> = {}
   ): MarvelQueryInterface<AsEndpoint<T>> =>
     new MarvelQuery<AsEndpoint<T>>({
-      endpoint: (Array.isArray(endpoint)
-        ? endpoint
-        : [endpoint]) as AsEndpoint<T>,
+      endpoint: EndpointBuilder.asEndpoint(endpoint),
       params,
     });
 
@@ -217,10 +215,10 @@ export class MarvelQuery<E extends Endpoint>
    * @param params Parameters of the query.
    * @returns The URL of the query.
    */
-  buildURL<E extends Endpoint>(
+  buildURL(
     apiKeys: APIKeys,
-    endpoint: E,
-    params: Parameters<E>
+    endpoint: Endpoint,
+    params: Record<string, unknown>
   ): string {
     this.logger.verbose(
       `Building URL for ${endpoint.join("/")} with parameters:`,
@@ -247,7 +245,7 @@ export class MarvelQuery<E extends Endpoint>
       apikey: publicKey,
       ts: timestamp.toString(),
       hash,
-      ...(params as Record<string, unknown>),
+      ...params,
     });
 
     // Combine the base URL and endpoint path with the query parameters
