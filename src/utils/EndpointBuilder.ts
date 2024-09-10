@@ -1,9 +1,10 @@
 import {
-  AsEndpoint,
+  OldAsEndpoint,
   DataType,
   Endpoint,
   EndpointDescriptor,
   EndpointType,
+  Extendpoint,
 } from "src/models/types";
 import logger, { CustomLogger } from "./Logger";
 
@@ -150,25 +151,49 @@ export class EndpointBuilder<E extends Endpoint>
     return true;
   }
 
-  static asEndpoint<T extends (Endpoint | EndpointType)>(input: T): AsEndpoint<T> {
+  static asEndpoint<T extends Endpoint | EndpointType>(
+    input: T
+  ): OldAsEndpoint<T> {
     let output;
     if (EndpointBuilder.isEndpointType(input)) {
       output = [input];
     }
     if (EndpointBuilder.isEndpoint(input)) {
-      output =  input;
+      output = input;
     }
-  
-    function assertAsEndpoint<T extends (Endpoint | EndpointType)>(endpoint: unknown): asserts endpoint is AsEndpoint<T> {
-      if (!EndpointBuilder.isEndpoint(endpoint) && !EndpointBuilder.isEndpointType(endpoint)) {
+
+    function assertAsEndpoint<T extends Endpoint | EndpointType>(
+      endpoint: unknown
+    ): asserts endpoint is OldAsEndpoint<T> {
+      if (
+        !EndpointBuilder.isEndpoint(endpoint) &&
+        !EndpointBuilder.isEndpointType(endpoint)
+      ) {
         throw new Error(`Invalid endpoint: ${endpoint}`);
       }
     }
-    
+
     assertAsEndpoint<T>(output);
-  
+
     return output;
   }
 
+  static extendEndpoint<TEndpoint extends Endpoint, TType extends EndpointType>(
+    endpoint: TEndpoint,
+    type: TType
+  ): Extendpoint<TEndpoint, TType> {
+    const extendedEndpoint = [endpoint[0], endpoint[1], type];
 
+    function assertExtendpoint<
+      TEndpoint extends Endpoint,
+      TType extends EndpointType
+    >(endpoint: unknown): asserts endpoint is Extendpoint<TEndpoint, TType> {
+      if (!EndpointBuilder.isEndpoint(endpoint)) {
+        throw new Error(`Invalid endpoint: ${endpoint}`);
+      }
+    }
+
+    assertExtendpoint<TEndpoint, TType>(extendedEndpoint);
+    return extendedEndpoint;
+  }
 }

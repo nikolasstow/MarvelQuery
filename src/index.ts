@@ -17,7 +17,7 @@ import type {
   APIResponseData,
   Metadata,
   ExtendResult,
-  AsEndpoint,
+  OldAsEndpoint,
   EndpointDescriptor,
   CreateQueryFunction,
 } from "./models/types";
@@ -25,6 +25,7 @@ import { AutoQuery } from "./utils/AutoQuery";
 import { EndpointBuilder } from "./utils/EndpointBuilder";
 import { ParameterManager } from "./utils/ParameterManager";
 import { ResultValidator } from "./utils/ResultValidator";
+import { AsEndpoint } from "lib";
 
 /**
  * The MarvelQuery class is responsible for handling requests to the Marvel API.
@@ -59,14 +60,20 @@ export class MarvelQuery<E extends Endpoint>
    * @param params Optional parameters for the query.
    * @returns A new instance of MarvelQueryInterface for the specified endpoint.
    */
-  private static createQuery = <T extends Endpoint | EndpointType>(
+  private static createQuery<T extends Endpoint>(
     endpoint: T,
-    params: Parameters<AsEndpoint<T>> = {}
-  ): MarvelQueryInterface<AsEndpoint<T>> =>
-    new MarvelQuery<AsEndpoint<T>>({
+    params: Parameters<T>
+  ): MarvelQueryInterface<T>;
+  private static createQuery<T extends EndpointType>(
+    endpoint: T,
+    params: Parameters<AsEndpoint<T>>
+  ): MarvelQueryInterface<AsEndpoint<T>>;
+  private static createQuery(endpoint, params) {
+    return new MarvelQuery({
       endpoint: EndpointBuilder.asEndpoint(endpoint),
       params,
     });
+  }
 
   /**
    * Initializes the MarvelQuery class with API keys and configuration settings.

@@ -12,7 +12,7 @@ import {
   EndpointType,
   NoSameEndpointType,
   Extendpoint,
-  AsEndpoint,
+  OldAsEndpoint,
 } from "./endpoint";
 import { MarvelQueryInterface } from "./interface";
 import {
@@ -56,7 +56,7 @@ export type DataType<E> = E extends Endpoint
     : ["Error, could not determine data type", E]
   : ["Error, not a valid endpoint", E];
 
-export type Parameters<E extends readonly unknown[]> = ParameterType<E> | {
+export type Parameters<E extends Endpoint> = ParameterType<E> | {
   offset?: number;
   limit?: number;
 }
@@ -126,5 +126,5 @@ export type ValidEndpoint<E> = E extends Endpoint ? E : never;
 
 export type CreateQueryFunction = <T extends Endpoint | EndpointType>(
   endpoint: T,
-  params: Parameters<AsEndpoint<T>>
-) => MarvelQueryInterface<AsEndpoint<T>>
+  params: Parameters<OldAsEndpoint<T>>
+) => MarvelQueryInterface<OldAsEndpoint<T>>

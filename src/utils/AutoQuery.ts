@@ -163,12 +163,11 @@ export class AutoQuery<E extends Endpoint> {
       query: <TType extends NoSameEndpointType<E>>(
         type: TType,
         params: Parameters<Extendpoint<E, TType>>
-      ): MarvelQueryInterface<Extendpoint<E, TType>> => {
-        return new this.createQuery<Extendpoint<E, TType>>({
-          endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<E, TType>,
+      ): MarvelQueryInterface<Extendpoint<E, TType>> =>
+        new this.createQuery<Extendpoint<E, TType>>({
+          endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
           params,
-        });
-      },
+        }),
     };
 
     // Combine the extended properties and the result-extending properties
@@ -225,18 +224,12 @@ export class AutoQuery<E extends Endpoint> {
           },
           query: <TType extends EndpointType>(
             type: TType,
-            params: Parameters<
-              Extendpoint<TEndpoint, TType>
-            > = {}
-          ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> => {
-            return new this.createQuery<Extendpoint<TEndpoint, TType>>({
-              endpoint: [endpoint[0], endpoint[1], type] as Extendpoint<
-                TEndpoint,
-                TType
-              >,
+            params: Parameters<Extendpoint<TEndpoint, TType>> = {}
+          ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> =>
+            new this.createQuery<Extendpoint<TEndpoint, TType>>({
+              endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
               params,
-            });
-          },
+            }),
         };
 
         return {
@@ -286,6 +279,33 @@ export class AutoQuery<E extends Endpoint> {
       // If there's a parent resource, set its name for the collection
       if (parent) {
         this.resourceNames.set(endpoint, parent);
+      }
+
+      function isList(input: unknown): input is List {
+        if (
+            typeof input === "object" &&
+            input !== null &&
+            typeof (input as List).available === "number" &&
+            typeof (input as List).returned === "number" &&
+            typeof (input as List).collectionURI === "string" &&
+            Array.isArray((input as List).items)
+        ) {
+            return (input as List).items.every(item =>
+                typeof item === "object" &&
+                item !== null &&
+                typeof item.resourceURI === "string" &&
+                typeof item.name === "string"
+            );
+        }
+        return false;
+    }
+
+      function assertExtendResourceList<T extends Endpoint, V extends List>(
+        value: any
+      ): asserts value is ExtendResourceList<T, V> {
+        if (!Array.isArray(value.items)) {
+          throw new Error(`Invalid collection: ${value}`);
+        }
       }
 
       return (<TEndpoint extends Endpoint>(
@@ -424,7 +444,11 @@ export class AutoQuery<E extends Endpoint> {
    */
   private createEndpointFromURI(url: string): Endpoint {
     const cleanedUrl = url.replace(/^.*\/public\//, "");
-    const endpoint = cleanedUrl.split("/");
+    const endpoint: unknown[] = cleanedUrl.split("/");
+
+    if (endpoint[1] !== undefined) {
+      endpoint[1] = Number(endpoint[1]);
+    }
 
     if (endpoint.length < 1) {
       this.logger.error(`Invalid URL: ${url}`);
