@@ -17,7 +17,6 @@ import type {
   APIResponseData,
   Metadata,
   ExtendResult,
-  OldAsEndpoint,
   EndpointDescriptor,
   CreateQueryFunction,
 } from "./models/types";

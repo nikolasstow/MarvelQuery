@@ -44,14 +44,6 @@ export type DistinctEndpointType<
       ]
   : never;
 
-export type OldAsEndpoint<T extends EndpointType | Endpoint> = T extends Endpoint
-  ? T
-  : T extends EndpointType
-  ? [T] extends Endpoint
-    ? [T]
-    : never
-  : never;
-
 export type AsEndpoint<T extends EndpointType> = [T] extends Endpoint ? [T] : never;
 
 export type NewEndpoint<E, T> = [DataType<E>, number, T];

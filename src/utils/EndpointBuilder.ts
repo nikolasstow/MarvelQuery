@@ -1,10 +1,10 @@
 import {
-  OldAsEndpoint,
   DataType,
   Endpoint,
   EndpointDescriptor,
   EndpointType,
   Extendpoint,
+  AsEndpoint,
 } from "src/models/types";
 import logger, { CustomLogger } from "./Logger";
 
@@ -33,7 +33,7 @@ export class EndpointBuilder<E extends Endpoint>
     // Initialize the logger for the class.
     this.logger = customLogger;
     // Validate the endpoint path and determine the data type.
-    this.assertsEndpoint(endpoint);
+    EndpointBuilder.assertsEndpoint(endpoint);
     this.path = endpoint;
 
     /** Determine the data type of the query from the endpoint.
@@ -45,82 +45,6 @@ export class EndpointBuilder<E extends Endpoint>
 
     // Log the data type that was determined.
     this.logger.verbose(`Data type: ${this.type}`);
-  }
-
-  /**
-   * Validates the structure of the endpoint path and ensures that it follows
-   * the correct format with valid types and IDs.
-   * @param endpoint - The endpoint path to be validated.
-   * @returns The validated endpoint path.
-   * @throws Will throw an error if the endpoint is invalid or missing.
-   */
-  private assertsEndpoint(endpoint: E): asserts endpoint is E {
-    if (!endpoint) {
-      // Log and throw an error if the endpoint is missing.
-      this.logger.error("Endpoint validation failed: Endpoint is required");
-      throw new Error("Endpoint is required");
-    }
-
-    const [first, second, third] = endpoint;
-
-    // Validate the type of the first and third elements in the path.
-    this.assertsType(first);
-    this.assertsId(second);
-    this.assertsType(third);
-
-    /** Ensure that the first and third elements of the endpoint are not identical. */
-    if (first && third && first === third) {
-      // Log and throw an error if the types are the same.
-      this.logger.error(
-        `Invalid endpoint: ${first} and ${third} cannot be the same type`
-      );
-      throw new Error(
-        `Invalid endpoint: ${endpoint[0]} and ${endpoint[2]} cannot be the same type`
-      );
-    }
-  }
-
-  /**
-   * Validates that the given element is a valid endpoint type.
-   * @param element - The endpoint type to be validated.
-   * @throws Will throw an error if the element is not a valid endpoint type.
-   */
-  private assertsType(element?: EndpointType): asserts element is EndpointType {
-    if (element && !EndpointBuilder.isEndpointType(element)) {
-      // Log and throw an error if the type is invalid.
-      this.logger.error(`Unknown endpoint type: ${element}`);
-      throw new Error(`Unknown endpoint type: ${element}`);
-    }
-  }
-
-  /**
-   * Validates that the input is a valid endpoint type.
-   * @param type - The endpoint type to be validated.
-   * @returns True if the type is valid, false otherwise.
-   */
-  static isEndpointType(type: unknown): type is EndpointType {
-    return (
-      typeof type === "string" &&
-      (type === "comics" ||
-        type === "characters" ||
-        type === "creators" ||
-        type === "events" ||
-        type === "series" ||
-        type === "stories")
-    );
-  }
-
-  /**
-   * Validates that the given element is a valid numeric ID.
-   * @param element - The ID to be validated.
-   * @throws Will throw an error if the element is not a valid number.
-   */
-  private assertsId(element?: number): asserts element is number {
-    if (element && typeof element !== "number") {
-      // Log and throw an error if the ID is not a number.
-      this.logger.error(`Invalid endpoint id: ${element}`);
-      throw new Error(`Invalid endpoint id: ${element}`);
-    }
   }
 
   /**
@@ -151,9 +75,81 @@ export class EndpointBuilder<E extends Endpoint>
     return true;
   }
 
-  static asEndpoint<T extends Endpoint | EndpointType>(
-    input: T
-  ): OldAsEndpoint<T> {
+  /**
+   * Validates the structure of the endpoint path and ensures that it follows
+   * the correct format with valid types and IDs.
+   * @param endpoint - The endpoint path to be validated.
+   * @returns The validated endpoint path.
+   * @throws Will throw an error if the endpoint is invalid or missing.
+   */
+  static assertsEndpoint(endpoint: unknown): asserts endpoint is Endpoint {
+    if (!Array.isArray(endpoint)) {
+      throw new Error(`Invalid endpoint: ${endpoint}`);
+    }
+
+    const [first, second, third] = endpoint;
+
+    // Validate the type of the first and third elements in the path.
+    EndpointBuilder.assertsType(first);
+    EndpointBuilder.assertsId(Number(second));
+    EndpointBuilder.assertsType(third);
+
+    /** Ensure that the first and third elements of the endpoint are not identical. */
+    if (first && third && first === third) {
+      throw new Error(
+        `Invalid endpoint: ${endpoint[0]} and ${endpoint[2]} cannot be the same type`
+      );
+    }
+  }
+
+  /**
+   * Validates that the given element is a valid endpoint type.
+   * @param element - The endpoint type to be validated.
+   * @throws Will throw an error if the element is not a valid endpoint type.
+   */
+  static assertsType(element: unknown): asserts element is EndpointType {
+    if (element && !EndpointBuilder.isEndpointType(element)) {
+      throw new Error(`Unknown endpoint type: ${element}`);
+    }
+  }
+
+  /**
+   * Validates that the input is a valid endpoint type.
+   * @param type - The endpoint type to be validated.
+   * @returns True if the type is valid, false otherwise.
+   */
+  static isEndpointType(type: unknown): type is EndpointType {
+    return (
+      typeof type === "string" &&
+      (type === "comics" ||
+        type === "characters" ||
+        type === "creators" ||
+        type === "events" ||
+        type === "series" ||
+        type === "stories")
+    );
+  }
+
+  /**
+   * Validates that the given element is a valid numeric ID.
+   * @param element - The ID to be validated.
+   * @throws Will throw an error if the element is not a valid number.
+   */
+  static assertsId(element: unknown): asserts element is number {
+    if (element && typeof element !== "number") {
+      throw new Error(`Invalid endpoint id: ${element}`);
+    }
+  }
+
+  // static assertEndpoint(value: unknown): asserts value is Endpoint {
+  //   if (!EndpointBuilder.isEndpoint(value)) {
+  //     throw new Error(`Invalid endpoint: ${value}`);
+  //   }
+  // }
+
+  static asEndpoint<T extends Endpoint>(input: T): T;
+  static asEndpoint<T extends EndpointType>(input: T): AsEndpoint<T>;
+  static asEndpoint(input) {
     let output;
     if (EndpointBuilder.isEndpointType(input)) {
       output = [input];
@@ -162,9 +158,7 @@ export class EndpointBuilder<E extends Endpoint>
       output = input;
     }
 
-    function assertAsEndpoint<T extends Endpoint | EndpointType>(
-      endpoint: unknown
-    ): asserts endpoint is OldAsEndpoint<T> {
+    function assertAsEndpoint(endpoint: unknown): asserts endpoint is Endpoint {
       if (
         !EndpointBuilder.isEndpoint(endpoint) &&
         !EndpointBuilder.isEndpointType(endpoint)
@@ -173,7 +167,7 @@ export class EndpointBuilder<E extends Endpoint>
       }
     }
 
-    assertAsEndpoint<T>(output);
+    assertAsEndpoint(output);
 
     return output;
   }

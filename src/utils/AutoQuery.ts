@@ -186,60 +186,74 @@ export class AutoQuery<E extends Endpoint> {
   private extendResource<V extends ResourceItem, BEndpoint extends Endpoint>(
     value: V,
     baseEndpoint: BEndpoint
-  ) {
+  ): ExtendResource<ResourceEndpoint<BEndpoint>, V> {
     try {
-      const id: number = this.extractIdFromURI(value.resourceURI);
       const baseType = this.typeFromEndpoint(baseEndpoint);
-      const endpoint = [baseType, id];
-
-      if (!EndpointBuilder.isEndpoint(endpoint)) {
-        throw new Error(`Invalid endpoint: ${endpoint.join("/")}`);
-      }
+      const endpoint = this.extractEndpointFromURI(value.resourceURI);
+      this.assertResourceEndpoint(baseType, endpoint);
 
       // Add the resource to the resources map
       this.resources[baseType].push(endpoint);
       this.resourceNames.set(endpoint, this.findResourceName(value));
 
-      // Return an extended resource with additional properties
-      return (<TEndpoint extends Endpoint>(
-        endpoint: TEndpoint
-      ): ExtendResource<TEndpoint, V> => {
-        const additionalProps: ExtendResourceProperties<TEndpoint> = {
-          endpoint,
-          fetch: () => {
-            const query = new this.createQuery({
-              endpoint,
-              params: {},
-            });
+      const additionalProps: ExtendResourceProperties<
+        ResourceEndpoint<BEndpoint>
+      > = {
+        endpoint,
+        fetch: () => {
+          const query = new this.createQuery({
+            endpoint,
+            params: {},
+          });
 
-            return query.fetch();
-          },
-          fetchSingle: () => {
-            const query = new this.createQuery({
-              endpoint,
-              params: {},
-            });
+          return query.fetch();
+        },
+        fetchSingle: () => {
+          const query = new this.createQuery({
+            endpoint,
+            params: {},
+          });
 
-            return query.fetchSingle();
-          },
-          query: <TType extends EndpointType>(
-            type: TType,
-            params: Parameters<Extendpoint<TEndpoint, TType>> = {}
-          ): MarvelQueryInterface<Extendpoint<TEndpoint, TType>> =>
-            new this.createQuery<Extendpoint<TEndpoint, TType>>({
+          return query.fetchSingle();
+        },
+        query: <TType extends EndpointType>(
+          type: TType,
+          params: Parameters<
+            Extendpoint<ResourceEndpoint<BEndpoint>, TType>
+          > = {}
+        ): MarvelQueryInterface<
+          Extendpoint<ResourceEndpoint<BEndpoint>, TType>
+        > =>
+          new this.createQuery<Extendpoint<ResourceEndpoint<BEndpoint>, TType>>(
+            {
               endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
               params,
-            }),
-        };
+            }
+          ),
+      };
 
-        return {
-          ...value,
-          ...additionalProps,
-        };
-      })(endpoint);
+      return {
+        ...value,
+        ...additionalProps,
+      };
     } catch (error) {
       this.logger.error(`Failed to determine resource endpoint: ${error}`);
-      return value;
+
+      const errorFunction = (...args) => {
+        return Promise.reject(error);
+      };
+
+      const additionalProps = {
+        endpoint: null,
+        fetch: errorFunction,
+        fetchSingle: errorFunction,
+        query: errorFunction,
+      };
+
+      return { ...value, ...additionalProps } as unknown as ExtendResource<
+        ResourceEndpoint<BEndpoint>,
+        V
+      >;
     }
   }
 
@@ -273,7 +287,7 @@ export class AutoQuery<E extends Endpoint> {
     parent?: string
   ) {
     try {
-      const endpoint = this.createEndpointFromURI(value.collectionURI);
+      const endpoint = this.extractEndpointFromURI(value.collectionURI);
       this.collections[baseType].push(endpoint);
 
       // If there's a parent resource, set its name for the collection
@@ -281,43 +295,33 @@ export class AutoQuery<E extends Endpoint> {
         this.resourceNames.set(endpoint, parent);
       }
 
-      function isList(input: unknown): input is List {
+      function isList(input: any): input is List {
         if (
-            typeof input === "object" &&
-            input !== null &&
-            typeof (input as List).available === "number" &&
-            typeof (input as List).returned === "number" &&
-            typeof (input as List).collectionURI === "string" &&
-            Array.isArray((input as List).items)
+          typeof input === "object" &&
+          input !== null &&
+          typeof input.available === "number" &&
+          typeof input.returned === "number" &&
+          typeof input.collectionURI === "string" &&
+          Array.isArray(input.items)
         ) {
-            return (input as List).items.every(item =>
-                typeof item === "object" &&
-                item !== null &&
-                typeof item.resourceURI === "string" &&
-                typeof item.name === "string"
-            );
+          return input.items.every(
+            (item) =>
+              typeof item === "object" &&
+              item !== null &&
+              typeof item.resourceURI === "string" &&
+              typeof item.name === "string"
+          );
         }
         return false;
-    }
-
-      function assertExtendResourceList<T extends Endpoint, V extends List>(
-        value: any
-      ): asserts value is ExtendResourceList<T, V> {
-        if (!Array.isArray(value.items)) {
-          throw new Error(`Invalid collection: ${value}`);
-        }
       }
 
       return (<TEndpoint extends Endpoint>(
         endpoint: TEndpoint
       ): ExtendCollection<TEndpoint, V> => {
-        const items = value.items.map(
-          (item) =>
-            this.extendResource(item, endpoint) as ExtendResourceList<
-              ResourceEndpoint<TEndpoint>,
-              V
-            >[number]
-        );
+        const items: ExtendResourceList<
+          ResourceEndpoint<TEndpoint>,
+          V
+        > = value.items.map((item) => this.extendResource(item, endpoint));
 
         const additionalProps: ExtendCollectionProperties<TEndpoint, V> = {
           items,
@@ -410,30 +414,15 @@ export class AutoQuery<E extends Endpoint> {
     this.logger.verbose(`Collections:\n\n${collectionsList}`);
   }
 
-  /**
-   * Extracts an ID from a resource URI.
-   * @param url - The URI string to extract the ID from.
-   * @returns The extracted ID as a number.
-   * @throws Will throw an error if the ID is invalid or missing.
-   */
-  private extractIdFromURI(url: string): number {
-    const cleanedUrl = url.replace(/^.*\/public\//, "");
-
-    const parts = cleanedUrl.split("/");
-
-    if (parts.length < 2) {
-      this.logger.error(`Invalid URL: ${url}`);
-      throw new Error(`Invalid URL: ${url}`);
+  private assertResourceEndpoint<B extends Endpoint>(
+    base: DataType<B>,
+    endpoint: unknown[]
+  ): asserts endpoint is ResourceEndpoint<B> {
+    EndpointBuilder.assertsEndpoint(endpoint);
+    const endpointType = this.typeFromEndpoint(endpoint);
+    if (base !== endpointType && endpoint.length !== 2) {
+      throw new Error(`Invalid resource endpoint: ${endpoint}`);
     }
-
-    const id = parts[1];
-
-    if (id && !/^\d+$/.test(id)) {
-      this.logger.error(`Invalid ID: ${id}`);
-      throw new Error(`Invalid ID: ${id}`);
-    }
-
-    return Number(id);
   }
 
   /**
@@ -442,22 +431,11 @@ export class AutoQuery<E extends Endpoint> {
    * @returns The constructed endpoint array.
    * @throws Will throw an error if the URI is invalid.
    */
-  private createEndpointFromURI(url: string): Endpoint {
+  private extractEndpointFromURI(url: string): Endpoint {
     const cleanedUrl = url.replace(/^.*\/public\//, "");
-    const endpoint: unknown[] = cleanedUrl.split("/");
+    const endpoint = cleanedUrl.split("/");
 
-    if (endpoint[1] !== undefined) {
-      endpoint[1] = Number(endpoint[1]);
-    }
-
-    if (endpoint.length < 1) {
-      this.logger.error(`Invalid URL: ${url}`);
-      throw new Error(`Invalid URL: ${url}`);
-    }
-
-    if (!EndpointBuilder.isEndpoint(endpoint)) {
-      throw new Error(`Invalid endpoint: ${endpoint}`);
-    }
+    EndpointBuilder.assertsEndpoint(endpoint);
 
     return endpoint;
   }
@@ -486,21 +464,15 @@ export class AutoQuery<E extends Endpoint> {
    * @returns The extracted endpoint type.
    * @throws Will throw an error if the type is invalid.
    */
-  private typeFromEndpoint<T extends Endpoint>(endpoint: T) {
-    if (endpoint[2] && EndpointBuilder.isEndpointType(endpoint[2]))
-      return endpoint[2];
+  private typeFromEndpoint<T extends Endpoint>(endpoint: T): DataType<T> {
+    const type = endpoint[2] ? endpoint[2] : endpoint[0];
+    EndpointBuilder.assertsType(type);
 
-    if (endpoint[0] && EndpointBuilder.isEndpointType(endpoint[0])) {
-      return endpoint[0];
-    } else {
-      throw new Error(
-        `Unable to determine type from endpoint: ${endpoint.join("/")}`
-      );
-    }
+    return type as DataType<T>;
   }
 
   /**
-   * Sorts and deduplicates an array of endpoints by their elements.
+   * Sorts and deduplicates an array of endpoints by their elements for logging.
    * @param list - The list of endpoints to sort and deduplicate.
    * @returns The sorted and deduplicated array of endpoints.
    */

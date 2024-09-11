@@ -1,3 +1,4 @@
+import { AsEndpoint } from "lib";
 import {
   MarvelResult,
   MarvelCharacter,
@@ -12,7 +13,6 @@ import {
   EndpointType,
   NoSameEndpointType,
   Extendpoint,
-  OldAsEndpoint,
 } from "./endpoint";
 import { MarvelQueryInterface } from "./interface";
 import {
@@ -124,7 +124,13 @@ export type InitializedQuery<E> = E extends Endpoint
 
 export type ValidEndpoint<E> = E extends Endpoint ? E : never;
 
-export type CreateQueryFunction = <T extends Endpoint | EndpointType>(
-  endpoint: T,
-  params: Parameters<OldAsEndpoint<T>>
-) => MarvelQueryInterface<OldAsEndpoint<T>>
+export type CreateQueryFunction = {
+  <T extends Endpoint>(
+    endpoint: T,
+    params: Parameters<T>
+  ): MarvelQueryInterface<T>;
+  <T extends EndpointType>(
+    endpoint: T,
+    params: Parameters<AsEndpoint<T>>
+  ): MarvelQueryInterface<AsEndpoint<T>>;
+}
