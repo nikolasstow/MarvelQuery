@@ -8,37 +8,29 @@ import {
   ResultMap,
 } from "./utility-types";
 import {
-  BaseEndpoint,
-  DistinctEndpointType,
+  EndpointFromType,
   Endpoint,
   EndpointType,
-  EndpointTyped,
-  ExtendedQueryResult,
   Extendpoint,
-  KeyEndpointMap,
   ResourceEndpoint,
+  IsEndpoint,
+  IsEndpointType,
+  NewEndpoint,
 } from "./endpoint";
 import { MarvelQueryInterface } from "./interface";
-
 import { ENDPOINT_MAP } from "../endpoints";
 
 export type EndpointValues<E extends Endpoint> = EndpointValueMap[DataType<E>];
 
 type UniqueEndpointType<T> = {
-  [K in keyof T]: T[K] extends EndpointType
-    ? T[K]
-    : ["UniqueEndpointType", "Error: Not a valid EndpointType", T[K]];
+  [K in keyof T]: IsEndpointType<T[K]>;
 };
 
 export type EndpointValueMap = {
   [K in keyof ResultMap]: UniqueEndpointType<(typeof ENDPOINT_MAP)[K]>;
 };
 
-export type ValuesExtend<T> = T extends EndpointType ? [T, number] : Endpoint;
-
-export type EndpointId<T extends EndpointType> = DistinctEndpointType<
-  [T, number]
->;
+export type EndpointId<T extends EndpointType> = [T, number];
 
 export type ExtendType<E> = E extends Endpoint
   ? {
@@ -73,31 +65,25 @@ export type ExtendedResource<
   E extends Endpoint,
   K extends keyof Result<E>
 > = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
-  ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
     ? ExtendResource<Extendpoint<E, EndpointValues<E>[K]>, Result<E>[K]> // Add properties to the resource
     : Result<E>[K]
-  : Result<E>[K];
 
 export type ExtendedResourceArray<
   E extends Endpoint,
   K extends keyof Result<E>
 > = K extends keyof EndpointValues<E> // Does the key exist in the endpoint values
-  ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint
     ? Result<E>[K] extends Array<ResourceItem>
       ? ExtendResourceArray<Extendpoint<E, EndpointValues<E>[K]>, Result<E>[K]>
       : Result<E>[K]
     : Result<E>[K]
-  : Result<E>[K];
 
 type ExtendedCollection<
   E extends Endpoint,
   K extends keyof Result<E>,
   V extends List
 > = K extends keyof EndpointValues<E> // Does the key exist in the endpoint type values
-  ? EndpointValues<E>[K] extends EndpointType // Is the value an endpoint type
     ? ExtendCollection<Extendpoint<E, EndpointValues<E>[K]>, V> // Add properties to the collection with a new endpoint using the original and the new type
-    : ["ExtendedCollection", "Not an endpoint", EndpointValues<E>[K]] // Result<E>[K]
-  : ["ExtendedCollection", "No endpoint found", K]; // Result<E>[K]
+    : never // Result<E>[K]
 
 export type ExtendResource<E extends Endpoint, V> = V &
   ExtendResourceProperties<E>;
@@ -133,6 +119,4 @@ export type ExtendCollectionProperties<E extends Endpoint, V extends List> = {
 export type ExtendResult<E extends Endpoint> = ExtendType<E> &
   ExtendResourceProperties<E>;
 
-export type ReturnType<T extends EndpointType> =
-  | ExtendResult<EndpointTyped<T>>
-  | ExtendResult<ExtendedQueryResult<T>>;
+  

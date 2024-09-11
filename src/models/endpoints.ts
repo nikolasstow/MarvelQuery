@@ -1,15 +1,7 @@
 import {
-  Endpoint,
   EndpointType,
-  KeyEndpointMap,
-  MarvelCharacter,
-  MarvelComic,
-  MarvelCreator,
-  MarvelEvent,
-  MarvelSeries,
-  MarvelStory,
 
-} from "./types";
+} from "./types/endpoint";
 
 // Utility function to help TypeScript infer exact types
 function createEndpointMap<T extends Record<string, EndpointType>>(map: T): T {

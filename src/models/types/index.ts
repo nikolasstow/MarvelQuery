@@ -1,4 +1,4 @@
-import { ReturnType } from "./extended-types";
+import { ReturnType } from "./endpoint";
 
 export type Comic = ReturnType<"comics">;
 export type Character = ReturnType<"characters">;

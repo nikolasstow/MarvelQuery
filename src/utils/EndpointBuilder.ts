@@ -4,7 +4,7 @@ import {
   EndpointDescriptor,
   EndpointType,
   Extendpoint,
-  AsEndpoint,
+  EndpointFromType,
 } from "src/models/types";
 import logger, { CustomLogger } from "./Logger";
 
@@ -39,12 +39,23 @@ export class EndpointBuilder<E extends Endpoint>
     /** Determine the data type of the query from the endpoint.
      * If the endpoint has three elements, use the third one; otherwise, use the first.
      */
-    this.type = (
-      endpoint.length === 3 ? endpoint[2] : endpoint[0]
-    ) as DataType<E>;
+    this.type = EndpointBuilder.typeFromEndpoint(endpoint);
 
     // Log the data type that was determined.
     this.logger.verbose(`Data type: ${this.type}`);
+  }
+
+  /**
+   * Extracts the resource type from an endpoint.
+   * @param endpoint - The endpoint to extract the type from.
+   * @returns The extracted endpoint type.
+   * @throws Will throw an error if the type is invalid.
+   */
+  static typeFromEndpoint<T extends Endpoint>(endpoint: T): DataType<T> {
+    const type = endpoint[2] ? endpoint[2] : endpoint[0];
+    EndpointBuilder.assertsType(type);
+
+    return type as DataType<T>;
   }
 
   /**
@@ -141,14 +152,8 @@ export class EndpointBuilder<E extends Endpoint>
     }
   }
 
-  // static assertEndpoint(value: unknown): asserts value is Endpoint {
-  //   if (!EndpointBuilder.isEndpoint(value)) {
-  //     throw new Error(`Invalid endpoint: ${value}`);
-  //   }
-  // }
-
   static asEndpoint<T extends Endpoint>(input: T): T;
-  static asEndpoint<T extends EndpointType>(input: T): AsEndpoint<T>;
+  static asEndpoint<T extends EndpointType>(input: T): EndpointFromType<T>;
   static asEndpoint(input) {
     let output;
     if (EndpointBuilder.isEndpointType(input)) {
@@ -158,17 +163,6 @@ export class EndpointBuilder<E extends Endpoint>
       output = input;
     }
 
-    function assertAsEndpoint(endpoint: unknown): asserts endpoint is Endpoint {
-      if (
-        !EndpointBuilder.isEndpoint(endpoint) &&
-        !EndpointBuilder.isEndpointType(endpoint)
-      ) {
-        throw new Error(`Invalid endpoint: ${endpoint}`);
-      }
-    }
-
-    assertAsEndpoint(output);
-
     return output;
   }
 
@@ -177,17 +171,8 @@ export class EndpointBuilder<E extends Endpoint>
     type: TType
   ): Extendpoint<TEndpoint, TType> {
     const extendedEndpoint = [endpoint[0], endpoint[1], type];
+    EndpointBuilder.assertsEndpoint(extendedEndpoint);
 
-    function assertExtendpoint<
-      TEndpoint extends Endpoint,
-      TType extends EndpointType
-    >(endpoint: unknown): asserts endpoint is Extendpoint<TEndpoint, TType> {
-      if (!EndpointBuilder.isEndpoint(endpoint)) {
-        throw new Error(`Invalid endpoint: ${endpoint}`);
-      }
-    }
-
-    assertExtendpoint<TEndpoint, TType>(extendedEndpoint);
-    return extendedEndpoint;
+    return extendedEndpoint as Extendpoint<TEndpoint, TType>;
   }
 }

@@ -32,10 +32,10 @@ import { EndpointBuilder } from "./EndpointBuilder";
  */
 export class AutoQuery<E extends Endpoint> {
   /** The query class used for auto-query injection. */
-  createQuery: new <NewEndpoint extends Endpoint>({
+  createQuery: new <N extends Endpoint>({
     endpoint,
     params,
-  }: InitQuery<NewEndpoint>) => MarvelQueryInterface<NewEndpoint>;
+  }: InitQuery<N>) => MarvelQueryInterface<N>;
 
   /** The descriptor for the current endpoint. */
   endpoint: EndpointDescriptor<E>;
@@ -73,10 +73,10 @@ export class AutoQuery<E extends Endpoint> {
    * @param logger - The custom logger instance for logging actions.
    */
   constructor(
-    MarvelQueryClass: new <NewEndpoint extends Endpoint>({
+    MarvelQueryClass: new <N extends Endpoint>({
       endpoint,
       params,
-    }: InitQuery<NewEndpoint>) => MarvelQueryInterface<NewEndpoint>,
+    }: InitQuery<N>) => MarvelQueryInterface<N>,
     endpoint: EndpointDescriptor<E>,
     logger: CustomLogger
   ) {
@@ -188,7 +188,7 @@ export class AutoQuery<E extends Endpoint> {
     baseEndpoint: BEndpoint
   ): ExtendResource<ResourceEndpoint<BEndpoint>, V> {
     try {
-      const baseType = this.typeFromEndpoint(baseEndpoint);
+      const baseType = EndpointBuilder.typeFromEndpoint(baseEndpoint);
       const endpoint = this.extractEndpointFromURI(value.resourceURI);
       this.assertResourceEndpoint(baseType, endpoint);
 
@@ -419,7 +419,7 @@ export class AutoQuery<E extends Endpoint> {
     endpoint: unknown[]
   ): asserts endpoint is ResourceEndpoint<B> {
     EndpointBuilder.assertsEndpoint(endpoint);
-    const endpointType = this.typeFromEndpoint(endpoint);
+    const endpointType = EndpointBuilder.typeFromEndpoint(endpoint);
     if (base !== endpointType && endpoint.length !== 2) {
       throw new Error(`Invalid resource endpoint: ${endpoint}`);
     }
@@ -456,19 +456,6 @@ export class AutoQuery<E extends Endpoint> {
    */
   private hasCollectionURI(obj: any): obj is List {
     return obj && obj.collectionURI && typeof obj.collectionURI === "string";
-  }
-
-  /**
-   * Extracts the resource type from an endpoint.
-   * @param endpoint - The endpoint to extract the type from.
-   * @returns The extracted endpoint type.
-   * @throws Will throw an error if the type is invalid.
-   */
-  private typeFromEndpoint<T extends Endpoint>(endpoint: T): DataType<T> {
-    const type = endpoint[2] ? endpoint[2] : endpoint[0];
-    EndpointBuilder.assertsType(type);
-
-    return type as DataType<T>;
   }
 
   /**

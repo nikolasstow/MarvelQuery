@@ -1,4 +1,4 @@
-import { AsEndpoint } from "lib";
+import { EndpointFromType } from "./endpoint";
 import {
   MarvelResult,
   MarvelCharacter,
@@ -56,10 +56,12 @@ export type DataType<E> = E extends Endpoint
     : ["Error, could not determine data type", E]
   : ["Error, not a valid endpoint", E];
 
-export type Parameters<E extends Endpoint> = ParameterType<E> | {
-  offset?: number;
-  limit?: number;
-}
+export type Parameters<E extends Endpoint> =
+  | ParameterType<E>
+  | {
+      offset?: number;
+      limit?: number;
+    };
 
 export type ParameterType<E extends readonly unknown[]> = E extends [
   infer First,
@@ -79,9 +81,25 @@ export type ParameterType<E extends readonly unknown[]> = E extends [
     : never
   : APIBaseParams;
 
-export type Result<E extends Endpoint> = DataType<E> extends EndpointType
-  ? ResultMap[DataType<E>]
-  : never;
+export type ParameterTyspe<E extends readonly unknown[]> = E extends [
+  infer First,
+  infer Second,
+  infer Third
+]
+  ? Third extends EndpointType
+    ? ParameterMap[Third]
+    : never
+  : E extends [infer Second]
+  ? Second extends number
+    ? never
+    : never
+  : E extends [infer First]
+  ? First extends EndpointType
+    ? ParameterMap[First]
+    : never
+  : APIBaseParams;
+
+export type Result<E extends Endpoint> = ResultMap[DataType<E>];
 
 export type OnResultFunction<R extends MarvelResult> = (
   data: R[]
@@ -131,6 +149,6 @@ export type CreateQueryFunction = {
   ): MarvelQueryInterface<T>;
   <T extends EndpointType>(
     endpoint: T,
-    params: Parameters<AsEndpoint<T>>
-  ): MarvelQueryInterface<AsEndpoint<T>>;
-}
+    params: Parameters<EndpointFromType<T>>
+  ): MarvelQueryInterface<EndpointFromType<T>>;
+};

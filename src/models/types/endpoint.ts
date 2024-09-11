@@ -1,3 +1,4 @@
+import { ExtendResult } from "./extended-types";
 import { ParameterMap, AnyType, ResultMap, DataType } from "./utility-types";
 
 /** The endpoint contains up to three elements. A type, a Marvel ID, and another type.
@@ -18,23 +19,11 @@ import { ParameterMap, AnyType, ResultMap, DataType } from "./utility-types";
  * your query endpoint would be ['characters', '1009491', events']
  */
 
-export type Endpoint = DistinctEndpointType<
-  [EndpointType, number?, EndpointType?]
->;
-/** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
-// export type EndpointType = keyof ParameterMap;
-export type EndpointType =
-  | "comics"
-  | "characters"
-  | "creators"
-  | "events"
-  | "series"
-  | "stories";
-
-/* */
-export type DistinctEndpointType<
-  E extends [EndpointType, number?, EndpointType?]
-> = E extends [infer First, number?, EndpointType?]
+export type Endpoint = [
+  EndpointType,
+  number?,
+  ExcludeEndpointType<EndpointType>?
+] extends [infer First, number?, EndpointType?]
   ? First extends EndpointType
     ? [First, number?, ExcludeEndpointType<First>?]
     : [
@@ -43,20 +32,56 @@ export type DistinctEndpointType<
         First
       ]
   : never;
+/** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
+export type EndpointType =
+  | "comics"
+  | "characters"
+  | "creators"
+  | "events"
+  | "series"
+  | "stories";
 
-export type AsEndpoint<T extends EndpointType> = [T] extends Endpoint ? [T] : never;
+/** Verifies if T is an Endpoint */
+export type IsEndpoint<T> = T extends Endpoint ? T : never;
 
-export type NewEndpoint<E, T> = [DataType<E>, number, T];
-export type IDEndpoint<E> = [DataType<E>, number];
-export type ResourceEndpoint<E> = IDEndpoint<E> extends Endpoint
-  ? IDEndpoint<E>
-  : never;
+/** Verifies if T is an EndpointType */
+export type IsEndpointType<T> = T extends EndpointType ? T : never;
 
-export type BaseEndpoint<E> = [DataType<E>];
+/** Converts an EndpointType to an Endpoint and is used in createQuery function so that Endpoints
+ * can be written as "comics" instead of ["comics"], reducing boilerplate */
+export type EndpointFromType<T extends EndpointType> = IsEndpoint<[T]>;
 
-type BaseEndpointOptions<T extends EndpointType> = {
-  [K in ExcludeEndpointType<T>]: [K];
-}[ExcludeEndpointType<T>];
+/** Create a new endpoint from an existing one and a new type */
+export type NewEndpoint<E, T> = IsEndpoint<[DataType<E>, number, T]>;
+
+/** Endpoint for a specific resource */
+export type ResourceEndpoint<E> = IsEndpoint<[DataType<E>, number]>;
+
+/** Utility type that removes the passed type from the available endpoint types */
+type ExcludeEndpointType<T extends EndpointType> = Exclude<EndpointType, T>;
+
+/** A map of endpoint types to any type */
+export type EndpointMap<V> = Record<EndpointType, V>;
+
+/** Creates a new endpoint from an existing one and a new type */
+export type Extendpoint<
+  E extends Endpoint,
+  T extends EndpointType
+> = DataType<E> extends T
+? ResourceEndpoint<E>
+: NewEndpoint<E, T>
+
+/** Utility type that removes the same type from the available endpoint types */
+export type NoSameEndpointType<E extends Endpoint> = Exclude<
+  EndpointType,
+  DataType<E>
+>;
+
+/** A descriptor or container for an endpoint type and path */
+export interface EndpointDescriptor<E extends Endpoint> {
+  path: E;
+  type: DataType<E>;
+}
 
 export type ExtendedQueryResult<T extends EndpointType> = NewEndpoint<
   BaseEndpointOptions<T>,
@@ -65,36 +90,10 @@ export type ExtendedQueryResult<T extends EndpointType> = NewEndpoint<
   ? NewEndpoint<BaseEndpointOptions<T>, T>
   : never;
 
-/** Utility type that removes the passed type from the available endpoint types */
-type ExcludeEndpointType<T extends EndpointType> = Exclude<EndpointType, T>;
-/** Utility type that infers the type of the first element of the endpoint, so it can be passed to the EndpointResultType.
- * This removes the type of the first element from the available endpoint types for the last element, ensuring they do not match.
- */
+  type BaseEndpointOptions<T extends EndpointType> = {
+    [K in ExcludeEndpointType<T>]: [K];
+  }[ExcludeEndpointType<T>];
 
-export type IsEndpoint<T> = T extends Endpoint ? T : never;
-
-export type KeyEndpointMap = Record<string, EndpointType>;
-export type EndpointMap<V> = Record<EndpointType, V>;
-
-export type Extendpoint<
-  E extends Endpoint,
-  T extends EndpointType
-> = DataType<E> extends EndpointType
-  ? NewEndpoint<E, T> extends Endpoint
-    ? NewEndpoint<E, T>
-    : DataType<E> extends T
-    ? IDEndpoint<E> extends Endpoint
-      ? IDEndpoint<E>
-      : never
-    : never
-  : never;
-
-export type NoSameEndpointType<E extends Endpoint> = Exclude<
-  EndpointType,
-  DataType<E>
->;
-/** Create a map of any data type with the endpoint as the key. */
-
-export type EndpointTyped<T extends EndpointType> = [T] extends Endpoint
-  ? [T]
-  : never;
+export type ReturnType<T extends EndpointType> =
+  | ExtendResult<EndpointFromType<T>>
+  | ExtendResult<ExtendedQueryResult<T>>;

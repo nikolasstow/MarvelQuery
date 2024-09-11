@@ -44,26 +44,29 @@ export interface Config {
   /** Replace the default http client (axios) with your own http client.  */
   httpClient: HTTPClient;
 }
+
 /** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
  * You can also apply global parameters to specific data types (comics, characters, events, etc.)
  */
-
 export interface GlobalParams extends Partial<ParameterMap> {
   all?: APIBaseParams;
 }
+
+/** Function type that is invoked for each request made. */
 export type OnRequestFunction = (
   url: string,
   endpoint: Endpoint,
   params: Record<string, unknown>
 ) => void;
-/** A map of functions, one for each result type, as well as 'any' to be called when the query is finished */
 
+/** A map of functions, one for each result type, as well as 'any' to be called when the query is finished */
 export type OnResultMap = {
   [K in EndpointType]?: OnResultFunction<ResultMap[K]>;
 } & {
   any?: AnyResultFunction;
 };
 
+/** The public and private keys for the API. */
 export interface APIKeys {
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   publicKey: string;
@@ -71,14 +74,10 @@ export interface APIKeys {
   privateKey: string;
 }
 
+/** Replace the default HTTP client with one of your choosing. */
 export type HTTPClient = <E extends Endpoint>(
   url: string
 ) => Promise<APIWrapper<Result<E>>>;
-
-export interface EndpointDescriptor<E extends Endpoint> {
-  path: E;
-  type: DataType<E>;
-}
 
 /**
  * Interface for the performance timer object.
