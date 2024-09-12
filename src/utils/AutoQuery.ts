@@ -3,27 +3,26 @@ import {
   Endpoint,
   EndpointDescriptor,
   EndpointType,
+  Extendpoint,
+  NoSameEndpointType,
+  ResourceEndpoint,
+  EndpointMap,
+} from "../models/types/endpoint-types";
+import {
   ExtendCollection,
   ExtendCollectionProperties,
-  Extendpoint,
   ExtendResource,
-  ExtendResourceList,
+  ExtendCollectionResources,
   ExtendResourceProperties,
   ExtendResult,
   ExtendType,
-  List,
-  NoSameEndpointType,
-  ResourceEndpoint,
-  ResourceItem,
-  Result,
-  Parameters,
-  EndpointMap,
-  DataType,
-  Summary,
-} from "../models/types";
-import { InitQuery, MarvelQueryInterface } from "../models/types";
+} from "../models/types/autoquery-types";
+import { Collection, Resource, Result, DataType } from "../models/types/data-types";
+import { Parameters } from "../models/types/param-types";
 import { ENDPOINT_MAP } from "../models/endpoints";
 import { EndpointBuilder } from "./EndpointBuilder";
+import { InitQuery } from "src/models/types/autoquery-types";
+import { MarvelQueryInterface } from "src/models/types/interface";
 
 /**
  * Utility class for auto-query injection that finds URIs in data and injects query methods
@@ -102,6 +101,12 @@ export class AutoQuery<E extends Endpoint> {
     return extendedResults;
   }
 
+  private determineEndpointType(key): EndpointType {
+    if (EndpointBuilder.isEndpointType(key)) return key;
+    if (key === "originalIssue") return "comics";
+    return this.endpoint.type;
+  }
+
   /**
    * Extends a single result by adding properties and methods for querying resources and collections.
    * @param result - The result object to extend.
@@ -115,31 +120,29 @@ export class AutoQuery<E extends Endpoint> {
       ExtendType<E>
     >((acc, key) => {
       const value = result[key];
-      const keyEndpointType: EndpointType | undefined =
-        ENDPOINT_MAP[this.endpoint.type][key];
-
-      if (!keyEndpointType) {
-        acc[key] = value;
-        return acc;
-      }
+      const keyEndpointType = this.determineEndpointType(key);
 
       // Extend resources with a resourceURI
       if (this.hasResourceURI(value)) {
         acc[key] = this.extendResource(value, [keyEndpointType]);
+        return acc;
       }
       // Extend collections with a collectionURI
-      else if (this.hasCollectionURI(value)) {
+      if (this.hasCollectionURI(value)) {
         acc[key] = this.extendCollection(
           value,
           keyEndpointType,
           this.findResourceName(result)
         );
+        return acc;
       }
       // Extend arrays of resources
-      else if (Array.isArray(value) && this.hasResourceURI(value[0])) {
+      if (Array.isArray(value) && this.hasResourceURI(value[0])) {
         acc[key] = this.extendResourceArray(value, [keyEndpointType]);
+        return acc;
       }
 
+      acc[key] = value;
       return acc;
     }, {} as ExtendType<E>);
 
@@ -183,7 +186,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param baseEndpoint - The base endpoint associated with the resource.
    * @returns The extended resource with additional query methods.
    */
-  private extendResource<V extends ResourceItem, BEndpoint extends Endpoint>(
+  private extendResource<V extends Resource, BEndpoint extends Endpoint>(
     value: V,
     baseEndpoint: BEndpoint
   ): ExtendResource<ResourceEndpoint<BEndpoint>, V> {
@@ -264,7 +267,7 @@ export class AutoQuery<E extends Endpoint> {
    * @returns An array of extended resources.
    */
   private extendResourceArray<
-    V extends Array<ResourceItem>,
+    V extends Array<Resource>,
     BEndpoint extends Endpoint
   >(value: V, baseEndpoint: BEndpoint) {
     if (!value.length) {
@@ -281,7 +284,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param parent - The parent resource name (if applicable).
    * @returns The extended collection with query methods.
    */
-  private extendCollection<V extends List, T extends EndpointType>(
+  private extendCollection<V extends Collection, T extends EndpointType>(
     value: V,
     baseType: T,
     parent?: string
@@ -295,7 +298,7 @@ export class AutoQuery<E extends Endpoint> {
         this.resourceNames.set(endpoint, parent);
       }
 
-      function isList(input: any): input is List {
+      function isList(input: any): input is Collection {
         if (
           typeof input === "object" &&
           input !== null &&
@@ -318,7 +321,7 @@ export class AutoQuery<E extends Endpoint> {
       return (<TEndpoint extends Endpoint>(
         endpoint: TEndpoint
       ): ExtendCollection<TEndpoint, V> => {
-        const items: ExtendResourceList<
+        const items: ExtendCollectionResources<
           ResourceEndpoint<TEndpoint>,
           V
         > = value.items.map((item) => this.extendResource(item, endpoint));
@@ -445,7 +448,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param obj - The object to check.
    * @returns True if the object has a `resourceURI`, false otherwise.
    */
-  private hasResourceURI(obj: any): obj is Summary {
+  private hasResourceURI(obj: any): obj is Resource {
     return obj && obj.resourceURI && typeof obj.resourceURI === "string";
   }
 
@@ -454,7 +457,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param obj - The object to check.
    * @returns True if the object has a `collectionURI`, false otherwise.
    */
-  private hasCollectionURI(obj: any): obj is List {
+  private hasCollectionURI(obj: any): obj is Collection {
     return obj && obj.collectionURI && typeof obj.collectionURI === "string";
   }
 

@@ -1,7 +1,7 @@
 import {
   EndpointType,
 
-} from "./types/endpoint";
+} from "./types/endpoint-types";
 
 // Utility function to help TypeScript infer exact types
 function createEndpointMap<T extends Record<string, EndpointType>>(map: T): T {
@@ -60,7 +60,7 @@ const stories = createEndpointMap({
 	events: "events",
 	characters: "characters",
 	creators: "creators",
-	originalissue: "comics",
+	originalIssue: "comics",
 });
 
 export const ENDPOINT_MAP = {

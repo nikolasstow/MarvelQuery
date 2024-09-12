@@ -18,9 +18,9 @@ import type {
   Metadata,
   ExtendResult,
   EndpointDescriptor,
-  CreateQueryFunction,
   EndpointFromType
 } from "./models/types";
+import { CreateQueryFunction } from "./models/types/";
 import { AutoQuery } from "./utils/AutoQuery";
 import { EndpointBuilder } from "./utils/EndpointBuilder";
 import { ParameterManager } from "./utils/ParameterManager";
@@ -61,13 +61,13 @@ export class MarvelQuery<E extends Endpoint>
    */
   private static createQuery<T extends Endpoint>(
     endpoint: T,
-    params: Parameters<T>
+    params?: Parameters<T>
   ): MarvelQueryInterface<T>;
   private static createQuery<T extends EndpointType>(
     endpoint: T,
-    params: Parameters<EndpointFromType<T>>
+    params?: Parameters<EndpointFromType<T>>
   ): MarvelQueryInterface<EndpointFromType<T>>;
-  private static createQuery(endpoint, params) {
+  private static createQuery(endpoint, params = {}) {
     return new MarvelQuery({
       endpoint: EndpointBuilder.asEndpoint(endpoint),
       params,

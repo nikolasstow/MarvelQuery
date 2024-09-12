@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EndpointMap } from "../types/endpoint";
+import { EndpointMap } from "../types/endpoint-types";
 import { FormatSchema, YearSchema } from "./schema-utilities";
 
 // Use .nullable() to allow null values
@@ -446,7 +446,7 @@ export const MarvelStorySchema = MarvelResultSchema.extend({
   creators: CreatorListSchema.describe(
     "A resource list of creators who worked on this story."
   ),
-  originalissue: ComicSummarySchema.nullable()
+  originalIssue: ComicSummarySchema.nullable()
     .optional()
     .describe(
       "A summary representation of the issue in which this story was originally published."

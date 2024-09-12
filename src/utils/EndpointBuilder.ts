@@ -1,11 +1,11 @@
 import {
-  DataType,
   Endpoint,
   EndpointDescriptor,
   EndpointType,
   Extendpoint,
   EndpointFromType,
-} from "src/models/types";
+} from "src/models/types/endpoint-types";
+import { DataType } from "src/models/types/data-types";
 import logger, { CustomLogger } from "./Logger";
 
 /**

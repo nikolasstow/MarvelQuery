@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EndpointType } from "./endpoint";
+import { Endpoint, EndpointType } from "./endpoint-types";
 import {
   APISchema,
   CharactersSchema,
@@ -12,9 +12,28 @@ import {
 } from "../schemas/param-schemas";
 import {
   Formats,
-  FormatsSchema,
   OrderByValues,
 } from "../schemas/schema-utilities";
+
+
+export type ParameterType<E extends readonly unknown[]> = E extends [
+  infer First,
+  infer Second,
+  infer Third
+]
+  ? Third extends EndpointType
+    ? ParameterMap[Third]
+    : never
+  : E extends [infer First, infer Second]
+  ? Second extends number
+    ? never
+    : never
+  : E extends [infer First]
+  ? First extends EndpointType
+    ? ParameterMap[First]
+    : never
+  : APIBaseParams;
+
 
 /** Remove a property, and replace it with a stricter type. */
 type Restrict<Z, P extends keyof Z, StrictProperty> = Omit<Z, P> &
@@ -177,4 +196,25 @@ export type StoryParams = z.input<typeof StoriesSchema>;
 /** Return comics within a predefined date range.
  * `lastWeek` `thisWeek` `nextWeek` `thisMonth`
  */
-export type DateDescriptor = z.input<typeof DateDescriptorSchema>;
+export type DateDescriptor = z.input<typeof DateDescriptorSchema>;export type Parameters<E extends Endpoint> = ParameterType<E> |
+{
+  offset?: number;
+  limit?: number;
+};
+export type ParameterMap = {
+  comics: ComicParams;
+  characters: CharacterParams;
+  creators: CreatorParams;
+  events: EventParams;
+  stories: StoryParams;
+  series: SeriesParams;
+};
+export type AnyParams = APIBaseParams |
+  ComicParams |
+  CharacterParams |
+  CreatorParams |
+  EventParams |
+  StoryParams |
+  SeriesParams |
+  undefined;
+

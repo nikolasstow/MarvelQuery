@@ -1,14 +1,14 @@
-import {
-  AnyParams,
-  Endpoint,
-  EndpointType,
-  Config,
-  Parameters,
-  EndpointDescriptor,
-} from "src/models/types";
+import { Parameters } from "src/models/types/param-types";
 import { ValidateParams } from "src/models/schemas/param-schemas";
 import logger, { CustomLogger } from "./Logger";
 import { EndpointBuilder } from "./EndpointBuilder";
+import { Config } from "src/models/types/config-types";
+import {
+  Endpoint,
+  EndpointDescriptor,
+  EndpointType,
+} from "src/models/types/endpoint-types";
+import { AnyParams } from "src/models/types/param-types";
 
 /**
  * Class responsible for managing and validating query parameters, including global
@@ -32,7 +32,10 @@ export class ParameterManager {
       const types = Object.keys(globalParams); // Get the keys of the globalParams object
 
       for (const type of types) {
-        if (!EndpointBuilder.isEndpointType(type) && type !== ("all" as EndpointType)) {
+        if (
+          !EndpointBuilder.isEndpointType(type) &&
+          type !== ("all" as EndpointType)
+        ) {
           logger.warn(`Invalid endpoint type in global parameters: ${type}`);
           continue;
         }
@@ -61,7 +64,11 @@ export class ParameterManager {
    * @param params - The parameters to validate.
    * @param customLogger - Optional custom logger instance for logging. Defaults to the global logger.
    */
-  static validate(type: EndpointType, params: AnyParams, customLogger = logger) {
+  static validate(
+    type: EndpointType,
+    params: AnyParams,
+    customLogger = logger
+  ) {
     customLogger.verbose(`Validating parameters for '${type}'`);
     try {
       // Confirm there's a validation function for the endpoint type

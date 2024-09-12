@@ -1,4 +1,5 @@
-import { Endpoint, EndpointDescriptor, Result } from "src/models/types";
+import { Endpoint, EndpointDescriptor } from "src/models/types/endpoint-types";
+import { Result } from "src/models/types/data-types";
 import { CustomLogger } from "./Logger";
 import { ResultSchemaMap } from "src/models/schemas/data-schemas";
 import { ZodError } from "zod";

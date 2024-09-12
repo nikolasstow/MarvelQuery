@@ -29,6 +29,7 @@ import {
   MarvelCharacterSchema,
   MarvelStorySchema,
 } from "../schemas/data-schemas";
+import { Endpoint, EndpointType } from "./endpoint-types";
 
 /**| Property   | Type     | Description                                                 
  * | ---------- | -------- | ------------------------------------------------------------
@@ -66,7 +67,7 @@ export type ComicPrice = z.infer<typeof ComicPriceSchema>;
  * | `resourceURI` | `string` | The path to the individual resource. |
  * | `name`        | `string` | The canonical name of the resource.  |
  */
-export type Summary = z.infer<typeof SummarySchema>;
+export type Resource = z.infer<typeof SummarySchema>;
 /**| Property      | Type     | Description                                  |
  * | ------------- | -------- | -------------------------------------------- |
  * | `resourceURI` | `string` | The path to the individual resource.         |
@@ -127,7 +128,7 @@ export type EventSummary = z.infer<typeof EventSummarySchema>;
  * | `collectionURI` | `string`              | The path to the full list of items in this collection.       
  * | `items`         | [`Summary`](#summary) | The list of returned issues in this collection.              
  */
-export type List = z.infer<typeof ListSchema>;
+export type Collection = z.infer<typeof ListSchema>;
 /**| Property        | Type                            | Description                                                  |
  * | --------------- | ------------------------------- | ------------------------------------------------------------ |
  * | `available`     | `number`                        | The number of total available issues in this list. Will always be greater than or equal to the "returned" value. |
@@ -361,5 +362,22 @@ export interface APIResponseResults<R extends MarvelResult>
 export interface APIWrapper<R extends MarvelResult> extends Metadata {
   data: APIResponseResults<R>;
 }
+export type DataType<E> = E extends Endpoint ? E[2] extends EndpointType ? E[2] : E[0] extends EndpointType ? E[0] : ["Error, could not determine data type", E] : ["Error, not a valid endpoint", E];
+
+export type Result<E extends Endpoint> = ResultMap[DataType<E>];
+export type ResultMap = {
+  comics: MarvelComic;
+  characters: MarvelCharacter;
+  creators: MarvelCreator;
+  events: MarvelEvent;
+  stories: MarvelStory;
+  series: MarvelSeries;
+};
+export type AnyType = MarvelComic |
+  MarvelCharacter |
+  MarvelCreator |
+  MarvelEvent |
+  MarvelSeries |
+  MarvelStory;
 
 /** Extend Types */

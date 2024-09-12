@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { EndpointType } from "../types/endpoint";
+import { EndpointType } from "../types/endpoint-types";
 
 // Define the schema for an array of numbers
 const MultipleIDSchema = z.array(z.number()).transform((arr) => arr.join(",")); // Convert the array to a comma-separated string
