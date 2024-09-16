@@ -2,15 +2,10 @@ import { Metadata, APIResponseData, APIWrapper } from "./data-types";
 import { ExtendResult } from "./autoquery-types";
 import { Result } from "./data-types";
 import { Parameters } from "./param-types";
-import { Endpoint, EndpointType } from "./endpoint-types";
+import { Endpoint } from "./endpoint-types";
 import { EndpointDescriptor } from "./endpoint-types";
 
-// export type StateTypes<E extends Endpoint> = keyof StateMap<E>;
-
-export type MarvelQueryInterface<
-  E extends Endpoint
-// Type extends StateTypes<E>
-> = {
+export type MarvelQueryInterface<E extends Endpoint> = {
   /** Endpoint of the query
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes ["characters", 1009491, "comics"]

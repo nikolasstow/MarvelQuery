@@ -1,9 +1,18 @@
-import { AnyType, APIWrapper, MarvelResult } from "./data-types";
+import {
+  APIWrapper,
+  MarvelCharacter,
+  MarvelComic,
+  MarvelCreator,
+  MarvelEvent,
+  MarvelResult,
+  MarvelSeries,
+  MarvelStory,
+} from "./data-types";
 import { APIBaseParams, Parameters } from "./param-types";
 import { ResultMap } from "./data-types";
 import { ParameterMap } from "./param-types";
 import { Result } from "./data-types";
-import { Endpoint, EndpointFromType, EndpointType } from "./endpoint-types";
+import { AsEndpoint, Endpoint, EndpointType } from "./endpoint-types";
 import { MarvelQueryInterface } from "./interface";
 
 /** The public and private keys for the API. */
@@ -83,7 +92,14 @@ export type OnResultFunction<R extends MarvelResult> = (
  * @param data - The results of the query.
  * @returns A promise that resolves when the query is finished.
  */
-export type AnyResultFunction = OnResultFunction<AnyType>;
+export type AnyResultFunction = OnResultFunction<
+  | MarvelComic
+  | MarvelCharacter
+  | MarvelCreator
+  | MarvelEvent
+  | MarvelSeries
+  | MarvelStory
+>;
 
 /** Replace the default HTTP client with one of your choosing. */
 export type HTTPClient = <E extends Endpoint>(
@@ -98,13 +114,7 @@ export type HTTPClient = <E extends Endpoint>(
  * @param params Optional parameters for the query.
  * @returns A new instance of MarvelQueryInterface for the specified endpoint.
  */
-export type CreateQueryFunction = {
-  <T extends Endpoint>(
-    endpoint: T,
-    params?: Parameters<T>
-  ): MarvelQueryInterface<T>;
-  <T extends EndpointType>(
-    endpoint: T,
-    params?: Parameters<EndpointFromType<T>>
-  ): MarvelQueryInterface<EndpointFromType<T>>;
-};
+export type CreateQueryFunction = <T extends Endpoint | EndpointType>(
+  endpoint: T,
+  params?: Parameters<AsEndpoint<T>>
+) => MarvelQueryInterface<AsEndpoint<T>>

@@ -19,7 +19,6 @@ import {
 } from "../models/types/autoquery-types";
 import { Collection, Resource, Result, DataType } from "../models/types/data-types";
 import { Parameters } from "../models/types/param-types";
-import { ENDPOINT_MAP } from "../models/endpoints";
 import { EndpointBuilder } from "./EndpointBuilder";
 import { InitQuery } from "src/models/types/autoquery-types";
 import { MarvelQueryInterface } from "src/models/types/interface";

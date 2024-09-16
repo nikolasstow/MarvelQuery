@@ -1,30 +1,33 @@
 import axios from "axios";
 import * as CryptoJS from "crypto-js";
 import logger, { CustomLogger } from "./utils/Logger";
-import type {
-  Endpoint,
-  Parameters,
-  Result,
-  EndpointType,
-  OnResultFunction,
-  ResultMap,
-  APIKeys,
-  Config,
-  AnyResultFunction,
-  MarvelQueryInterface,
-  InitQuery,
-  APIWrapper,
-  APIResponseData,
-  Metadata,
-  ExtendResult,
-  EndpointDescriptor,
-  EndpointFromType
-} from "./models/types";
-import { CreateQueryFunction } from "./models/types/";
 import { AutoQuery } from "./utils/AutoQuery";
 import { EndpointBuilder } from "./utils/EndpointBuilder";
 import { ParameterManager } from "./utils/ParameterManager";
 import { ResultValidator } from "./utils/ResultValidator";
+import { Config } from "./models/types/config-types";
+import { Parameters } from "./models/types/param-types";
+import { ExtendResult, InitQuery } from "./models/types/autoquery-types";
+import {
+  APIKeys,
+  CreateQueryFunction,
+  OnResultFunction,
+  AnyResultFunction,
+} from "./models/types/config-types";
+import {
+  ResultMap,
+  Metadata,
+  APIResponseData,
+  APIWrapper,
+  Result,
+} from "./models/types/data-types";
+import {
+  Endpoint,
+  EndpointType,
+  EndpointDescriptor,
+  AsEndpoint,
+} from "./models/types/endpoint-types";
+import { MarvelQueryInterface } from "./models/types/interface";
 
 /**
  * The MarvelQuery class is responsible for handling requests to the Marvel API.
@@ -50,8 +53,8 @@ export class MarvelQuery<E extends Endpoint>
     verbose: false,
     httpClient: (url) => axios.get(url).then((response) => response.data),
   };
-
-  /**
+  
+ /**
    * Creates a new instance of the MarvelQuery class.
    *
    * @template T The type of the endpoint or endpoint type.
@@ -59,20 +62,16 @@ export class MarvelQuery<E extends Endpoint>
    * @param params Optional parameters for the query.
    * @returns A new instance of MarvelQueryInterface for the specified endpoint.
    */
-  private static createQuery<T extends Endpoint>(
-    endpoint: T,
-    params?: Parameters<T>
-  ): MarvelQueryInterface<T>;
-  private static createQuery<T extends EndpointType>(
-    endpoint: T,
-    params?: Parameters<EndpointFromType<T>>
-  ): MarvelQueryInterface<EndpointFromType<T>>;
-  private static createQuery(endpoint, params = {}) {
-    return new MarvelQuery({
-      endpoint: EndpointBuilder.asEndpoint(endpoint),
-      params,
-    });
-  }
+ private static createQuery = <T extends Endpoint | EndpointType>(
+  endpoint: T,
+  params: Parameters<AsEndpoint<T>> = {}
+): MarvelQueryInterface<AsEndpoint<T>> =>
+  new MarvelQuery<AsEndpoint<T>>({
+    endpoint: (Array.isArray(endpoint)
+      ? endpoint
+      : [endpoint]) as AsEndpoint<T>,
+    params,
+  });
 
   /**
    * Initializes the MarvelQuery class with API keys and configuration settings.
@@ -417,4 +416,6 @@ export class MarvelQuery<E extends Endpoint>
 }
 
 export default MarvelQuery;
-export * from "./models/types";
+export * from "./models/types/data-types";
+export { DateDescriptor } from "./models/types/param-types";
+export { OnResultMap } from "./models/types/config-types";

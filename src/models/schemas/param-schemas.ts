@@ -5,10 +5,9 @@ import {
   ModifiedSince,
   OrderBy,
   YearSchema,
-  FormatSchema,
   FormatsSchema,
 } from "./schema-utilities";
-import { EndpointMap } from "../types";
+import { EndpointMap } from "../types/endpoint-types";
 
 export const APISchema = z.object({
   modifiedSince: ModifiedSince.optional().describe(

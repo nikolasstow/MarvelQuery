@@ -10,41 +10,25 @@ import {
   SeriesSchema,
   StoriesSchema,
 } from "../schemas/param-schemas";
-import {
-  Formats,
-  OrderByValues,
-} from "../schemas/schema-utilities";
+import { Formats, OrderByValues } from "../schemas/schema-utilities";
 
-
-export type ParameterType<E extends readonly unknown[]> = E extends [
-  infer First,
-  infer Second,
-  infer Third
-]
-  ? Third extends EndpointType
-    ? ParameterMap[Third]
-    : never
-  : E extends [infer First, infer Second]
-  ? Second extends number
-    ? never
-    : never
-  : E extends [infer First]
-  ? First extends EndpointType
-    ? ParameterMap[First]
-    : never
-  : APIBaseParams;
-
+export type ParameterType<E extends Endpoint> =
+  ParameterMap[E extends Required<Endpoint> // Does the Endpoint have a third element?
+    ? E[2] // If it does, the third element is the data type
+    : E extends [EndpointType, number] // Is there a second element and it's a number?
+    ? never // Then it's a resource endpoint and has no parameters
+    : E[0]]; // If neither of the above, the first element is the data type
 
 /** Remove a property, and replace it with a stricter type. */
 type Restrict<Z, P extends keyof Z, StrictProperty> = Omit<Z, P> &
   StrictProperty;
 
-/** Create a stricter type for the 'orderBy' property. */
-type OrderByType<T extends EndpointType> = (typeof OrderByValues)[T][number]; // Creates a union of strings from OrderByValues[Type].
-type PrefixWithDash<F extends string> = `-${F}`; // Prefixes a string with '-'
-type AddDescending<F extends string> = F | PrefixWithDash<F>; // Creates a union of the original string with the prefixed string.
-type OrderByOptions<F extends EndpointType> = AddDescending<OrderByType<F>>; // creates a union of the strings from OrderByValues[Type] with the prefixed strings.
-
+/** Create a union of strings from OrderByValues (a map keyed by EndpointType). */
+type OrderByType<T extends EndpointType> = (typeof OrderByValues)[T][number];
+/** A stricter type for ‘orderBy’ that uses OrderByType, a union of fields that can be used for ordering, and allows the sorting order to be flipped by adding a ‘-’ prefix to any of the fields */
+type OrderByOptions<T extends EndpointType> =
+  | OrderByType<T>
+  | `-${OrderByType<T>}`;
 /** Add an 'orderBy' property with a union of OrderByOptions (union of orderBy options for each endpoint) and an array of the same type. */
 type OrderByProperty<T extends EndpointType> = {
   orderBy?: OrderByOptions<T> | OrderByOptions<T>[];
@@ -196,11 +180,13 @@ export type StoryParams = z.input<typeof StoriesSchema>;
 /** Return comics within a predefined date range.
  * `lastWeek` `thisWeek` `nextWeek` `thisMonth`
  */
-export type DateDescriptor = z.input<typeof DateDescriptorSchema>;export type Parameters<E extends Endpoint> = ParameterType<E> |
-{
-  offset?: number;
-  limit?: number;
-};
+export type DateDescriptor = z.input<typeof DateDescriptorSchema>;
+export type Parameters<E extends Endpoint> =
+  | ParameterType<E>
+  | {
+      offset?: number;
+      limit?: number;
+    };
 export type ParameterMap = {
   comics: ComicParams;
   characters: CharacterParams;
@@ -209,12 +195,12 @@ export type ParameterMap = {
   stories: StoryParams;
   series: SeriesParams;
 };
-export type AnyParams = APIBaseParams |
-  ComicParams |
-  CharacterParams |
-  CreatorParams |
-  EventParams |
-  StoryParams |
-  SeriesParams |
-  undefined;
-
+export type AnyParams =
+  | APIBaseParams
+  | ComicParams
+  | CharacterParams
+  | CreatorParams
+  | EventParams
+  | StoryParams
+  | SeriesParams
+  | undefined;

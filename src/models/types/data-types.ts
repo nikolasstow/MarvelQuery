@@ -29,13 +29,55 @@ import {
   MarvelCharacterSchema,
   MarvelStorySchema,
 } from "../schemas/data-schemas";
-import { Endpoint, EndpointType } from "./endpoint-types";
+import {
+  Endpoint,
+  EndpointFromType,
+  EndpointType,
+  ExcludeEndpointType,
+  NewEndpoint,
+} from "./endpoint-types";
+import { ExtendResult } from "./autoquery-types";
 
-/**| Property   | Type     | Description                                                 
+/** Result data type as an EndpointType, determined by the endpoint <E> */
+export type DataType<E> = E extends Endpoint
+  ? E[2] extends EndpointType // If there is a 3rd element (and is an EndpointType) use it
+    ? E[2]
+    : E[0] extends EndpointType // Otherwise use the first element (if it is an EndpointType)
+    ? E[0]
+    : ["Error, could not determine data type", E]
+  : ["Error, not a valid endpoint", E];
+
+/** The data type of the result, determined by the endpoint <E> */
+export type Result<E extends Endpoint> = ResultMap[DataType<E>];
+
+/** A map of the EndpointTypes to the corresponding result types */
+export type ResultMap = {
+  comics: MarvelComic;
+  characters: MarvelCharacter;
+  creators: MarvelCreator;
+  events: MarvelEvent;
+  stories: MarvelStory;
+  series: MarvelSeries;
+};
+
+/** The return type of the endpoint after AutoQuery Injection */
+type ReturnType<T extends EndpointType> =
+  | ExtendResult<EndpointFromType<T>> // [T]
+  | ExtendResult<NewEndpoint<EndpointFromType<ExcludeEndpointType<T>>, T>>; // [ExcludeEndpointType<T>, number , T]
+
+export type Comic = ReturnType<"comics">;
+export type Character = ReturnType<"characters">;
+export type Creator = ReturnType<"creators">;
+export type Event = ReturnType<"events">;
+export type Series = ReturnType<"series">;
+export type Story = ReturnType<"stories">;
+
+
+/**| Property   | Type     | Description
  * | ---------- | -------- | ------------------------------------------------------------
  * | `type`     | `string` | Only return resources created or changed since the specified date.
- * | `language` | `string` | The IETF language tag denoting the language the text object is written in. 
- * | `text`     | `string` | The text.                                                    
+ * | `language` | `string` | The IETF language tag denoting the language the text object is written in.
+ * | `text`     | `string` | The text.
  */
 export type TextObject = z.infer<typeof TextObjectSchema>;
 /**| Property | Type     | Description                                      |
@@ -50,16 +92,16 @@ export type URL = z.infer<typeof URLSchema>;
  * | `extension` | `string` | A full URL (including scheme, domain, and path). |
  */
 export type Image = z.infer<typeof ImageSchema>;
-/**| Property | Type     | Description                                                 
+/**| Property | Type     | Description
  * | -------- | -------- | ------------------------------------------------------------ |
- * | `type`   | `string` | A description of the price (e.g. print price, digital price). 
- * | `price`  | `number` | The price (all prices in USD).    
+ * | `type`   | `string` | A description of the price (e.g. print price, digital price).
+ * | `price`  | `number` | The price (all prices in USD).
  */
 export type ComicDate = z.infer<typeof ComicDateSchema>;
-/**| Property | Type     | Description                                                 
+/**| Property | Type     | Description
  * | -------- | -------- | ------------------------------------------------------------
  * | `type`   | `string` | A description of the price (e.g. print price, digital price).
- * | `price`  | `number` | The price (all prices in USD).   
+ * | `price`  | `number` | The price (all prices in USD).
  */
 export type ComicPrice = z.infer<typeof ComicPriceSchema>;
 /**| Property      | Type     | Description                          |
@@ -121,12 +163,12 @@ export type CharacterSummary = z.infer<typeof CharacterSummarySchema>;
  * | `name`        | `string` | The name of the event.                     |
  */
 export type EventSummary = z.infer<typeof EventSummarySchema>;
-/**| Property        | Type                  | Description                                                  
- * | --------------- | --------------------- | ------------------------------------------------------------ 
- * | `available`     | `number`              | The number of total available resources in this list. Will always be greater than or equal to the "returned" value. 
- * | `returned`      | `number`              | The number of resources returned in this collection (up to 20). 
- * | `collectionURI` | `string`              | The path to the full list of items in this collection.       
- * | `items`         | [`Summary`](#summary) | The list of returned issues in this collection.              
+/**| Property        | Type                  | Description
+ * | --------------- | --------------------- | ------------------------------------------------------------
+ * | `available`     | `number`              | The number of total available resources in this list. Will always be greater than or equal to the "returned" value.
+ * | `returned`      | `number`              | The number of resources returned in this collection (up to 20).
+ * | `collectionURI` | `string`              | The path to the full list of items in this collection.
+ * | `items`         | [`Summary`](#summary) | The list of returned issues in this collection.
  */
 export type Collection = z.infer<typeof ListSchema>;
 /**| Property        | Type                            | Description                                                  |
@@ -137,12 +179,12 @@ export type Collection = z.infer<typeof ListSchema>;
  * | `items`         | [`ComicSummary`](#comicsummary) | The list of returned issues in this collection.              |
  */
 export type ComicList = z.infer<typeof ComicListSchema>;
-/**| Property        | Type                            | Description                                                  
- * | --------------- | ------------------------------- | ------------------------------------------------------------ 
+/**| Property        | Type                            | Description
+ * | --------------- | ------------------------------- | ------------------------------------------------------------
  * | `available`     | `number`                        | The number of total available stories in this list. Will always be greater than or equal to the "returned" value. |
  * | `returned`      | `number`                        | The number of stories returned in this collection (up to 20).
- * | `collectionURI` | `string`                        | The path to the full list of stories in this collection.     
- * | `items`         | [`StorySummary`](#storysummary) | The list of returned stories in this collection.             
+ * | `collectionURI` | `string`                        | The path to the full list of stories in this collection.
+ * | `items`         | [`StorySummary`](#storysummary) | The list of returned stories in this collection.
  */
 export type StoryList = z.infer<typeof StoryListSchema>;
 /**| Property        | Type                              | Description                                                  |
@@ -188,7 +230,7 @@ export type MarvelResult = z.infer<typeof MarvelResultSchema>;
  * @property modified - The date the resource was most recently modified.
  * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this comic.
- * 
+ *
  * @property digitalId - The ID of the digital comic representation of this comic. Will be 0 if the comic is not available digitally.
  * @property title - The canonical title of the comic.
  * @property issueNumber - The number of the issue in the series (will generally be 0 for collection formats).
@@ -221,7 +263,7 @@ export type MarvelComic = z.infer<typeof MarvelComicSchema>;
  * @property modified - The date the resource was most recently modified.
  * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this item.
- * 
+ *
  * @property title - The title of the event.
  * @property description - A description of the event.
  * @property start - The date of publication of the first issue in this event
@@ -241,7 +283,7 @@ export type MarvelEvent = z.infer<typeof MarvelEventSchema>;
  * @property modified - The date the resource was most recently modified.
  * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this series.
- * 
+ *
  * @property title - The canonical title of the series.
  * @property description - A description of the series.
  * @property startYear - The first year in which the series has been published.
@@ -262,7 +304,7 @@ export type MarvelSeries = z.infer<typeof MarvelSeriesSchema>;
  * @property modified - The date the resource was most recently modified.
  * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this creator.
- * 
+ *
  * @property firstName - The first name of the creator.
  * @property middleName - The middle name of the creator.
  * @property lastName - The last name of the creator.
@@ -280,7 +322,7 @@ export type MarvelCreator = z.infer<typeof MarvelCreatorSchema>;
  * @property modified - The date the resource was most recently modified.
  * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this character.
- * 
+ *
  * @property name - The name of the character.
  * @property description - A short bio or description of the character.
  * @property { ComicList } comics -  A resource list containing comics which feature this character.
@@ -295,7 +337,7 @@ export type MarvelCharacter = z.infer<typeof MarvelCharacterSchema>;
  * @property modified - The date the resource was most recently modified.
  * @property { URL[] } urls - A set of public web site URLs for the resource.
  * @property { Image } thumbnail - The representative image for this story.
- * 
+ *
  * @property title - The story title.
  * @property description - A description of the story.
  * @property type - The story type e.g. interior story, cover, text story.
@@ -362,22 +404,3 @@ export interface APIResponseResults<R extends MarvelResult>
 export interface APIWrapper<R extends MarvelResult> extends Metadata {
   data: APIResponseResults<R>;
 }
-export type DataType<E> = E extends Endpoint ? E[2] extends EndpointType ? E[2] : E[0] extends EndpointType ? E[0] : ["Error, could not determine data type", E] : ["Error, not a valid endpoint", E];
-
-export type Result<E extends Endpoint> = ResultMap[DataType<E>];
-export type ResultMap = {
-  comics: MarvelComic;
-  characters: MarvelCharacter;
-  creators: MarvelCreator;
-  events: MarvelEvent;
-  stories: MarvelStory;
-  series: MarvelSeries;
-};
-export type AnyType = MarvelComic |
-  MarvelCharacter |
-  MarvelCreator |
-  MarvelEvent |
-  MarvelSeries |
-  MarvelStory;
-
-/** Extend Types */
