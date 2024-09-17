@@ -12,7 +12,29 @@ import {
 } from "../schemas/param-schemas";
 import { Formats, OrderByValues } from "../schemas/schema-utilities";
 
-export type ParameterType<E extends Endpoint> =
+/** A map of parameters for each endpoint type. */
+export type ParameterMap = {
+  comics: ComicParams;
+  characters: CharacterParams;
+  creators: CreatorParams;
+  events: EventParams;
+  stories: StoryParams;
+  series: SeriesParams;
+};
+
+/** A union of all parameter types. */
+export type AnyParams =
+  | APIBaseParams
+  | ComicParams
+  | CharacterParams
+  | CreatorParams
+  | EventParams
+  | StoryParams
+  | SeriesParams
+  | undefined;
+
+/** Parameters for a given endpoint. */
+export type Params<E extends Endpoint> =
   ParameterMap[E extends Required<Endpoint> // Does the Endpoint have a third element?
     ? E[2] // If it does, the third element is the data type
     : E extends [EndpointType, number] // Is there a second element and it's a number?
@@ -25,10 +47,12 @@ type Restrict<Z, P extends keyof Z, StrictProperty> = Omit<Z, P> &
 
 /** Create a union of strings from OrderByValues (a map keyed by EndpointType). */
 type OrderByType<T extends EndpointType> = (typeof OrderByValues)[T][number];
+
 /** A stricter type for ‘orderBy’ that uses OrderByType, a union of fields that can be used for ordering, and allows the sorting order to be flipped by adding a ‘-’ prefix to any of the fields */
 type OrderByOptions<T extends EndpointType> =
   | OrderByType<T>
   | `-${OrderByType<T>}`;
+
 /** Add an 'orderBy' property with a union of OrderByOptions (union of orderBy options for each endpoint) and an array of the same type. */
 type OrderByProperty<T extends EndpointType> = {
   orderBy?: OrderByOptions<T> | OrderByOptions<T>[];
@@ -181,26 +205,3 @@ export type StoryParams = z.input<typeof StoriesSchema>;
  * `lastWeek` `thisWeek` `nextWeek` `thisMonth`
  */
 export type DateDescriptor = z.input<typeof DateDescriptorSchema>;
-export type Parameters<E extends Endpoint> =
-  | ParameterType<E>
-  | {
-      offset?: number;
-      limit?: number;
-    };
-export type ParameterMap = {
-  comics: ComicParams;
-  characters: CharacterParams;
-  creators: CreatorParams;
-  events: EventParams;
-  stories: StoryParams;
-  series: SeriesParams;
-};
-export type AnyParams =
-  | APIBaseParams
-  | ComicParams
-  | CharacterParams
-  | CreatorParams
-  | EventParams
-  | StoryParams
-  | SeriesParams
-  | undefined;

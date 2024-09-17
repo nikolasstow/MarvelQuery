@@ -6,7 +6,7 @@ import { EndpointBuilder } from "./utils/EndpointBuilder";
 import { ParameterManager } from "./utils/ParameterManager";
 import { ResultValidator } from "./utils/ResultValidator";
 import { Config } from "./models/types/config-types";
-import { Parameters } from "./models/types/param-types";
+import { Params } from "./models/types/param-types";
 import { ExtendResult, InitQuery } from "./models/types/autoquery-types";
 import {
   APIKeys,
@@ -41,20 +41,22 @@ export class MarvelQuery<E extends Endpoint>
 {
   /** ********* Static Properties ********* */
   /** Stores the API keys used for authentication with the Marvel API */
-  static apiKeys: APIKeys;
+  private static apiKeys: APIKeys;
   /**
    * Configuration settings for the MarvelQuery class.
    * These include global parameters, verbosity, HTTP client, and more.
    * The default configuration can be overridden when initializing the class.
    */
-  static config: Config = {
+  private static config: Config = {
     globalParams: {},
     omitUndefined: true,
-    verbose: false,
+    logOptions: {
+      verbose: false,
+    },
     httpClient: (url) => axios.get(url).then((response) => response.data),
   };
-  
- /**
+
+  /**
    * Creates a new instance of the MarvelQuery class.
    *
    * @template T The type of the endpoint or endpoint type.
@@ -62,16 +64,16 @@ export class MarvelQuery<E extends Endpoint>
    * @param params Optional parameters for the query.
    * @returns A new instance of MarvelQueryInterface for the specified endpoint.
    */
- private static createQuery = <T extends Endpoint | EndpointType>(
-  endpoint: T,
-  params: Parameters<AsEndpoint<T>> = {}
-): MarvelQueryInterface<AsEndpoint<T>> =>
-  new MarvelQuery<AsEndpoint<T>>({
-    endpoint: (Array.isArray(endpoint)
-      ? endpoint
-      : [endpoint]) as AsEndpoint<T>,
-    params,
-  });
+  private static createQuery = <T extends Endpoint | EndpointType>(
+    endpoint: T,
+    params: Params<AsEndpoint<T>> = {}
+  ): MarvelQuery<AsEndpoint<T>> =>
+    new MarvelQuery<AsEndpoint<T>>({
+      endpoint: (Array.isArray(endpoint)
+        ? endpoint
+        : [endpoint]) as AsEndpoint<T>,
+      params,
+    });
 
   /**
    * Initializes the MarvelQuery class with API keys and configuration settings.
@@ -85,7 +87,7 @@ export class MarvelQuery<E extends Endpoint>
     config: Partial<Config> = {}
   ): CreateQueryFunction {
     // Set verbose logging based on the configuration
-    logger.setVerbose(config.verbose || false);
+    logger.setConfig(config);
     logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
     // Assign API keys and merge the provided config with the default config
@@ -112,13 +114,13 @@ export class MarvelQuery<E extends Endpoint>
     | AnyResultFunction;
 
   /**
-   * Endpoint path as an array, and the type of the endpoint
+   * Endpoint path as a tuple, and the type of the endpoint
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes { path: ["characters", "1009491", "comics"], type: "comics" }
    *  */
   endpoint: EndpointDescriptor<E>;
   /** Parameters of the query */
-  params: Parameters<E>;
+  params: Params<E>;
   /** The URL of the query */
   url: string;
   /** The number of results returned by the query. */
@@ -417,5 +419,10 @@ export class MarvelQuery<E extends Endpoint>
 
 export default MarvelQuery;
 export * from "./models/types/data-types";
-export { DateDescriptor } from "./models/types/param-types";
-export { OnResultMap } from "./models/types/config-types";
+export * from "./models/types/param-types";
+export * from "./models/types/config-types";
+export {
+  Endpoint,
+  EndpointType,
+  EndpointDescriptor,
+} from "./models/types/endpoint-types";

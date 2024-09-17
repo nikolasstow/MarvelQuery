@@ -8,7 +8,7 @@ import {
   MarvelSeries,
   MarvelStory,
 } from "./data-types";
-import { APIBaseParams, Parameters } from "./param-types";
+import { APIBaseParams, Params } from "./param-types";
 import { ResultMap } from "./data-types";
 import { ParameterMap } from "./param-types";
 import { Result } from "./data-types";
@@ -36,8 +36,6 @@ export interface Config {
   /** Remove undefined parameters from the query */
   omitUndefined: boolean; // set to true (by default) this will remove undefined values from the query
 
-  /** Enable verbose logging. */
-  verbose: boolean;
   /** An optional function that will be called before the request is sent.
    * You can use it to log the request or track the number of requests to the API. */
   onRequest?: OnRequestFunction;
@@ -52,7 +50,8 @@ export interface Config {
    * }```
    */
   onResult?: OnResultMap;
-  consoleCharLimit?: number; // Maximum number of characters to print in the console
+  /** Logging options */
+  logOptions?: LogOptions;
   /** Replace the default http client (axios) with your own http client.  */
   httpClient: HTTPClient;
 }
@@ -60,7 +59,7 @@ export interface Config {
 /** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
  * You can also apply global parameters to specific data types (comics, characters, events, etc.)
  */
-interface GlobalParams extends Partial<ParameterMap> {
+export interface GlobalParams extends Partial<ParameterMap> {
   all?: APIBaseParams;
 }
 
@@ -86,6 +85,15 @@ export type OnResultMap = {
 export type OnResultFunction<R extends MarvelResult> = (
   data: R[]
 ) => void | Promise<unknown>;
+
+export interface LogOptions {
+  /** Enable verbose logging. */
+  verbose?: boolean;
+  /** Maximum number of lines in a log message. */
+  maxLines?: number;
+  /** Maximum length of a line in a log message. */
+  maxLineLength?: number;
+}
 
 /**
  * A function that is called when a query of any type is finished.
@@ -116,5 +124,5 @@ export type HTTPClient = <E extends Endpoint>(
  */
 export type CreateQueryFunction = <T extends Endpoint | EndpointType>(
   endpoint: T,
-  params?: Parameters<AsEndpoint<T>>
+  params?: Params<AsEndpoint<T>>
 ) => MarvelQueryInterface<AsEndpoint<T>>

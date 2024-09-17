@@ -48,9 +48,8 @@ export type IsEndpointType<T> = T extends EndpointType ? T : never;
 export type EndpointFromType<T extends EndpointType> = IsEndpoint<[T]>;
 
 /** Accepts an Endpoint or an EndpointType and returns an Endpoint */
-export type AsEndpoint<T extends Endpoint | EndpointType> = T extends Endpoint
-  ? T
-  : EndpointFromType<IsEndpointType<T>>;
+export type AsEndpoint<T extends Endpoint | EndpointType> =
+  T extends EndpointType ? EndpointFromType<T> : T;
 
 /** Create a new endpoint from an existing one and a new type */
 export type NewEndpoint<E, T> = IsEndpoint<[DataType<E>, number, T]>;

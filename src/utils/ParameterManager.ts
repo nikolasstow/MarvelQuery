@@ -1,4 +1,4 @@
-import { Parameters } from "src/models/types/param-types";
+import { Params } from "src/models/types/param-types";
 import { ValidateParams } from "src/models/schemas/param-schemas";
 import logger, { CustomLogger } from "./Logger";
 import { EndpointBuilder } from "./EndpointBuilder";
@@ -94,7 +94,7 @@ export class ParameterManager {
    */
   query<E extends Endpoint>(
     endpoint: EndpointDescriptor<E>,
-    params: Parameters<E>
+    params: Params<E>
   ) {
     // Remove undefined parameters unless 'omitUndefined' is false.
     const cleanParams = ParameterManager.config.omitUndefined
@@ -135,8 +135,8 @@ export class ParameterManager {
    * @returns A new object with undefined values removed.
    */
   private omitUndefined<E extends Endpoint>(
-    params: Parameters<E>
-  ): Parameters<E> {
+    params: Params<E>
+  ): Params<E> {
     // Create a new object by filtering out undefined values
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined)

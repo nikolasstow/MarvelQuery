@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { performance } from "perf_hooks";
+import { Config } from "src/models/types/config-types";
 import * as winston from "winston";
 import "winston-daily-rotate-file";
 
@@ -8,6 +9,7 @@ import "winston-daily-rotate-file";
  * Adds custom methods for performance timing, verbosity control, and file-only logging.
  */
 export interface CustomLogger extends winston.Logger {
+  setConfig: any;
   /** Path to the log file used by the logger. */
   logFilePath: string;
 
@@ -79,6 +81,8 @@ export interface PerformanceTimer {
 export class Logger {
   private static instance: Logger;
   private static verboseStatus: boolean = false;
+  private static maxLines: number = 23;
+  private static maxLineLength: number = 500;
   /** Set to store recent logs to prevent duplicate messages */
   recentLogs: Set<string> = new Set<string>();
   /** The custom Winston logger instance */
@@ -90,8 +94,6 @@ export class Logger {
    * @param id - Optional identifier for the logger (e.g., query ID).
    */
   constructor(id?: string) {
-    const MAX_LINES = 23; // Maximum lines to display in the console before truncating.
-    const MAX_CONSOLE_LENGTH = 2000; // Maximum length of a log message in the console before truncating.
     const DATE_PATTERN = "yyyy-MM-dd"; // Date format for log files.
 
     const logFilePath = `logs/marvelquery-${format(
@@ -134,9 +136,9 @@ export class Logger {
 
           let currentLineCount = 0;
           for (const line of lines) {
-            const wrappedLineCount = Math.ceil(line.length / MAX_CONSOLE_LENGTH);
-            if (currentLineCount + wrappedLineCount > MAX_LINES) {
-              truncatedLines.push(line.slice(0, MAX_CONSOLE_LENGTH) + "...");
+            const wrappedLineCount = Math.ceil(line.length / Logger.maxLineLength);
+            if (currentLineCount + wrappedLineCount > Logger.maxLines) {
+              truncatedLines.push(line.slice(0, Logger.maxLineLength) + "...");
               truncatedLines.push(
                 `\n──────────────────────────────────────────────────────────────────────────\n`
               );
@@ -191,6 +193,7 @@ export class Logger {
     this.logger.logFilePath = logFilePath;
     this.logger.performance = this.performance.bind(this);
     this.logger.measurePerformance = this.measurePerformance.bind(this);
+    this.logger.setConfig = Logger.setConfig.bind(this);
     this.logger.setVerbose = Logger.setVerbose.bind(this);
     this.logger.verboseStatus = Logger.verboseStatus;
     this.logger.identify = this.createLoggerWithId.bind(this);
@@ -250,6 +253,12 @@ export class Logger {
   static setVerbose(verbose: boolean) {
     Logger.verboseStatus = verbose;
     Logger.instance.logger.level = verbose ? "verbose" : "info";
+  }
+
+  static setConfig(config: Config) {
+    Logger.maxLines = config.logOptions?.maxLines ?? 23;
+    Logger.maxLineLength = config.logOptions?.maxLineLength ?? 500;
+    Logger.setVerbose(config.logOptions?.verbose ?? false);
   }
 
   /**

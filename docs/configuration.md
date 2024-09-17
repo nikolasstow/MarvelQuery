@@ -13,10 +13,10 @@ const createQuery = MarvelQuery.init({
 
 ## `APIKeys`
 
-| Property     | Type     | Description                                          |
-| ------------ | -------- | ---------------------------------------------------- |
-| `publicKey`  | `string` | Marvel API public key as set during initialization.  |
-| `privateKey` | `string` | Marvel API private key as set during initialization. |
+| Property     | Type     | Description            |
+| ------------ | -------- | ---------------------- |
+| `publicKey`  | `string` | Marvel API public key  |
+| `privateKey` | `string` | Marvel API private key |
 
 ## `Config`
 
@@ -24,9 +24,9 @@ const createQuery = MarvelQuery.init({
 | --------------- | ------------------------------ | ------------------------------------------------------------ |
 | `globalParams`  | `GlobalParams`                 | Global parameters to be applied to all queries, or all queries of a specific type. |
 | `omitUndefined` | `boolean`                      | Remove undefined parameters from queries.                    |
-| `verbose`       | `boolean`                      | Enabled detailed logging for debugging.                      |
 | `onResult`      | `OnResultMap`                  | A map of functions to be called when all results, or results of a specific type, are returned. |
 | `onRequest`     | ` (url: string) => void`       | A function that is called for each request. Useful for monitoring your API usage. |
+| `logOptions`    | `LogOptions`                   | Options for logging: verbose, maxLines, maxLineLength        |
 | `httpClient`    | [`HTTPClient`](#fetchfunction) | Replace the default fetch function (axios) with your own HTTP client. |
 
 ## Configuration Options and Examples
@@ -76,6 +76,18 @@ const createQuery = MarvelQuery.init({ ... }, {
       })
     }
   }
+});
+```
+
+### `logOptions`
+
+Set `verbose` to true to get extensive logging with details for debugging. Configure amount of lines and line lengths for messages logged in the console. Messages will be truncated only in the console, and the full message can be found in the log files.
+
+```ts
+const createQuery = MarvelQuery.init({ ... }, {
+	verbose: true,
+  maxLines: 23,
+	maxLineLength: 500,
 });
 ```
 

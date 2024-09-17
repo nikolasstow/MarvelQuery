@@ -35,7 +35,7 @@ const spiders = await createQuery(["characters"], {
 
 ### Defining your Endpoint
 
-The endpoint is an array containing 1 to 3 elements that specify the target locations for data retrieval and determine the data type of the results.
+The endpoint is an tuple containing 1 to 3 elements that specify the target locations for data retrieval and determine the data type of the results.
 
 ```ts
 ["comics"] // Search for comics

@@ -1,5 +1,5 @@
 import { Collection, Resource, Result } from "./data-types";
-import { Parameters } from "./param-types";
+import { Params } from "./param-types";
 import {
   Endpoint,
   Extendpoint,
@@ -65,22 +65,22 @@ export type ExtendCollectionProperties<
 };
 
 /** Query method for a resource */
-type QueryResource<TEndpoint extends Endpoint> = <
-  TType extends NoSameEndpointType<TEndpoint>
+type QueryResource<E extends Endpoint> = <
+  TType extends NoSameEndpointType<E>
 >(
   type: TType,
-  params?: Parameters<Extendpoint<TEndpoint, TType>>
-) => MarvelQueryInterface<Extendpoint<TEndpoint, TType>>;
+  params?: Params<Extendpoint<E, TType>>
+) => MarvelQueryInterface<Extendpoint<E, TType>>;
 
 /** Query method for a collection */
 type QueryCollection<E extends Endpoint> = (
-  params?: Parameters<E>
+  params?: Params<E>
 ) => MarvelQueryInterface<E>;
 
 /** Initial query method for an instance */
 export type InitQuery<E extends Endpoint> = {
   endpoint: E;
-  params: Parameters<E>;
+  params: Params<E>;
 };
 
 /** Injects AutoQuery in each result property containing a resource or collection,

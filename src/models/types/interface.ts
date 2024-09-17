@@ -1,7 +1,7 @@
 import { Metadata, APIResponseData, APIWrapper } from "./data-types";
 import { ExtendResult } from "./autoquery-types";
 import { Result } from "./data-types";
-import { Parameters } from "./param-types";
+import { Params } from "./param-types";
 import { Endpoint } from "./endpoint-types";
 import { EndpointDescriptor } from "./endpoint-types";
 
@@ -12,7 +12,7 @@ export type MarvelQueryInterface<E extends Endpoint> = {
    */
   endpoint: EndpointDescriptor<E>;
   /** Parameters of the query */
-  params: Parameters<E>;
+  params: Params<E>;
 
   /** The URL of the query
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```

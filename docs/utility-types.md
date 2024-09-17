@@ -2,7 +2,7 @@
 
 ## Endpoints {#endpoint}
 
-In the MarvelQuery library, the endpoint is split into an array by slashes. These three parts determine what you are looking for and what data you will receive:
+In the MarvelQuery library, the endpoint is split into a tuple by slashes. These three parts determine what you are looking for and what data you will receive:
 
 1. **First element:** Specifies the type of the subject of your query. This is the only required element, allowing you to search the entire Marvel API for items of that type.
 2. **Second element:** Represents an ID, querying a specific item of the data type specified in the first element (e.g., 1009466).

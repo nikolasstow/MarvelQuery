@@ -17,8 +17,13 @@ import {
   ExtendResult,
   ExtendType,
 } from "../models/types/autoquery-types";
-import { Collection, Resource, Result, DataType } from "../models/types/data-types";
-import { Parameters } from "../models/types/param-types";
+import {
+  Collection,
+  Resource,
+  Result,
+  DataType,
+} from "../models/types/data-types";
+import { Params } from "../models/types/param-types";
 import { EndpointBuilder } from "./EndpointBuilder";
 import { InitQuery } from "src/models/types/autoquery-types";
 import { MarvelQueryInterface } from "src/models/types/interface";
@@ -164,7 +169,7 @@ export class AutoQuery<E extends Endpoint> {
       },
       query: <TType extends NoSameEndpointType<E>>(
         type: TType,
-        params: Parameters<Extendpoint<E, TType>>
+        params: Params<Extendpoint<E, TType>>
       ): MarvelQueryInterface<Extendpoint<E, TType>> =>
         new this.createQuery<Extendpoint<E, TType>>({
           endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
@@ -220,12 +225,8 @@ export class AutoQuery<E extends Endpoint> {
         },
         query: <TType extends EndpointType>(
           type: TType,
-          params: Parameters<
-            Extendpoint<ResourceEndpoint<BEndpoint>, TType>
-          > = {}
-        ): MarvelQueryInterface<
-          Extendpoint<ResourceEndpoint<BEndpoint>, TType>
-        > =>
+          params: Params<Extendpoint<ResourceEndpoint<BEndpoint>, TType>> = {}
+        ): MarvelQueryInterface<Extendpoint<ResourceEndpoint<BEndpoint>, TType>> =>
           new this.createQuery<Extendpoint<ResourceEndpoint<BEndpoint>, TType>>(
             {
               endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
@@ -329,7 +330,7 @@ export class AutoQuery<E extends Endpoint> {
           items,
           endpoint,
           query: (
-            params: Parameters<TEndpoint> = {}
+            params: Params<TEndpoint> = {}
           ): MarvelQueryInterface<TEndpoint> =>
             new this.createQuery<TEndpoint>({ endpoint, params }),
         };
@@ -428,9 +429,9 @@ export class AutoQuery<E extends Endpoint> {
   }
 
   /**
-   * Creates an endpoint array from a URI.
-   * @param url - The URI string to convert into an endpoint array.
-   * @returns The constructed endpoint array.
+   * Creates an endpoint tuple from a URI.
+   * @param url - The URI string to convert into an endpoint tuple.
+   * @returns The constructed endpoint tuple.
    * @throws Will throw an error if the URI is invalid.
    */
   private extractEndpointFromURI(url: string): Endpoint {
