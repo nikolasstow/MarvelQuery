@@ -13,7 +13,7 @@ import {
 import { MarvelQueryInterface } from "./interface";
 
 /** Extends the type of the result with additional properties. */
-export type ExtendType<E> = E extends Endpoint
+export type ExtendType<E extends Endpoint> = E extends Endpoint
   ? {
       [K in keyof Result<E>]: Result<E>[K] extends Collection // Iterate through each property in the result type
         ? ExtendCollection<CollectionEndpoint<E, K>, Result<E>[K]> // If the property is a collection, inject the AutoQuery properties
@@ -23,7 +23,7 @@ export type ExtendType<E> = E extends Endpoint
         ? ExtendResourceArray<ResourceEndpointFromKey<E, K>, Result<E>[K]> // Inject each resource with the AutoQuery properties
         : Result<E>[K];
     }
-  : ["utility-types.ts ExtendType", "Cannot extend type"];
+  : never;
 
 /** The type of an endpoint as determined by it's property keyy, a mirror of the determineEndpointType method in AutoQuery. */
 export type ResourceEndpointFromKey<E extends Endpoint, K> = 
@@ -53,7 +53,7 @@ export type ExtendCollectionResources<
 /** Adds AutoQuery properties to an array of resources */
 type ExtendResourceArray<E extends Endpoint, V> = V extends Array<Resource>
   ? ExtendResource<E, V[number]>[]
-  : never;
+  : ["Error: Expected an array of resources", V];
 
 /** AutoQuery properties for a resource */
 export type ExtendResourceProperties<E extends Endpoint> = {

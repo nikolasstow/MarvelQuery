@@ -25,8 +25,8 @@ export type Endpoint = [EndpointType, number?, EndpointType?] extends [
 ]
   ? First extends EndpointType // Verify if the first element is an EndpointType
     ? [First, number?, ExcludeEndpointType<First>?] // Remove the type of the first element from the available endpoint types for the last element
-    : never
-  : never;
+    : ["Error: Invalid endpoint type", First] // If the first element is not an EndpointType, return an error
+  : ["Error: Invalid endpoint"];
 
 /** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
 export type EndpointType =
