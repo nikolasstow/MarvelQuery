@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Endpoint, EndpointType } from "./endpoint-types";
+import { Endpoint, EndpointType, IsEndpoint } from "./endpoint-types";
 import {
   APISchema,
   CharactersSchema,
@@ -34,12 +34,14 @@ export type AnyParams =
   | undefined;
 
 /** Parameters for a given endpoint. */
-export type Params<E extends Endpoint> =
+export type Params<E extends Endpoint> = 
   ParameterMap[E extends Required<Endpoint> // Does the Endpoint have a third element?
     ? E[2] // If it does, the third element is the data type
     : E extends [EndpointType, number] // Is there a second element and it's a number?
     ? never // Then it's a resource endpoint and has no parameters
     : E[0]]; // If neither of the above, the first element is the data type
+
+type daas = Params<IsEndpoint<["comics", 123]>>;
 
 /** Remove a property, and replace it with a stricter type. */
 type Restrict<Z, P extends keyof Z, StrictProperty> = Omit<Z, P> &

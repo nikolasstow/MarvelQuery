@@ -6,6 +6,9 @@ import {
   ResourceEndpoint,
   NoSameEndpointType,
   CollectionEndpoint,
+  EndpointType,
+  EndpointFromType,
+  IsEndpoint,
 } from "./endpoint-types";
 import { MarvelQueryInterface } from "./interface";
 
@@ -15,12 +18,18 @@ export type ExtendType<E> = E extends Endpoint
       [K in keyof Result<E>]: Result<E>[K] extends Collection // Iterate through each property in the result type
         ? ExtendCollection<CollectionEndpoint<E, K>, Result<E>[K]> // If the property is a collection, inject the AutoQuery properties
         : RequiredNonNullable<Result<E>>[K] extends Resource // If the property a resource,
-        ? ExtendResource<ResourceEndpoint<E>, Result<E>[K]> // Also inject the AutoQuery properties, but for a resource
+        ? ExtendResource<ResourceEndpointFromKey<E, K>, Result<E>[K]> // Also inject the AutoQuery properties, but for a resource
         : RequiredNonNullable<Result<E>>[K] extends Array<Resource> // If the property is an array of resources
-        ? ExtendResourceArray<ResourceEndpoint<E>, Result<E>[K]> // Inject each resource with the AutoQuery properties
+        ? ExtendResourceArray<ResourceEndpointFromKey<E, K>, Result<E>[K]> // Inject each resource with the AutoQuery properties
         : Result<E>[K];
     }
   : ["utility-types.ts ExtendType", "Cannot extend type"];
+
+/** The type of an endpoint as determined by it's property keyy, a mirror of the determineEndpointType method in AutoQuery. */
+export type ResourceEndpointFromKey<E extends Endpoint, K> = 
+  K extends EndpointType ? ResourceEndpoint<IsEndpoint<[K, number]>> 
+  : K extends "originalIssue" ? ResourceEndpoint<IsEndpoint<["comics", number]>>
+  : ResourceEndpoint<E> ;
 
 /** Utility type that makes all properties in T required and non-nullable */
 type RequiredNonNullable<T> = {

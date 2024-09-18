@@ -14,7 +14,6 @@ import MarvelQuery, {
   SeriesSummary,
   StorySummary,
   ComicPrice,
-  Summary,
 } from ".";
 
 /**
@@ -35,6 +34,10 @@ async function spiderMan() {
     name: "Peter Parker",
   }).fetchSingle();
 
+  const story = await createQuery(["stories"]).fetchSingle()
+    .then( story => story.originalIssue);
+
+    story?.fetchSingle().then(comic => comic)
   // Need more results? Just call fetch again
   // spiderMan.fetch("comics",{
   //   format: "comic",
