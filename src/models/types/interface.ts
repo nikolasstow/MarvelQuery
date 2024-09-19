@@ -1,12 +1,12 @@
 import { Metadata, APIResponseData, APIWrapper } from "./data-types";
-import { ExtendResult } from "./autoquery-types";
-import { Result } from "./data-types";
+import { ExtendResult, Result } from "./autoquery-types";
+import { APIResult } from "./data-types";
 import { Params } from "./param-types";
 import { Endpoint } from "./endpoint-types";
 import { EndpointDescriptor } from "./endpoint-types";
-import { CustomLogger } from "src/utils/Logger";
 
-export interface MarvelQueryInit<E extends Endpoint> {
+export interface MarvelQueryInit<E extends Endpoint, A extends boolean> {
+  autoQuery: A;
   /** Query identifier for logging */
   queryId: string;
   /** Endpoint of the query
@@ -16,18 +16,21 @@ export interface MarvelQueryInit<E extends Endpoint> {
   endpoint: EndpointDescriptor<E>;
   /** Parameters of the query */
   params: Params<E>;
+  /** Generates a url using the api keys, the endpoint, and parameters */
+  buildURL(): string;
   /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
-  fetch(): Promise<MarvelQueryFetched<E>>;
+  fetch(): Promise<MarvelQueryFetched<E, A>>;
   /** Send the request to the API, and validate the response. */
-  request(url: string): Promise<APIWrapper<Result<E>>>;
+  request(url: string): Promise<APIWrapper<APIResult<E>>>;
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  fetchSingle(): Promise<ExtendResult<E>>;
-};
+  fetchSingle(): Promise<Result<E, A>>;
+}
 
-export interface MarvelQueryFetched<E extends Endpoint> extends MarvelQueryInit<E> {
+export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
+  extends MarvelQueryInit<E, A> {
   /** The URL of the query
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
    */
@@ -53,13 +56,10 @@ export interface MarvelQueryFetched<E extends Endpoint> extends MarvelQueryInit<
    */
   responseData: APIResponseData;
   /** The results of the query. */
-  results: ExtendResult<E>[];
+  results: Result<E, A>[];
   /** The conjunction of all results from this query instance. */
-  resultHistory: ExtendResult<E>[];
+  resultHistory: Result<E, A>[];
 
   /** The query is complete when all results have been fetched. */
   isComplete: boolean;
-
-  /** Generates a url using the api keys, the endpoint, and parameters */
-  buildURL(): string;
 }

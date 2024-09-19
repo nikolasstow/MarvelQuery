@@ -1,5 +1,5 @@
 import { Endpoint, EndpointDescriptor } from "src/models/types/endpoint-types";
-import { Result } from "src/models/types/data-types";
+import { APIResult } from "src/models/types/data-types";
 import { CustomLogger } from "./Logger";
 import { ResultSchemaMap } from "src/models/schemas/data-schemas";
 import { ZodError } from "zod";
@@ -21,7 +21,7 @@ export class ResultValidator<E extends Endpoint> {
    * @param logger - The custom logger instance used for logging validation actions.
    */
   constructor(
-    results: Result<E>[],
+    results: APIResult<E>[],
     endpoint: EndpointDescriptor<E>,
     logger: CustomLogger
   ) {

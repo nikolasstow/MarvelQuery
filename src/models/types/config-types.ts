@@ -11,7 +11,7 @@ import {
 import { APIBaseParams, Params } from "./param-types";
 import { ResultMap } from "./data-types";
 import { ParameterMap } from "./param-types";
-import { Result } from "./data-types";
+import { APIResult } from "./data-types";
 import { AsEndpoint, Endpoint, EndpointType } from "./endpoint-types";
 import { MarvelQueryInit } from "./interface";
 
@@ -24,8 +24,8 @@ export interface APIKeys {
 }
 
 /** Arguments for initialization of the API */
-export interface Config {
-  // Options
+export interface Config<A extends boolean> {
+  autoQuery: A;
   /** Global parameters to be applied to all queries, or all queries of a specific type.
    * @example ```globalParams: {
    * all: { limit: 10 },
@@ -112,7 +112,7 @@ export type AnyResultFunction = OnResultFunction<
 /** Replace the default HTTP client with one of your choosing. */
 export type HTTPClient = <E extends Endpoint>(
   url: string
-) => Promise<APIWrapper<Result<E>>>;
+) => Promise<APIWrapper<APIResult<E>>>;
 
 /**
  * Creates a new instance of the MarvelQuery class.
@@ -122,7 +122,7 @@ export type HTTPClient = <E extends Endpoint>(
  * @param params Optional parameters for the query.
  * @returns A new instance of MarvelQueryInterface for the specified endpoint.
  */
-export type CreateQueryFunction = <T extends Endpoint | EndpointType>(
+export type CreateQueryFunction<A extends boolean> = <T extends Endpoint | EndpointType>(
   endpoint: T,
   params?: Params<AsEndpoint<T>>
-) => MarvelQueryInit<AsEndpoint<T>>
+) => MarvelQueryInit<AsEndpoint<T>, A>

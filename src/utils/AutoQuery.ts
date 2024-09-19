@@ -21,7 +21,7 @@ import {
 import {
   Collection,
   Resource,
-  Result,
+  APIResult,
   DataType,
 } from "../models/types/data-types";
 import { Params } from "../models/types/param-types";
@@ -94,7 +94,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param results - The array of results to inject queries into.
    * @returns An array of extended results with query methods added.
    */
-  inject(results: Result<E>[]): ExtendResult<E>[] {
+  inject(results: APIResult<E>[]): ExtendResult<E>[] {
     this.logger.verbose(`Starting auto-query injection...`);
 
     const extendedResults = results.map((result) => this.extendResult(result));
@@ -117,7 +117,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param result - The result object to extend.
    * @returns The extended result object with query methods added.
    */
-  extendResult(result: Result<E>): ExtendResult<E> {
+  extendResult(result: APIResult<E>): ExtendResult<E> {
     const endpoint = this.endpoint.path;
     const resultName = this.findResourceName(result);
 

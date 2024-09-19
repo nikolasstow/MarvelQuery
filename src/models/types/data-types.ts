@@ -48,7 +48,7 @@ export type DataType<E> = E extends Endpoint
   : ["Error, not a valid endpoint", E];
 
 /** The data type of the result, determined by the endpoint <E> */
-export type Result<E extends Endpoint> = ResultMap[DataType<E>];
+export type APIResult<E extends Endpoint> = ResultMap[DataType<E>];
 
 /** A map of the EndpointTypes to the corresponding result types */
 export type ResultMap = {

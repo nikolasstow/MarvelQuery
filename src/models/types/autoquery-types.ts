@@ -1,4 +1,4 @@
-import { Collection, Resource, Result } from "./data-types";
+import { Collection, Resource, APIResult } from "./data-types";
 import { Params } from "./param-types";
 import {
   Endpoint,
@@ -15,21 +15,25 @@ import { MarvelQueryInit } from "./interface";
 /** Extends the type of the result with additional properties. */
 export type ExtendType<E extends Endpoint> = E extends Endpoint
   ? {
-      [K in keyof Result<E>]: Result<E>[K] extends Collection // Iterate through each property in the result type
-        ? ExtendCollection<CollectionEndpoint<E, K>, Result<E>[K]> // If the property is a collection, inject the AutoQuery properties
-        : RequiredNonNullable<Result<E>>[K] extends Resource // If the property a resource,
-        ? ExtendResource<ResourceEndpointFromKey<E, K>, Result<E>[K]> // Also inject the AutoQuery properties, but for a resource
-        : RequiredNonNullable<Result<E>>[K] extends Array<Resource> // If the property is an array of resources
-        ? ExtendResourceArray<ResourceEndpointFromKey<E, K>, Result<E>[K]> // Inject each resource with the AutoQuery properties
-        : Result<E>[K];
+      [K in keyof APIResult<E>]: APIResult<E>[K] extends Collection // Iterate through each property in the result type
+        ? ExtendCollection<CollectionEndpoint<E, K>, APIResult<E>[K]> // If the property is a collection, inject the AutoQuery properties
+        : RequiredNonNullable<APIResult<E>>[K] extends Resource // If the property a resource,
+        ? ExtendResource<ResourceEndpointFromKey<E, K>, APIResult<E>[K]> // Also inject the AutoQuery properties, but for a resource
+        : RequiredNonNullable<APIResult<E>>[K] extends Array<Resource> // If the property is an array of resources
+        ? ExtendResourceArray<ResourceEndpointFromKey<E, K>, APIResult<E>[K]> // Inject each resource with the AutoQuery properties
+        : APIResult<E>[K];
     }
   : never;
 
 /** The type of an endpoint as determined by it's property keyy, a mirror of the determineEndpointType method in AutoQuery. */
-export type ResourceEndpointFromKey<E extends Endpoint, K> = 
-  K extends EndpointType ? ResourceEndpoint<IsEndpoint<[K, number]>> 
-  : K extends "originalIssue" ? ResourceEndpoint<IsEndpoint<["comics", number]>>
-  : ResourceEndpoint<E> ;
+export type ResourceEndpointFromKey<
+  E extends Endpoint,
+  K
+> = K extends EndpointType
+  ? ResourceEndpoint<IsEndpoint<[K, number]>>
+  : K extends "originalIssue"
+  ? ResourceEndpoint<IsEndpoint<["comics", number]>>
+  : ResourceEndpoint<E>;
 
 /** Utility type that makes all properties in T required and non-nullable */
 type RequiredNonNullable<T> = {
@@ -59,7 +63,7 @@ type ExtendResourceArray<E extends Endpoint, V> = V extends Array<Resource>
 export type ExtendResourceProperties<E extends Endpoint> = {
   endpoint: E;
   query: QueryResource<E>;
-  fetch: () => Promise<MarvelQueryInit<E>>;
+  fetch: () => Promise<MarvelQueryInit<E, true>>;
   fetchSingle: () => Promise<ExtendResult<E>>;
 };
 
@@ -74,17 +78,15 @@ export type ExtendCollectionProperties<
 };
 
 /** Query method for a resource */
-type QueryResource<E extends Endpoint> = <
-  TType extends NoSameEndpointType<E>
->(
+type QueryResource<E extends Endpoint> = <TType extends NoSameEndpointType<E>>(
   type: TType,
   params?: Params<Extendpoint<E, TType>>
-) => MarvelQueryInit<Extendpoint<E, TType>>;
+) => MarvelQueryInit<Extendpoint<E, TType>, true>;
 
 /** Query method for a collection */
 type QueryCollection<E extends Endpoint> = (
   params?: Params<E>
-) => MarvelQueryInit<E>;
+) => MarvelQueryInit<E, true>;
 
 /** Initial query method for an instance */
 export type InitQuery<E extends Endpoint> = {
@@ -97,3 +99,7 @@ export type InitQuery<E extends Endpoint> = {
  */
 export type ExtendResult<E extends Endpoint> = ExtendType<E> &
   ExtendResourceProperties<E>;
+
+export type Result<E extends Endpoint, A extends boolean> = A extends true
+  ? ExtendResult<E>
+  : APIResult<E>;

@@ -23,6 +23,8 @@ import MarvelQuery, {
 const createQuery = MarvelQuery.init({
   publicKey: "your-public-key",
   privateKey: "your-private-key",
+}, {
+  autoQuery: true,
 });
 
 /**

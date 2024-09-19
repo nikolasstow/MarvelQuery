@@ -7,7 +7,11 @@ import { ParameterManager } from "./utils/ParameterManager";
 import { ResultValidator } from "./utils/ResultValidator";
 import { Config } from "./models/types/config-types";
 import { Params } from "./models/types/param-types";
-import { ExtendResult, InitQuery } from "./models/types/autoquery-types";
+import {
+  ExtendResult,
+  InitQuery,
+  Result,
+} from "./models/types/autoquery-types";
 import {
   APIKeys,
   CreateQueryFunction,
@@ -19,7 +23,7 @@ import {
   Metadata,
   APIResponseData,
   APIWrapper,
-  Result,
+  APIResult,
 } from "./models/types/data-types";
 import {
   Endpoint,
@@ -36,7 +40,7 @@ import { MarvelQueryFetched, MarvelQueryInit } from "./models/types/interface";
  *
  * @template E The endpoint type, extending the base Endpoint type.
  */
-export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
+export class MarvelQuery<E extends Endpoint, A extends boolean> implements MarvelQueryInit<E, A> {
   /** ********* Static Properties ********* */
   /** Stores the API keys used for authentication with the Marvel API */
   private static apiKeys: APIKeys;
@@ -45,14 +49,7 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    * These include global parameters, verbosity, HTTP client, and more.
    * The default configuration can be overridden when initializing the class.
    */
-  private static config: Config = {
-    globalParams: {},
-    omitUndefined: true,
-    logOptions: {
-      verbose: false,
-    },
-    httpClient: (url) => axios.get(url).then((response) => response.data),
-  };
+  private static config: Config<boolean>
 
   /**
    * Creates a new instance of the MarvelQuery class.
@@ -62,11 +59,11 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    * @param params Optional parameters for the query.
    * @returns A new instance of MarvelQueryInterface for the specified endpoint.
    */
-  private static createQuery = <T extends Endpoint | EndpointType>(
+  private static createQuery = <T extends Endpoint | EndpointType, A extends boolean>(
     endpoint: T,
     params: Params<AsEndpoint<T>> = {}
-  ): MarvelQuery<AsEndpoint<T>> =>
-    new MarvelQuery<AsEndpoint<T>>({
+  ): MarvelQuery<AsEndpoint<T>, A> =>
+    new MarvelQuery<AsEndpoint<T>, A>({
       endpoint: (Array.isArray(endpoint)
         ? endpoint
         : [endpoint]) as AsEndpoint<T>,
@@ -80,17 +77,27 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    * @param config Optional configuration overrides.
    * @returns The createQuery function for creating new query instances.
    */
-  static init(
+  static init<A extends boolean = true>(
     apiKeys: APIKeys,
-    config: Partial<Config> = {}
-  ): CreateQueryFunction {
+    config: Partial<Config<A>> = {}
+  ): CreateQueryFunction<A> {
     // Set verbose logging based on the configuration
     logger.setConfig(config);
     logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
+    const defaultConfig: Config<true> = {
+      autoQuery: true,
+      globalParams: {},
+      omitUndefined: true,
+      logOptions: {
+        verbose: false,
+      },
+      httpClient: (url) => axios.get(url).then((response) => response.data),
+    };
+
     // Assign API keys and merge the provided config with the default config
     MarvelQuery.apiKeys = apiKeys;
-    MarvelQuery.config = { ...MarvelQuery.config, ...config };
+    MarvelQuery.config = { ...defaultConfig, ...config };
 
     // Set config as static property on ParameterManager class
     ParameterManager.setConfig(config);
@@ -101,6 +108,8 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
   /** ********* Instance Properties ********* */
   /** Query identifier for logging */
   queryId: string;
+
+  autoQuery: A;
   /** Modified logger instance with query identifier */
   private logger: CustomLogger;
   /**
@@ -122,7 +131,7 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
   /** The URL of the query */
   url: string;
 
-  // TODO: Add back state management so that the following properties are not accessible until fetch is called
+  // Properties for the fetched results (will be hidden pre-fetch)
   /** The number of results returned by the query. */
   count: number = 0;
   /** The total number of results available for the query. */
@@ -132,9 +141,9 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
   /** Data for the API response. */
   responseData: APIResponseData;
   /** The results of the query. */
-  results: ExtendResult<E>[];
+  results: Result<E, typeof MarvelQuery.config.autoQuery>[];
   /** A history of all results returned by this query instance.. */
-  resultHistory: ExtendResult<E>[] = [];
+  resultHistory: Result<E, typeof MarvelQuery.config.autoQuery>[] = [];
   /** The query is complete when all results have been fetched. */
   isComplete: boolean = false;
 
@@ -195,7 +204,7 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    *
    * @returns A promise that resolves to the MarvelQuery instance.
    */
-  async fetch(): Promise<MarvelQueryFetched<E>> {
+  async fetch(): Promise<MarvelQueryFetched<E, A>> {
     // Build the URL for the API request using the endpoint and parameters
     this.url = this.buildURL();
     // Send the request and await the response
@@ -205,7 +214,7 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
     // Call the onResult function if it is defined
     this.callOnResult(processedResults);
     // Return the MarvelQuery instance for method chaining
-    return this;
+    return this as MarvelQueryFetched<E, A>;
   }
 
   /**
@@ -259,7 +268,9 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    * @param response The API response containing the results to process.
    * @returns An array of extended results.
    */
-  private processResults(response: APIWrapper<Result<E>>): ExtendResult<E>[] {
+  private processResults(
+    response: APIWrapper<APIResult<E>>
+  ): Result<E, A>[] {
     // Destructure the response to extract data and metadata
     const { data, ...metadata } = response;
     const { results, ...responseData } = data;
@@ -297,23 +308,31 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
           )
         : false;
 
-    /**
-     * Create an instance of the AutoQuery class, passing the MarvelQuery class with the query endpoint.
-     * Results are passed to the inject() method where they are processed and injected with properties
-     * and a query method that returns an instance of the MarvelQuery class passed in the constructor.
-     */
-    const autoQuery = new AutoQuery<E>(MarvelQuery, this.endpoint, this.logger);
-    const formattedResults = autoQuery.inject(results);
+    let returnData = results as Result<E, A>[];
+
+    if (this.autoQuery) {
+      /**
+       * Create an instance of the AutoQuery class, passing the MarvelQuery class with the query endpoint.
+       * Results are passed to the inject() method where they are processed and injected with properties
+       * and a query method that returns an instance of the MarvelQuery class passed in the constructor.
+       */
+      const autoQuery = new AutoQuery<E>(
+        MarvelQuery,
+        this.endpoint,
+        this.logger
+      );
+      returnData = autoQuery.inject(results) as Result<E, A>[];
+    }
 
     // Update the MarvelQuery instance properties
     this.isComplete = complete || duplicateResults || noResults;
     this.metadata = metadata;
     this.responseData = responseData;
-    this.results = formattedResults;
-    this.resultHistory = [...this.resultHistory, ...formattedResults];
+    this.results = returnData;
+    this.resultHistory = [...this.resultHistory, ...returnData];
 
-    this.logger.verbose("Results processed and extended.");
-    return formattedResults;
+    this.logger.verbose("Results processed " + this.autoQuery ? 'and extended with AutoQuery Injection.' : 'sucessfully.');
+    return returnData;
   }
 
   /**
@@ -334,7 +353,7 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    *
    * @param results The processed results to pass to the onResult function.
    */
-  private callOnResult(results: ExtendResult<E>[]): void {
+  private callOnResult(results: Result<E, typeof MarvelQuery.config.autoQuery>[]): void {
     // Call the onResult function if it is defined
     if (this.onResult) {
       this.logger.verbose(
@@ -350,7 +369,7 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    * @param url The URL to send the request to.
    * @returns A promise that resolves to the API response wrapped in an APIWrapper.
    */
-  async request(url: string): Promise<APIWrapper<Result<E>>> {
+  async request(url: string): Promise<APIWrapper<APIResult<E>>> {
     // Create a timer for the request to measure performance
     const timer = logger.performance(
       `Sending request to endpoint: ${this.endpoint.path.join("/")}`,
@@ -387,7 +406,7 @@ export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
    *
    * @returns A promise that resolves to a single extended result.
    */
-  async fetchSingle(): Promise<ExtendResult<E>> {
+  async fetchSingle(): Promise<Result<E, A>> {
     this.logger.verbose("Fetching a single result.");
 
     // Set parameters to fetch only a single result
