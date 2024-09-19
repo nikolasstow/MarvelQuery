@@ -27,7 +27,7 @@ import {
   EndpointDescriptor,
   AsEndpoint,
 } from "./models/types/endpoint-types";
-import { MarvelQueryInterface } from "./models/types/interface";
+import { MarvelQueryFetched, MarvelQueryInit } from "./models/types/interface";
 
 /**
  * The MarvelQuery class is responsible for handling requests to the Marvel API.
@@ -36,9 +36,7 @@ import { MarvelQueryInterface } from "./models/types/interface";
  *
  * @template E The endpoint type, extending the base Endpoint type.
  */
-export class MarvelQuery<E extends Endpoint>
-  implements MarvelQueryInterface<E>
-{
+export class MarvelQuery<E extends Endpoint> implements MarvelQueryInit<E> {
   /** ********* Static Properties ********* */
   /** Stores the API keys used for authentication with the Marvel API */
   private static apiKeys: APIKeys;
@@ -104,7 +102,7 @@ export class MarvelQuery<E extends Endpoint>
   /** Query identifier for logging */
   queryId: string;
   /** Modified logger instance with query identifier */
-  logger: CustomLogger;
+  private logger: CustomLogger;
   /**
    * A function to be called when the query is finished.
    * This can be specific to the endpoint type or a general function.
@@ -123,6 +121,8 @@ export class MarvelQuery<E extends Endpoint>
   params: Params<E>;
   /** The URL of the query */
   url: string;
+
+  // TODO: Add back state management so that the following properties are not accessible until fetch is called
   /** The number of results returned by the query. */
   count: number = 0;
   /** The total number of results available for the query. */
@@ -195,20 +195,13 @@ export class MarvelQuery<E extends Endpoint>
    *
    * @returns A promise that resolves to the MarvelQuery instance.
    */
-  async fetch(): Promise<MarvelQuery<E>> {
+  async fetch(): Promise<MarvelQueryFetched<E>> {
     // Build the URL for the API request using the endpoint and parameters
-    this.url = this.buildURL(
-      MarvelQuery.apiKeys,
-      this.endpoint.path,
-      this.params
-    );
-
+    this.url = this.buildURL();
     // Send the request and await the response
     const response = await this.request(this.url);
-
     // Process the response, and extend the results with the additional properties
     const processedResults = this.processResults(response);
-
     // Call the onResult function if it is defined
     this.callOnResult(processedResults);
     // Return the MarvelQuery instance for method chaining
@@ -216,17 +209,14 @@ export class MarvelQuery<E extends Endpoint>
   }
 
   /**
-   * Builds the URL for the API request using the endpoint and parameters.
-   * @param apiKeys Public and private keys for authentication.
-   * @param endpoint Endpoint path as an array.
-   * @param params Parameters of the query.
-   * @returns The URL of the query.
+   * Builds the URL for the query using the api keys, the endpoint and parameters.
+   *
+   * @returns The URL for the query.
    */
-  buildURL(
-    apiKeys: APIKeys,
-    endpoint: Endpoint,
-    params: Record<string, unknown>
-  ): string {
+  public buildURL(): string {
+    const endpoint = this.endpoint.path;
+    const params: Record<string, unknown> = this.params;
+
     this.logger.verbose(
       `Building URL for ${endpoint.join("/")} with parameters:`,
       params
@@ -238,7 +228,7 @@ export class MarvelQuery<E extends Endpoint>
     const timestamp = Number(new Date());
 
     // Destructure the API keys for public and private keys
-    const { privateKey, publicKey } = apiKeys;
+    const { privateKey, publicKey } = MarvelQuery.apiKeys;
 
     // Create an MD5 hash with the timestamp, private key and public key
     const hash = privateKey

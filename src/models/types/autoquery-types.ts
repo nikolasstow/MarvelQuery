@@ -10,7 +10,7 @@ import {
   EndpointFromType,
   IsEndpoint,
 } from "./endpoint-types";
-import { MarvelQueryInterface } from "./interface";
+import { MarvelQueryInit } from "./interface";
 
 /** Extends the type of the result with additional properties. */
 export type ExtendType<E extends Endpoint> = E extends Endpoint
@@ -59,7 +59,7 @@ type ExtendResourceArray<E extends Endpoint, V> = V extends Array<Resource>
 export type ExtendResourceProperties<E extends Endpoint> = {
   endpoint: E;
   query: QueryResource<E>;
-  fetch: () => Promise<MarvelQueryInterface<E>>;
+  fetch: () => Promise<MarvelQueryInit<E>>;
   fetchSingle: () => Promise<ExtendResult<E>>;
 };
 
@@ -79,12 +79,12 @@ type QueryResource<E extends Endpoint> = <
 >(
   type: TType,
   params?: Params<Extendpoint<E, TType>>
-) => MarvelQueryInterface<Extendpoint<E, TType>>;
+) => MarvelQueryInit<Extendpoint<E, TType>>;
 
 /** Query method for a collection */
 type QueryCollection<E extends Endpoint> = (
   params?: Params<E>
-) => MarvelQueryInterface<E>;
+) => MarvelQueryInit<E>;
 
 /** Initial query method for an instance */
 export type InitQuery<E extends Endpoint> = {

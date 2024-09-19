@@ -1,12 +1,18 @@
 # Endpoints and Utility Types
 
-## Endpoints {#endpoint}
+### Endpoint Tuple
 
-In the MarvelQuery library, the endpoint is split into a tuple by slashes. These three parts determine what you are looking for and what data you will receive:
+The Marvel API represents an endpoint as a string (e.g., `"comics/1323/characters"`), where each part separated by a slash (`/`) defines the type, ID, and collection type. In the MarvelQuery library, for practical reasons, this string format is converted into a **tuple** (e.g., `["comics", 1323, "characters"]`). A tuple is like an array, but with a fixed structure where each element has a specific meaning and type.
 
-1. **First element:** Specifies the type of the subject of your query. This is the only required element, allowing you to search the entire Marvel API for items of that type.
-2. **Second element:** Represents an ID, querying a specific item of the data type specified in the first element (e.g., 1009466).
-3. **Third element:** Specifies the data type expected in the results (e.g., “creators” who worked on a comic series, or “events” that feature a specific character).
+The tuple contains up to three elements:
+
+- **First element**: Specifies the type of the subject of your query (e.g. `"comics"`, `"characters"`). This is the only required element, allowing you to search the entire Marvel API for items of that type.
+- **Second element** (optional): Represents an ID, querying a specific item of the data type specified in the first element (e.g., `1009466` for a specific character).
+- **Third element** (optional): Represents a collection of resources related to the specific resource identified by the first two elements. While a two-element endpoint targets a single resource, adding a third element queries a collection of related resources. The third element specifies the type of this collection (e.g., `"creators"`, `"events"`), but the type used here must differ from the type in the first element.
+
+By using this tuple structure, the library provides a more organized way to define the endpoint, while internally converting it back into the string format required by the Marvel API.
+
+> **Note**: I am aware that TypeScript supports template literals in types now, but I've been unable to get it working with the same level of type safety and user experience. However, I am open to suggestions.
 
 ```ts
 /**
@@ -20,19 +26,16 @@ const comics = await createQuery(['comics'], {
   dateDescriptor: "thisWeek"
 })
   .fetch()
-  .then(api => api.results); // returns MarvelComic[]
+  .then(api => api.results); // returns Comic[]
 
 // Or finding your favorite character:
-const endpoint = ['characters'];
-const params = {
+const stiltMan = await createQuery(['characters'], {
   nameStartsWith: "Stilt-Man"
-};
-
-const stiltMan = await createQuery(endpoint, params)
+})
   .fetchSingle()
   .then(api => api.result.id); // returns 1009627
 
-// If you have an ID, you can request that character individually by adding it to the array.
+// If you have an ID, you can request that character individually by adding it to the tuple.
 const characterEndpoint = ['characters', 1009627];
 
 // Even better, with an ID you can fetch all the comics featuring that character:
@@ -43,7 +46,7 @@ const eventsEndpoint = ['characters', 1009627, 'events'];
 
 const eventsWithStilts = await createQuery(eventsEndpoint, params)
   .fetch()
-  .then(api => api.results); // returns MarvelEvent[]
+  .then(api => api.results); // returns Event[]
 ```
 
 

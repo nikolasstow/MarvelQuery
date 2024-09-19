@@ -27,7 +27,7 @@ import {
 import { Params } from "../models/types/param-types";
 import { EndpointBuilder } from "./EndpointBuilder";
 import { InitQuery } from "src/models/types/autoquery-types";
-import { MarvelQueryInterface } from "src/models/types/interface";
+import { MarvelQueryInit } from "src/models/types/interface";
 
 /**
  * Utility class for auto-query injection that finds URIs in data and injects query methods
@@ -39,7 +39,7 @@ export class AutoQuery<E extends Endpoint> {
   createQuery: new <N extends Endpoint>({
     endpoint,
     params,
-  }: InitQuery<N>) => MarvelQueryInterface<N>;
+  }: InitQuery<N>) => MarvelQueryInit<N>;
 
   /** The descriptor for the current endpoint. */
   endpoint: EndpointDescriptor<E>;
@@ -80,7 +80,7 @@ export class AutoQuery<E extends Endpoint> {
     MarvelQueryClass: new <N extends Endpoint>({
       endpoint,
       params,
-    }: InitQuery<N>) => MarvelQueryInterface<N>,
+    }: InitQuery<N>) => MarvelQueryInit<N>,
     endpoint: EndpointDescriptor<E>,
     logger: CustomLogger
   ) {
@@ -172,7 +172,7 @@ export class AutoQuery<E extends Endpoint> {
       query: <TType extends NoSameEndpointType<E>>(
         type: TType,
         params: Params<Extendpoint<E, TType>>
-      ): MarvelQueryInterface<Extendpoint<E, TType>> =>
+      ): MarvelQueryInit<Extendpoint<E, TType>> =>
         new this.createQuery<Extendpoint<E, TType>>({
           endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
           params,
@@ -227,7 +227,7 @@ export class AutoQuery<E extends Endpoint> {
         query: <TType extends EndpointType>(
           type: TType,
           params: Params<Extendpoint<NEndpoint, TType>> = {}
-        ): MarvelQueryInterface<Extendpoint<NEndpoint, TType>> =>
+        ): MarvelQueryInit<Extendpoint<NEndpoint, TType>> =>
           new this.createQuery<Extendpoint<NEndpoint, TType>>({
             endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
             params,
@@ -308,7 +308,7 @@ export class AutoQuery<E extends Endpoint> {
           endpoint,
           query: (
             params: Params<TEndpoint> = {}
-          ): MarvelQueryInterface<TEndpoint> =>
+          ): MarvelQueryInit<TEndpoint> =>
             new this.createQuery<TEndpoint>({ endpoint, params }),
         };
 

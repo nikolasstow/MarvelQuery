@@ -4,8 +4,11 @@ import { Result } from "./data-types";
 import { Params } from "./param-types";
 import { Endpoint } from "./endpoint-types";
 import { EndpointDescriptor } from "./endpoint-types";
+import { CustomLogger } from "src/utils/Logger";
 
-export type MarvelQueryInterface<E extends Endpoint> = {
+export interface MarvelQueryInit<E extends Endpoint> {
+  /** Query identifier for logging */
+  queryId: string;
   /** Endpoint of the query
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes ["characters", 1009491, "comics"]
@@ -13,7 +16,18 @@ export type MarvelQueryInterface<E extends Endpoint> = {
   endpoint: EndpointDescriptor<E>;
   /** Parameters of the query */
   params: Params<E>;
+  /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
+   * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
+   * now with the results of the query, and offset adjusted to request the next page of results.
+   */
+  fetch(): Promise<MarvelQueryFetched<E>>;
+  /** Send the request to the API, and validate the response. */
+  request(url: string): Promise<APIWrapper<Result<E>>>;
+  /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
+  fetchSingle(): Promise<ExtendResult<E>>;
+};
 
+export interface MarvelQueryFetched<E extends Endpoint> extends MarvelQueryInit<E> {
   /** The URL of the query
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
    */
@@ -46,13 +60,6 @@ export type MarvelQueryInterface<E extends Endpoint> = {
   /** The query is complete when all results have been fetched. */
   isComplete: boolean;
 
-  /** Validate the parameters of the query, build the URL, send the request and call the onResult function with the results of the request.
-   * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
-   * now with the results of the query, and offset adjusted to request the next page of results.
-   */
-  fetch(): Promise<MarvelQueryInterface<E>>;
-  /** Send the request to the API, and validate the response. */
-  request(url: string): Promise<APIWrapper<Result<E>>>;
-  /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  fetchSingle(): Promise<ExtendResult<E>>;
-};
+  /** Generates a url using the api keys, the endpoint, and parameters */
+  buildURL(): string;
+}

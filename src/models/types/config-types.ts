@@ -13,7 +13,7 @@ import { ResultMap } from "./data-types";
 import { ParameterMap } from "./param-types";
 import { Result } from "./data-types";
 import { AsEndpoint, Endpoint, EndpointType } from "./endpoint-types";
-import { MarvelQueryInterface } from "./interface";
+import { MarvelQueryInit } from "./interface";
 
 /** The public and private keys for the API. */
 export interface APIKeys {
@@ -125,4 +125,4 @@ export type HTTPClient = <E extends Endpoint>(
 export type CreateQueryFunction = <T extends Endpoint | EndpointType>(
   endpoint: T,
   params?: Params<AsEndpoint<T>>
-) => MarvelQueryInterface<AsEndpoint<T>>
+) => MarvelQueryInit<AsEndpoint<T>>
