@@ -1,0 +1,41 @@
+2024-09-19 23:44:13 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-19 23:44:13 [VERBOSE] (Q3861) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-19 23:44:13 [VERBOSE] (Q3861) - Data type: characters
+
+2024-09-19 23:44:13 [VERBOSE] (Q3861) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-19 23:44:13 [VERBOSE] (Q3864) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-19 23:44:13 [VERBOSE] (Q3864) - Generated hash: 957b007c9d434b95e525cb0e972445dc
+
+2024-09-19 23:44:13 [VERBOSE] (Q3864) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726814653865&hash=957b007c9d434b95e525cb0e972445dc&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-19 23:44:13 [VERBOSE] (Q3866) - Generated hash: 6b2a98dfd8498e37a77f1afcac1fd5e5
+
+2024-09-19 23:44:13 [VERBOSE] (Q3866) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726814653866&hash=6b2a98dfd8498e37a77f1afcac1fd5e5&offset=0&limit=50&name=Peter+Parker
+

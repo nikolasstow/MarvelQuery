@@ -1,60 +1,127 @@
-import MarvelQuery, { CreateQueryFunction } from "../src";
-import { CharactersSchema } from "../src/models/schemas/param-schemas";
+import { generateMock } from "@anatine/zod-mock";
+import { faker } from "@faker-js/faker";
+import nock from "nock";
+import {
+  ResultSchemaMap,
+  MarvelCharacterSchema,
+  MarvelComicSchema,
+} from "../src/models/schemas/data-schemas";
+
+import MarvelQuery from "../src";
+
+const mockKeys = {
+  publicKey: "mockPublicKey",
+  privateKey: "mockPrivateKey",
+};
+
+let createQueryWithAQ = MarvelQuery.init(mockKeys,{
+  isTestEnv: true,
+});
+let createQueryStandard = MarvelQuery.init(mockKeys, {
+  isTestEnv: true,
+  autoQuery: false,
+});
 
 describe("MarvelQuery", () => {
-  let createQuery: CreateQueryFunction;
+  let testCases = [
+    { method: createQueryWithAQ, name: "AutoQuery" },
+    { method: createQueryStandard, name: "Standard query" },
+  ];
 
   beforeAll(() => {
-    // Initialize MarvelQuery with mock keys and get the createQuery function
-    createQuery = MarvelQuery.init({
-      publicKey: "mockPublicKey",
-      privateKey: "mockPrivateKey",
+    const marvelAPI = nock("https://gateway.marvel.com/v1/public");
+
+    const setupMockEndpoint = (
+      scope: nock.Scope,
+      path: string | RegExp,
+      mockData: any
+    ) => {
+      scope
+        .get(path)
+        .query(true) // Match any query parameters
+        .reply(200, {
+          data: {
+            results: [mockData],
+          },
+        });
+    };
+
+    Object.entries(ResultSchemaMap).forEach(([key, schema]) => {
+      const mockData = generateMock(schema);
+
+      setupMockEndpoint(marvelAPI, `/${key}`, mockData);
+      setupMockEndpoint(marvelAPI, new RegExp(`/${key}/.*`), mockData);
+      setupMockEndpoint(marvelAPI, new RegExp(`/.*?/.*?/${key}`), mockData);
     });
   });
 
-  // Create a new instance of MarvelQuery with an EndpointType
-  it("should create an instance with API key and secret", () => {
-    const query = createQuery("characters", { name: "Peter Parker" });
-    expect(query).toBeInstanceOf(MarvelQuery);
+  afterAll(() => {
+    nock.cleanAll();
   });
+
+  // Create a new instance of MarvelQuery with an EndpointType
+  test.each(testCases)(
+    "$name should create an instance with an EndpointType",
+    ({ method }) => {
+      const query = method("characters", { name: "Peter Parker" });
+      expect(query).toBeInstanceOf(MarvelQuery);
+    }
+  );
 
   // Create a new instance of MarvelQuery with an Endpoint
-  it("should create an instance with API key and secret", () => {
-    const query = createQuery(["characters"], { name: "Peter Parker" });
-    expect(query).toBeInstanceOf(MarvelQuery);
-  });
+  test.each(testCases)(
+    "$name should create an instance with an Endpoint",
+    ({ method }) => {
+      const query = method(["characters"], { name: "Peter Parker" });
+      expect(query).toBeInstanceOf(MarvelQuery);
+    }
+  );
 
   // Build a valid URL
-  it("should build a valid URL", () => {
-    const query = createQuery("characters", { name: "Peter Parker" });
-    const url = query.buildURL();
-    expect(url).toContain("/characters");
-    expect(url).toContain("apikey=mockPublicKey");
-    expect(url).toContain("name=Peter+Parker");
-  });
+  test.each(testCases)(
+    "$name should build a valid URL with endpoint, API keys, and parameters",
+    ({ method }) => {
+      const query = createQueryWithAQ("characters", { name: "Peter Parker" });
+      const url = query.buildURL();
+      expect(url).toContain("/characters");
+      expect(url).toContain("apikey=mockPublicKey");
+      expect(url).toContain("name=Peter+Parker");
+    }
+  );
 
-  it("should return characters named Peter Parker", async () => {
-    const query = createQuery("characters", { name: "Peter Parker" });
-    const url = query.buildURL();
-    const result = await query.request(url);
+  it("should return comics whose title starts with 'Amazing'", async () => {
+    const query = await createQueryStandard("comics", {
+      titleStartsWith: "Amazing",
+    }).fetch();
 
-    result.data.results.forEach((character) => {
-      // Validate using zod schema
-      const validationResult = CharactersSchema.safeParse(character); // Wont work because result is already extended
+    // Validate using zod schema
+    const results = query.results;
+    results.forEach((result: any) => {
+      const validationResult = MarvelComicSchema.safeParse(result);
       // Check if the validation passed
+      if (!validationResult.success) {
+        console.error("Validation Errors:", validationResult.error.format());
+        console.error("Schema:", MarvelComicSchema);
+        console.error("Data being validated:", result);
+      }
       expect(validationResult.success).toBe(true);
     });
   });
 
   it("should return a single character named Peter Parker", async () => {
-    const result = await createQuery("characters", {
+    const result = await createQueryStandard("characters", {
       name: "Peter Parker",
     }).fetchSingle();
+
     // Validate using zod schema
-    const validationResult = CharactersSchema.safeParse(result); // Wont work because result is already extended
+    const validationResult = MarvelCharacterSchema.safeParse(result);
     // Check if the validation passed
+    if (!validationResult.success) {
+      console.error("Validation Errors:", validationResult.error.format());
+      console.error("Schema:", MarvelCharacterSchema);
+      console.error("Data being validated:", result);
+    }
+
     expect(validationResult.success).toBe(true);
   });
-
-  // Add more tests for other methods and functionalities
 });

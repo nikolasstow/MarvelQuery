@@ -54,6 +54,8 @@ export interface Config<A extends boolean> {
   logOptions?: LogOptions;
   /** Replace the default http client (axios) with your own http client.  */
   httpClient: HTTPClient;
+  /** Flag for test enviroment */
+  isTestEnv?: boolean;
 }
 
 /** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.

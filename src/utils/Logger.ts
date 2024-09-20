@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { performance } from "perf_hooks";
-import { Config } from "src/models/types/config-types";
+import { Config } from "../models/types/config-types";
 import * as winston from "winston";
 import "winston-daily-rotate-file";
 
@@ -83,6 +83,7 @@ export class Logger {
   private static verboseStatus: boolean = false;
   private static maxLines: number = 23;
   private static maxLineLength: number = 500;
+  private static isTestEnv: boolean = false;
   /** Set to store recent logs to prevent duplicate messages */
   recentLogs: Set<string> = new Set<string>();
   /** The custom Winston logger instance */
@@ -181,7 +182,7 @@ export class Logger {
           }
 
           this.recentLogs.add(deduplicationKey);
-          setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000); // Remove after 1 minute
+          if (!Logger.isTestEnv) setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000); // Remove after 1 minute
 
           return logMessage;
         })
@@ -255,10 +256,11 @@ export class Logger {
     Logger.instance.logger.level = verbose ? "verbose" : "info";
   }
 
-  static setConfig(config: Config) {
+  static setConfig<A extends boolean>(config: Config<A>) {
     Logger.maxLines = config.logOptions?.maxLines ?? 23;
     Logger.maxLineLength = config.logOptions?.maxLineLength ?? 500;
     Logger.setVerbose(config.logOptions?.verbose ?? false);
+    Logger.isTestEnv = config.isTestEnv ?? false;
   }
 
   /**

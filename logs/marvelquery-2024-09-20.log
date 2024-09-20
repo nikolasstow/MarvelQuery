@@ -1,0 +1,1396 @@
+2024-09-20 00:11:58 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:11:58 [VERBOSE] (Q8802) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:11:58 [VERBOSE] (Q8802) - Data type: characters
+
+2024-09-20 00:11:58 [VERBOSE] (Q8802) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:11:58 [VERBOSE] (Q8806) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:11:58 [VERBOSE] (Q8806) - Generated hash: e92deff4e33b9015f8e8eac84c684a56
+
+2024-09-20 00:11:58 [VERBOSE] (Q8806) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816318806&hash=e92deff4e33b9015f8e8eac84c684a56&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:11:58 [VERBOSE] (Q8807) - Generated hash: 712b095876c351b6caca53a57b5cfa64
+
+2024-09-20 00:11:58 [VERBOSE] (Q8807) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816318808&hash=712b095876c351b6caca53a57b5cfa64&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+
+
+2024-09-20 00:11:58 [VERBOSE] (Q8808) - Sending request to endpoint: characters
+
+2024-09-20 00:11:58 [VERBOSE] (Q8808) - API Request Complete. Duration: 10.58ms
+
+2024-09-20 00:11:58 [VERBOSE] (Q8808) - Validating query results
+
+2024-09-20 00:11:58 [VERBOSE] (Q8808) - All results validated successfully
+
+
+
+
+2024-09-20 00:11:58 [VERBOSE] (Q8824) - Fetching a single result.
+
+2024-09-20 00:11:58 [VERBOSE] (Q8824) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:11:58 [VERBOSE] (Q8824) - Generated hash: 03129a01fe9d473ddd46590087e15158
+
+2024-09-20 00:11:58 [VERBOSE] (Q8824) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816318825&hash=03129a01fe9d473ddd46590087e15158&offset=0&limit=1&name=Peter+Parker
+
+
+2024-09-20 00:11:58 [VERBOSE] (Q8824) - API Request Complete. Duration: 3.54ms
+
+
+
+2024-09-20 00:11:58 [VERBOSE] (Q8824) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:11:58 [VERBOSE] (Q8824) - and extended with AutoQuery Injection.
+
+2024-09-20 00:13:17 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:13:18 [VERBOSE] (Q8008) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:13:18 [VERBOSE] (Q8008) - Data type: characters
+
+2024-09-20 00:13:18 [VERBOSE] (Q8008) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:13:18 [VERBOSE] (Q8012) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:13:18 [VERBOSE] (Q8012) - Generated hash: 1c86382b20d43a91f559b5ad107278f8
+
+2024-09-20 00:13:18 [VERBOSE] (Q8012) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816398012&hash=1c86382b20d43a91f559b5ad107278f8&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:13:18 [VERBOSE] (Q8013) - Generated hash: 9ea364eb983dedba635d327e3b1e9f97
+
+2024-09-20 00:13:18 [VERBOSE] (Q8013) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816398013&hash=9ea364eb983dedba635d327e3b1e9f97&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - Fetching a single result.
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - Generated hash: b8db79df37d508eb53c5497f0dac66af
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816398014&hash=b8db79df37d508eb53c5497f0dac66af&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - Sending request to endpoint: characters
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - API Request Complete. Duration: 9.70ms
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - Validating query results
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - All results validated successfully
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:13:18 [VERBOSE] (Q8014) - and extended with AutoQuery Injection.
+
+2024-09-20 00:15:51 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:15:51 [VERBOSE] (Q1435) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:15:51 [VERBOSE] (Q1435) - Data type: characters
+
+2024-09-20 00:15:51 [VERBOSE] (Q1435) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:15:51 [VERBOSE] (Q1438) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:15:51 [VERBOSE] (Q1438) - Generated hash: d4f8355b31692a366815ced7ac35289e
+
+2024-09-20 00:15:51 [VERBOSE] (Q1438) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816551439&hash=d4f8355b31692a366815ced7ac35289e&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Generated hash: d267f8b6815d4979abe500847993aa1b
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816551440&hash=d267f8b6815d4979abe500847993aa1b&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Fetching a single result.
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816551440&hash=d267f8b6815d4979abe500847993aa1b&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Sending request to endpoint: characters
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - API Request Complete. Duration: 9.62ms
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Validating query results
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - All results validated successfully
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:15:51 [VERBOSE] (Q1440) - and extended with AutoQuery Injection.
+
+2024-09-20 00:18:58 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:18:58 [VERBOSE] (Q8983) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:18:58 [VERBOSE] (Q8983) - Data type: characters
+
+2024-09-20 00:18:58 [VERBOSE] (Q8983) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:18:58 [VERBOSE] (Q8987) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:18:58 [VERBOSE] (Q8987) - Generated hash: 35fb867df4281bc50e270542afd3eeed
+
+2024-09-20 00:18:58 [VERBOSE] (Q8987) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816738987&hash=35fb867df4281bc50e270542afd3eeed&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:18:58 [VERBOSE] (Q8988) - Generated hash: 6d3a63da8869c793357569fcf4a89985
+
+2024-09-20 00:18:58 [VERBOSE] (Q8988) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816738989&hash=6d3a63da8869c793357569fcf4a89985&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+2024-09-20 00:18:58 [VERBOSE] (Q8989) - Fetching a single result.
+
+2024-09-20 00:18:58 [VERBOSE] (Q8989) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+
+2024-09-20 00:18:58 [VERBOSE] (Q8989) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816738989&hash=6d3a63da8869c793357569fcf4a89985&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:18:58 [VERBOSE] (Q8989) - Sending request to endpoint: characters
+
+2024-09-20 00:18:59 [VERBOSE] (Q8989) - API Request Complete. Duration: 10.23ms
+
+2024-09-20 00:18:59 [VERBOSE] (Q8989) - Validating query results
+
+2024-09-20 00:18:59 [VERBOSE] (Q8989) - All results validated successfully
+
+2024-09-20 00:18:59 [VERBOSE] (Q8989) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:18:59 [VERBOSE] (Q8989) - and extended with AutoQuery Injection.
+
+2024-09-20 00:22:19 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:22:19 [VERBOSE] (Q9811) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:22:19 [VERBOSE] (Q9811) - Data type: characters
+
+2024-09-20 00:22:19 [VERBOSE] (Q9811) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:22:19 [VERBOSE] (Q9815) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:22:19 [VERBOSE] (Q9815) - Generated hash: 82b884d00e083cabd74f3089064fdefe
+
+2024-09-20 00:22:19 [VERBOSE] (Q9815) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816939815&hash=82b884d00e083cabd74f3089064fdefe&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Generated hash: 0997a3b49366f32fd277e1da970d1549
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816939817&hash=0997a3b49366f32fd277e1da970d1549&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Fetching a single result.
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726816939817&hash=0997a3b49366f32fd277e1da970d1549&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Sending request to endpoint: characters
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - API Request Complete. Duration: 10.19ms
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Validating query results
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - All results validated successfully
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:22:19 [VERBOSE] (Q9817) - and extended with AutoQuery Injection.
+
+2024-09-20 00:31:45 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:31:45 [VERBOSE] (Q5082) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:31:45 [VERBOSE] (Q5082) - Data type: characters
+
+2024-09-20 00:31:45 [VERBOSE] (Q5082) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:31:45 [VERBOSE] (Q5086) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:31:45 [VERBOSE] (Q5086) - Generated hash: 3149f99a8f7975305c08ebcc9be7b93a
+
+2024-09-20 00:31:45 [VERBOSE] (Q5086) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817505086&hash=3149f99a8f7975305c08ebcc9be7b93a&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:31:45 [VERBOSE] (Q5089) - Generated hash: 2b6cb932d321075494e1b5a99d60d900
+
+2024-09-20 00:31:45 [VERBOSE] (Q5089) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817505089&hash=2b6cb932d321075494e1b5a99d60d900&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - Fetching a single result.
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - Generated hash: cdb06f309553a1b0b45f5d2d6bd99416
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817505090&hash=cdb06f309553a1b0b45f5d2d6bd99416&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - Sending request to endpoint: characters
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - API Request Complete. Duration: 9.84ms
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - Validating query results
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - All results validated successfully
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:31:45 [VERBOSE] (Q5090) - and extended with AutoQuery Injection.
+
+2024-09-20 00:33:45 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:33:45 [VERBOSE] (Q5724) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:33:45 [VERBOSE] (Q5724) - Data type: characters
+
+2024-09-20 00:33:45 [VERBOSE] (Q5724) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:33:45 [VERBOSE] (Q5728) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:33:45 [VERBOSE] (Q5728) - Generated hash: 57fbd385e3613afadb96c2ea7a33aad0
+
+2024-09-20 00:33:45 [VERBOSE] (Q5728) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817625728&hash=57fbd385e3613afadb96c2ea7a33aad0&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:33:45 [VERBOSE] (Q5729) - Generated hash: 3d40caba0c4367983b18b2a169cdaa35
+
+2024-09-20 00:33:45 [VERBOSE] (Q5729) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817625729&hash=3d40caba0c4367983b18b2a169cdaa35&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - Fetching a single result.
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - Generated hash: 4250deab5b4064600f79013525b6ad01
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817625730&hash=4250deab5b4064600f79013525b6ad01&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - Sending request to endpoint: characters
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - API Request Complete. Duration: 9.90ms
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - Validating query results
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - All results validated successfully
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:33:45 [VERBOSE] (Q5730) - and extended with AutoQuery Injection.
+
+2024-09-20 00:37:34 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:37:34 [VERBOSE] (Q4248) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:37:34 [VERBOSE] (Q4248) - Data type: characters
+
+2024-09-20 00:37:34 [VERBOSE] (Q4248) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:37:34 [VERBOSE] (Q4253) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:37:34 [VERBOSE] (Q4253) - Generated hash: ac5d5709dcbc14c11bfe8349cf2ff127
+
+2024-09-20 00:37:34 [VERBOSE] (Q4253) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817854253&hash=ac5d5709dcbc14c11bfe8349cf2ff127&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:37:34 [VERBOSE] (Q4255) - Generated hash: 2adfc12cc347bebde8595b9019941fd4
+
+2024-09-20 00:37:34 [VERBOSE] (Q4255) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817854255&hash=2adfc12cc347bebde8595b9019941fd4&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - Fetching a single result.
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - Generated hash: f2879e809fe7afc9670782d655e69bd8
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726817854257&hash=f2879e809fe7afc9670782d655e69bd8&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - Sending request to endpoint: characters
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - API Request Complete. Duration: 11.06ms
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - Validating query results
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - All results validated successfully
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:37:34 [VERBOSE] (Q4257) - and extended with AutoQuery Injection.
+
+2024-09-20 00:42:41 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:42:41 [VERBOSE] (Q1675) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:42:41 [VERBOSE] (Q1675) - Data type: characters
+
+2024-09-20 00:42:41 [VERBOSE] (Q1675) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:42:41 [VERBOSE] (Q1679) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:42:41 [VERBOSE] (Q1679) - Generated hash: 1deb393a7ddc2657c258df66d96be2c3
+
+2024-09-20 00:42:41 [VERBOSE] (Q1679) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818161680&hash=1deb393a7ddc2657c258df66d96be2c3&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Generated hash: d9b33c1ba4be2ae49bf65fb1a9bcbc0a
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818161681&hash=d9b33c1ba4be2ae49bf65fb1a9bcbc0a&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Data type: comics
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Validating parameters for 'comics'
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818161681&hash=d9b33c1ba4be2ae49bf65fb1a9bcbc0a&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Sending request to endpoint: comics
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - API Request Complete. Duration: 10.01ms
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Validating query results
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - All results validated successfully
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:42:41 [VERBOSE] (Q1681) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:42:41 [VERBOSE] (Q1694) - Fetching a single result.
+
+2024-09-20 00:42:41 [VERBOSE] (Q1694) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:42:41 [VERBOSE] (Q1694) - Generated hash: 495cc2e01ef0f922235558b3358d7cbf
+
+2024-09-20 00:42:41 [VERBOSE] (Q1694) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818161694&hash=495cc2e01ef0f922235558b3358d7cbf&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:42:41 [VERBOSE] (Q1694) - Sending request to endpoint: characters
+
+2024-09-20 00:42:41 [VERBOSE] (Q1694) - API Request Complete. Duration: 3.41ms
+
+
+
+
+
+2024-09-20 00:44:10 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:44:10 [VERBOSE] (Q831) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:44:10 [VERBOSE] (Q831) - Data type: characters
+
+2024-09-20 00:44:10 [VERBOSE] (Q831) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:44:10 [VERBOSE] (Q835) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:44:10 [VERBOSE] (Q835) - Generated hash: e7206d08550d36b5efc6c29e1077515a
+
+2024-09-20 00:44:10 [VERBOSE] (Q835) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818250835&hash=e7206d08550d36b5efc6c29e1077515a&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:44:10 [VERBOSE] (Q836) - Generated hash: 87adeda4f1574cdbf6e40b7d03a1c5a5
+
+2024-09-20 00:44:10 [VERBOSE] (Q836) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818250837&hash=87adeda4f1574cdbf6e40b7d03a1c5a5&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Data type: comics
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Validating parameters for 'comics'
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818250837&hash=87adeda4f1574cdbf6e40b7d03a1c5a5&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Sending request to endpoint: comics
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - API Request Complete. Duration: 8.66ms
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Validating query results
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - All results validated successfully
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:44:10 [VERBOSE] (Q837) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:44:10 [VERBOSE] (Q848) - Fetching a single result.
+
+2024-09-20 00:44:10 [VERBOSE] (Q848) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:44:10 [VERBOSE] (Q848) - Generated hash: 9d2500497f692bb6994e5cf8dedfdeb2
+
+2024-09-20 00:44:10 [VERBOSE] (Q848) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818250849&hash=9d2500497f692bb6994e5cf8dedfdeb2&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:44:10 [VERBOSE] (Q848) - Sending request to endpoint: characters
+
+2024-09-20 00:44:10 [VERBOSE] (Q848) - API Request Complete. Duration: 3.45ms
+
+
+
+
+
+2024-09-20 00:44:47 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:44:47 [VERBOSE] (Q7412) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:44:47 [VERBOSE] (Q7412) - Data type: characters
+
+2024-09-20 00:44:47 [VERBOSE] (Q7412) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:44:47 [VERBOSE] (Q7416) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:44:47 [VERBOSE] (Q7416) - Generated hash: b2e6423362f19b745f8c5c837322ed5b
+
+2024-09-20 00:44:47 [VERBOSE] (Q7416) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818287416&hash=b2e6423362f19b745f8c5c837322ed5b&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:44:47 [VERBOSE] (Q7417) - Generated hash: b45b7907ff6c506b8c36f8b3710be94d
+
+2024-09-20 00:44:47 [VERBOSE] (Q7417) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818287417&hash=b45b7907ff6c506b8c36f8b3710be94d&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Data type: comics
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Validating parameters for 'comics'
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Generated hash: 705fd2d22ab467de8cc2c65daa9fe57d
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818287418&hash=705fd2d22ab467de8cc2c65daa9fe57d&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Sending request to endpoint: comics
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - API Request Complete. Duration: 9.82ms
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Validating query results
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - All results validated successfully
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:44:47 [VERBOSE] (Q7418) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:44:47 [VERBOSE] (Q7430) - Fetching a single result.
+
+2024-09-20 00:44:47 [VERBOSE] (Q7430) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:44:47 [VERBOSE] (Q7430) - Generated hash: 57dd072ed074b3d4f1d80b1712f32254
+
+2024-09-20 00:44:47 [VERBOSE] (Q7430) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818287430&hash=57dd072ed074b3d4f1d80b1712f32254&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:44:47 [VERBOSE] (Q7430) - Sending request to endpoint: characters
+
+2024-09-20 00:44:47 [VERBOSE] (Q7430) - API Request Complete. Duration: 3.40ms
+
+
+
+
+
+2024-09-20 00:47:31 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:47:31 [VERBOSE] (Q1893) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:47:31 [VERBOSE] (Q1893) - Data type: characters
+
+2024-09-20 00:47:31 [VERBOSE] (Q1893) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:47:31 [VERBOSE] (Q1896) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:47:31 [VERBOSE] (Q1896) - Generated hash: 4429320d0ddfbdf54c3fbffdf3cf98c8
+
+2024-09-20 00:47:31 [VERBOSE] (Q1896) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818451897&hash=4429320d0ddfbdf54c3fbffdf3cf98c8&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Generated hash: 0297a93884246cc034a98b171f0d18db
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818451898&hash=0297a93884246cc034a98b171f0d18db&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Data type: comics
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Validating parameters for 'comics'
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Generated hash: d4a0e5779170fc69466d605290491bc1
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818451899&hash=d4a0e5779170fc69466d605290491bc1&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Sending request to endpoint: comics
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - API Request Complete. Duration: 10.10ms
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Validating query results
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - All results validated successfully
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:47:31 [VERBOSE] (Q1898) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:47:31 [VERBOSE] (Q1911) - Fetching a single result.
+
+2024-09-20 00:47:31 [VERBOSE] (Q1911) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:47:31 [VERBOSE] (Q1911) - Generated hash: 11630ea68783167a8ef2e2f13f0a9443
+
+2024-09-20 00:47:31 [VERBOSE] (Q1911) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818451912&hash=11630ea68783167a8ef2e2f13f0a9443&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:47:31 [VERBOSE] (Q1911) - Sending request to endpoint: characters
+
+2024-09-20 00:47:31 [VERBOSE] (Q1911) - API Request Complete. Duration: 3.34ms
+
+
+
+
+
+2024-09-20 00:49:16 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:49:16 [VERBOSE] (Q6508) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:49:16 [VERBOSE] (Q6508) - Data type: characters
+
+2024-09-20 00:49:16 [VERBOSE] (Q6508) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:49:16 [VERBOSE] (Q6512) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:49:16 [VERBOSE] (Q6512) - Generated hash: 3efa67723954b11cd1860a97ac570ca2
+
+2024-09-20 00:49:16 [VERBOSE] (Q6512) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818556512&hash=3efa67723954b11cd1860a97ac570ca2&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:49:16 [VERBOSE] (Q6513) - Generated hash: 00f53d3f176250c76bb94e6a95fb962a
+
+2024-09-20 00:49:16 [VERBOSE] (Q6513) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818556513&hash=00f53d3f176250c76bb94e6a95fb962a&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Data type: comics
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Validating parameters for 'comics'
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Generated hash: 79ad49fc760c36be5d5d4b401bd47cc6
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818556514&hash=79ad49fc760c36be5d5d4b401bd47cc6&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Sending request to endpoint: comics
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - API Request Complete. Duration: 10.89ms
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Validating query results
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - All results validated successfully
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:49:16 [VERBOSE] (Q6514) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:49:16 [VERBOSE] (Q6528) - Fetching a single result.
+
+2024-09-20 00:49:16 [VERBOSE] (Q6528) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:49:16 [VERBOSE] (Q6528) - Generated hash: 4ee4c62c1e23d12ec01ec56e8977fe4c
+
+2024-09-20 00:49:16 [VERBOSE] (Q6528) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818556528&hash=4ee4c62c1e23d12ec01ec56e8977fe4c&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:49:16 [VERBOSE] (Q6528) - Sending request to endpoint: characters
+
+2024-09-20 00:49:16 [VERBOSE] (Q6528) - API Request Complete. Duration: 2.40ms
+
+
+
+
+
+2024-09-20 00:49:30 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:49:30 [VERBOSE] (Q804) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:49:30 [VERBOSE] (Q804) - Data type: characters
+
+2024-09-20 00:49:30 [VERBOSE] (Q804) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:49:30 [VERBOSE] (Q812) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:49:30 [VERBOSE] (Q812) - Generated hash: 3afb1d1d90bde8cadbcddd2f02787d64
+
+2024-09-20 00:49:30 [VERBOSE] (Q812) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818570814&hash=3afb1d1d90bde8cadbcddd2f02787d64&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:49:30 [VERBOSE] (Q816) - Generated hash: fe3c9d38c62c2674c7fcc7d9de6efa05
+
+2024-09-20 00:49:30 [VERBOSE] (Q816) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818570817&hash=fe3c9d38c62c2674c7fcc7d9de6efa05&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Data type: comics
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Validating parameters for 'comics'
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Generated hash: ce1574058745871a980de40e84ad63e9
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818570820&hash=ce1574058745871a980de40e84ad63e9&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Sending request to endpoint: comics
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - API Request Complete. Duration: 27.95ms
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Validating query results
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - All results validated successfully
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:49:30 [VERBOSE] (Q818) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:49:30 [VERBOSE] (Q853) - Fetching a single result.
+
+2024-09-20 00:49:30 [VERBOSE] (Q853) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:49:30 [VERBOSE] (Q853) - Generated hash: 5bf0f42bdb497eac87a4ba37fc9eddae
+
+2024-09-20 00:49:30 [VERBOSE] (Q853) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818570855&hash=5bf0f42bdb497eac87a4ba37fc9eddae&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:49:30 [VERBOSE] (Q853) - Sending request to endpoint: characters
+
+2024-09-20 00:49:30 [VERBOSE] (Q853) - API Request Complete. Duration: 6.34ms
+
+
+
+
+
+2024-09-20 00:56:26 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:56:26 [VERBOSE] (Q6698) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:56:26 [VERBOSE] (Q6698) - Data type: characters
+
+2024-09-20 00:56:26 [VERBOSE] (Q6698) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:56:26 [VERBOSE] (Q6701) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:56:26 [VERBOSE] (Q6701) - Generated hash: a147912d3e9dcc924e69359e65080fd4
+
+2024-09-20 00:56:26 [VERBOSE] (Q6701) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818986702&hash=a147912d3e9dcc924e69359e65080fd4&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Generated hash: bdbde85220ec5980dba9c9344a01dbc0
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818986703&hash=bdbde85220ec5980dba9c9344a01dbc0&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Data type: comics
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Validating parameters for 'comics'
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Generated hash: 3de4f2a03591152c126e3f8065fa8e35
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818986704&hash=3de4f2a03591152c126e3f8065fa8e35&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Sending request to endpoint: comics
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - API Request Complete. Duration: 10.73ms
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Validating query results
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - All results validated successfully
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:56:26 [VERBOSE] (Q6703) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:56:26 [VERBOSE] (Q6717) - Fetching a single result.
+
+2024-09-20 00:56:26 [VERBOSE] (Q6717) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:56:26 [VERBOSE] (Q6717) - Generated hash: 882e1da5f8fd3d2e09b84286464420dc
+
+2024-09-20 00:56:26 [VERBOSE] (Q6717) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818986717&hash=882e1da5f8fd3d2e09b84286464420dc&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:56:26 [VERBOSE] (Q6717) - Sending request to endpoint: characters
+
+2024-09-20 00:56:26 [VERBOSE] (Q6717) - API Request Complete. Duration: 3.52ms
+
+
+
+
+
+2024-09-20 00:56:38 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:56:38 [VERBOSE] (Q8155) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:56:38 [VERBOSE] (Q8155) - Data type: characters
+
+2024-09-20 00:56:38 [VERBOSE] (Q8155) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:56:38 [VERBOSE] (Q8163) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:56:38 [VERBOSE] (Q8163) - Generated hash: 5c11c0d888a59b190502952efecd4734
+
+2024-09-20 00:56:38 [VERBOSE] (Q8163) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818998164&hash=5c11c0d888a59b190502952efecd4734&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:56:38 [VERBOSE] (Q8167) - Generated hash: a121f2ae398ff63f0cf4b7d83c4b78d6
+
+2024-09-20 00:56:38 [VERBOSE] (Q8167) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818998169&hash=a121f2ae398ff63f0cf4b7d83c4b78d6&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Data type: comics
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Validating parameters for 'comics'
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Generated hash: 59f5811761f80f964a5326b5cf9c0811
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726818998172&hash=59f5811761f80f964a5326b5cf9c0811&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Sending request to endpoint: comics
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - API Request Complete. Duration: 27.96ms
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Validating query results
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - All results validated successfully
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:56:38 [VERBOSE] (Q8170) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:56:38 [VERBOSE] (Q8206) - Fetching a single result.
+
+2024-09-20 00:56:38 [VERBOSE] (Q8206) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:56:38 [VERBOSE] (Q8206) - Generated hash: c3877c383e500ff0be464c8b42f7a7d4
+
+2024-09-20 00:56:38 [VERBOSE] (Q8206) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726818998209&hash=c3877c383e500ff0be464c8b42f7a7d4&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:56:38 [VERBOSE] (Q8206) - Sending request to endpoint: characters
+
+2024-09-20 00:56:38 [VERBOSE] (Q8206) - API Request Complete. Duration: 4.88ms
+
+
+
+
+
+2024-09-20 00:58:01 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-20 00:58:01 [VERBOSE] (Q1326) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-20 00:58:01 [VERBOSE] (Q1326) - Data type: characters
+
+2024-09-20 00:58:01 [VERBOSE] (Q1326) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-20 00:58:01 [VERBOSE] (Q1330) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-20 00:58:01 [VERBOSE] (Q1330) - Generated hash: f76125015e6302a35fe9187d76cd1e3a
+
+2024-09-20 00:58:01 [VERBOSE] (Q1330) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726819081330&hash=f76125015e6302a35fe9187d76cd1e3a&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-20 00:58:01 [VERBOSE] (Q1331) - Generated hash: 55bd4d523ec78c5501ffedb937c5eb3a
+
+2024-09-20 00:58:01 [VERBOSE] (Q1331) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726819081331&hash=55bd4d523ec78c5501ffedb937c5eb3a&offset=0&limit=50&name=Peter+Parker
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Data type: comics
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Validating parameters for 'comics'
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Generated hash: 7e5905657de77e0aad63f75ab64c230c
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726819081332&hash=7e5905657de77e0aad63f75ab64c230c&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Sending request to endpoint: comics
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - API Request Complete. Duration: 10.75ms
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Validating query results
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - All results validated successfully
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - Fetched undefined results. Total fetched: NaN/undefined. Remaining: NaN.
+
+2024-09-20 00:58:01 [VERBOSE] (Q1332) - and extended with AutoQuery Injection.
+
+
+
+
+2024-09-20 00:58:01 [VERBOSE] (Q1345) - Fetching a single result.
+
+2024-09-20 00:58:01 [VERBOSE] (Q1345) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-20 00:58:01 [VERBOSE] (Q1345) - Generated hash: 5475aaa9ca9ba1b5c7d9cb2982b8bab6
+
+2024-09-20 00:58:01 [VERBOSE] (Q1345) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726819081346&hash=5475aaa9ca9ba1b5c7d9cb2982b8bab6&offset=0&limit=1&name=Peter+Parker
+
+2024-09-20 00:58:01 [VERBOSE] (Q1345) - Sending request to endpoint: characters
+
+2024-09-20 00:58:01 [VERBOSE] (Q1345) - API Request Complete. Duration: 3.41ms
+
+
+
+
+

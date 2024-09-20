@@ -1,14 +1,14 @@
-import { Params } from "src/models/types/param-types";
-import { ValidateParams } from "src/models/schemas/param-schemas";
+import { Params } from "../models/types/param-types";
+import { ValidateParams } from "../models/schemas/param-schemas";
 import logger, { CustomLogger } from "./Logger";
 import { EndpointBuilder } from "./EndpointBuilder";
-import { Config } from "src/models/types/config-types";
+import { Config } from "../models/types/config-types";
 import {
   Endpoint,
   EndpointDescriptor,
   EndpointType,
-} from "src/models/types/endpoint-types";
-import { AnyParams } from "src/models/types/param-types";
+} from "../models/types/endpoint-types";
+import { AnyParams } from "../models/types/param-types";
 
 /**
  * Class responsible for managing and validating query parameters, including global
@@ -16,14 +16,14 @@ import { AnyParams } from "src/models/types/param-types";
  */
 export class ParameterManager {
   /** Configuration object for managing global and specific query settings */
-  static config: Partial<Config>;
+  static config: Partial<Config<boolean>>;
 
   /**
    * Sets the global configuration for parameter management.
    * Validates global parameters if provided.
    * @param config - A partial configuration object.
    */
-  static setConfig(config: Partial<Config>) {
+  static setConfig<A extends boolean>(config: Partial<Config<A>>) {
     ParameterManager.config = config;
 
     if (config.globalParams) {
