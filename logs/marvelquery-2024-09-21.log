@@ -779,3 +779,852 @@
 
 
 
+2024-09-21 08:07:09 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-21 08:07:09 [VERBOSE] (Q9844) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-21 08:07:09 [VERBOSE] (Q9844) - Data type: characters
+
+2024-09-21 08:07:09 [VERBOSE] (Q9844) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-21 08:07:09 [VERBOSE] (Q9848) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-21 08:07:09 [VERBOSE] (Q9848) - Generated hash: 4c16b9d3b334d8bc5b94cd1350eef9e1
+
+2024-09-21 08:07:09 [VERBOSE] (Q9848) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931229848&hash=4c16b9d3b334d8bc5b94cd1350eef9e1&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-21 08:07:09 [VERBOSE] (Q9849) - Generated hash: 66e3b87c573f896b3c1ab23e41c64fd7
+
+2024-09-21 08:07:09 [VERBOSE] (Q9849) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931229849&hash=66e3b87c573f896b3c1ab23e41c64fd7&offset=0&limit=50&name=Peter+Parker
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Data type: comics
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Validating parameters for 'comics'
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Generated hash: 19e37c8a1944585a36d0e69a5df3ec3f
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726931229850&hash=19e37c8a1944585a36d0e69a5df3ec3f&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Sending request to endpoint: comics
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - API Request Complete. Duration: 10.18ms
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Validating query results
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - All results validated successfully
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Fetched 1 results. Total fetched: 1/1. Remaining: 0.
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - No more results found
+
+2024-09-21 08:07:09 [VERBOSE] (Q9850) - Results processed sucessfully.
+
+
+
+
+2024-09-21 08:07:09 [VERBOSE] (Q9863) - Fetching a single result.
+
+2024-09-21 08:07:09 [VERBOSE] (Q9863) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-21 08:07:09 [VERBOSE] (Q9863) - Generated hash: b78ec7e3d539c78a1546934aa4205e31
+
+2024-09-21 08:07:09 [VERBOSE] (Q9863) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931229863&hash=b78ec7e3d539c78a1546934aa4205e31&offset=0&limit=1&name=Peter+Parker
+
+2024-09-21 08:07:09 [VERBOSE] (Q9863) - Sending request to endpoint: characters
+
+2024-09-21 08:07:09 [VERBOSE] (Q9863) - API Request Complete. Duration: 3.40ms
+
+
+
+
+
+
+
+
+
+
+
+2024-09-21 08:07:09 [VERBOSE] (Q9867) - Generated hash: 9ca2a12e711747012e505914ef52e0f0
+
+2024-09-21 08:07:09 [VERBOSE] (Q9867) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931229868&hash=9ca2a12e711747012e505914ef52e0f0&offset=0&limit=1&name=Peter+Parker
+
+
+2024-09-21 08:07:09 [VERBOSE] (Q9867) - API Request Complete. Duration: 3.30ms
+
+
+
+
+
+
+2024-09-21 08:08:12 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-21 08:08:12 [VERBOSE] (Q2589) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-21 08:08:12 [VERBOSE] (Q2589) - Data type: characters
+
+2024-09-21 08:08:12 [VERBOSE] (Q2589) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-21 08:08:12 [VERBOSE] (Q2593) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-21 08:08:12 [VERBOSE] (Q2593) - Generated hash: bb614bba2c17879886677980794af977
+
+2024-09-21 08:08:12 [VERBOSE] (Q2593) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931292594&hash=bb614bba2c17879886677980794af977&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-21 08:08:12 [VERBOSE] (Q2595) - Generated hash: a6584541079f70c5ca684d2522acb63c
+
+2024-09-21 08:08:12 [VERBOSE] (Q2595) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931292595&hash=a6584541079f70c5ca684d2522acb63c&offset=0&limit=50&name=Peter+Parker
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Data type: comics
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Validating parameters for 'comics'
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Generated hash: 100db75d8114d0d2994b638b67190118
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726931292596&hash=100db75d8114d0d2994b638b67190118&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Sending request to endpoint: comics
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - API Request Complete. Duration: 9.90ms
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Validating query results
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - All results validated successfully
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Fetched 1 results. Total fetched: 1/1. Remaining: 0.
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - No more results found
+
+2024-09-21 08:08:12 [VERBOSE] (Q2596) - Results processed sucessfully.
+
+
+
+
+2024-09-21 08:08:12 [VERBOSE] (Q2608) - Fetching a single result.
+
+2024-09-21 08:08:12 [VERBOSE] (Q2608) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-21 08:08:12 [VERBOSE] (Q2608) - Generated hash: e0186ed5aa69a0c4f476ad3372ee602c
+
+2024-09-21 08:08:12 [VERBOSE] (Q2608) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931292609&hash=e0186ed5aa69a0c4f476ad3372ee602c&offset=0&limit=1&name=Peter+Parker
+
+2024-09-21 08:08:12 [VERBOSE] (Q2608) - Sending request to endpoint: characters
+
+2024-09-21 08:08:12 [VERBOSE] (Q2608) - API Request Complete. Duration: 3.45ms
+
+
+
+
+
+
+
+
+
+
+
+2024-09-21 08:08:12 [VERBOSE] (Q2613) - Generated hash: 6d29a666f9cf69bfcfa0924fd0fd3410
+
+2024-09-21 08:08:12 [VERBOSE] (Q2613) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726931292613&hash=6d29a666f9cf69bfcfa0924fd0fd3410&offset=0&limit=1&name=Peter+Parker
+
+
+2024-09-21 08:08:12 [VERBOSE] (Q2613) - API Request Complete. Duration: 3.24ms
+
+
+
+
+
+
+2024-09-21 08:29:12 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-21 08:29:12 [VERBOSE] (Q2211) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-21 08:29:12 [VERBOSE] (Q2211) - Data type: characters
+
+2024-09-21 08:29:12 [VERBOSE] (Q2211) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-21 08:29:12 [VERBOSE] (Q2217) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-21 08:29:12 [VERBOSE] (Q2217) - Generated hash: fad7e62d202b279ce10f7dd2c2fa4976
+
+2024-09-21 08:29:12 [VERBOSE] (Q2217) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932552218&hash=fad7e62d202b279ce10f7dd2c2fa4976&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-21 08:29:12 [VERBOSE] (Q2219) - Generated hash: e99a021b694e6aecab3c1138c840e609
+
+2024-09-21 08:29:12 [VERBOSE] (Q2219) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932552219&hash=e99a021b694e6aecab3c1138c840e609&offset=0&limit=50&name=Peter+Parker
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Data type: comics
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Validating parameters for 'comics'
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Generated hash: ba35aec2d54217f5bfd46e66d5903ac6
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726932552221&hash=ba35aec2d54217f5bfd46e66d5903ac6&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Sending request to endpoint: comics
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - API Request Complete. Duration: 12.53ms
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Validating query results
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Validation failed for result at index 0:
+{
+  "_errors": [],
+  "creators": {
+    "_errors": [],
+    "collectionURI": {
+      "_errors": [
+        "Invalid url"
+      ]
+    }
+  },
+  "events": {
+    "_errors": [],
+    "collectionURI": {
+      "_errors": [
+        "Invalid url"
+      ]
+    }
+  }
+}
+2024-09-21 08:29:12 [WARN] (Q2220) - All results failed validation.
+
+2024-09-21 08:29:12 [VERBOSE] - 
+----- Failed Result at Index 0 -----
+{
+  "id": 8458916230856704,
+  "modified": "pectus",
+  "resourceURI": "https://full-bikini.name",
+  "thumbnail": {
+    "path": "https://tedious-ramen.info",
+    "extension": "villa"
+  },
+  "digitalId": 198072661442560,
+  "title": "aestivus",
+  "issueNumber": 0,
+  "variantDescription": "tredecim",
+  "description": "in",
+  "isbn": "978-0-88895-016-1",
+  "upc": "adamo",
+  "diamondCode": "facere",
+  "ean": "cena",
+  "issn": "asperiores",
+  "format": "digital comic",
+  "pageCount": 0,
+  "textObjects": [
+    {
+      "type": "lion",
+      "language": "venustas",
+      "text": "Depono utique adipisci comprehendo calculus attero. Pel commodo iste cohibeo creator vulgo xiphias aeneus. Denuo eaque ipsam vestigium tunc."
+    },
+    {
+      "type": "horse",
+      "language": "amet",
+      "text": "Accommodo depono cunabula correptius."
+    }
+  ],
+  "series": {
+    "resourceURI": "https://gateway.marvel.com/v1/public/series/2",
+    "name": "Dr. Gilberto Graham"
+  },
+  "variants": [
+    {
+      "resourceURI": "https://gateway.marvel.com/v1/public/comics/9803",
+      "name": "Leo Schinner"
+    },
+    {
+      "resourceURI": "https://gateway.marvel.com/v1/public/comics/555",
+      "name": "Herbert Rowe"
+    },
+    {
+      "resourceURI": "https://gateway.marvel.com/v1/public/comics/29",
+      "name": "Mack Predovic"
+    }
+  ],
+  "collections": [
+    {
+      "resourceURI": "https://gateway.marvel.com/v1/public/comics/627",
+      "name": "Robin Denesik"
+    }
+  ],
+  "collectedIssues": [
+    {
+      "resourceURI": "https://gateway.marvel.com/v1/public/comics/315",
+      "name": "Donald Cronin"
+    },
+    {
+      "resourceURI": "https://gateway.marvel.com/v1/public/comics/2",
+      "name": "Dianne Langosh"
+    },
+    {
+      "resourceURI": "https://gateway.marvel.com/v1/public/comics/563415639",
+      "name": "Betty Donnelly"
+    }
+  ],
+  "dates": [
+    {
+      "type": "cat",
+      "date": "2024-09-21T13:52:04.035Z"
+    },
+    {
+      "type": "fish",
+      "date": "2024-09-21T11:15:48.296Z"
+    },
+    {
+      "type": "horse",
+      "date": "2024-09-21T04:00:38.207Z"
+    }
+  ],
+  "prices": [
+    {
+      "type": "bear",
+      "price": 4267318181888000
+    },
+    {
+      "type": "crocodilia",
+      "price": 7641346993029120
+    },
+    {
+      "type": "dog",
+      "price": 4852526811709440
+    },
+    {
+      "type": "lion",
+      "price": 2085695870992384
+    },
+    {
+      "type": "rabbit",
+      "price": 7904291966681088
+    }
+  ],
+  "urls": [
+    {
+      "type": "fish",
+      "url": "https://warlike-roll.net/"
+    },
+    {
+      "type": "lion",
+      "url": "https://somber-hubcap.name/"
+    }
+  ],
+  "images": [
+    {
+      "path": "https://testy-rediscovery.info",
+      "extension": "delectus"
+    },
+    {
+      "path": "https://admirable-shirtdress.biz",
+      "extension": "comptus"
+    },
+    {
+      "path": "https://blank-kinase.com/",
+      "extension": "vacuus"
+    }
+  ],
+  "creators": {
+    "available": 4367555892346880,
+    "returned": 7981584099573760,
+    "collectionURI": "https://gateway<marvel|com/v1/public/comics/318115/creators",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/creators/27644035",
+        "name": "Cody Roob",
+        "role": "accusantium"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/creators/025879",
+        "name": "Harvey Bauch",
+        "role": "ultio"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/creators/43228",
+        "name": "Donnie Botsford Sr.",
+        "role": "conforto"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/creators/505111406",
+        "name": "Wesley Reynolds",
+        "role": "vigor"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/creators/32",
+        "name": "Olive Bashirian",
+        "role": "dapifer"
+      }
+    ]
+  },
+  "characters": {
+    "available": 39591765606400,
+    "returned": 6895415504928768,
+    "collectionURI": "https://gateway'marvel'com/v1/public/comics/56439/characters",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/characters/5686228080",
+        "name": "Ernest Veum",
+        "role": "bos"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/characters/675139",
+        "name": "Tricia Collins V",
+        "role": "condico"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/characters/4",
+        "name": "Santiago Boyle",
+        "role": "decens"
+      }
+    ]
+  },
+  "stories": {
+    "available": 4393870154530816,
+    "returned": 7481395886686208,
+    "collectionURI": "https://gatewayCmarvelOcom/v1/public/comics/279/stories",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/6500672",
+        "name": "Rick Tillman",
+        "type": "insect"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/74361691",
+        "name": "Willie Rempel",
+        "type": "cow"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/19776388",
+        "name": "Iris Auer",
+        "type": "bird"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/8588",
+        "name": "Mr. Pat Hand II",
+        "type": "crocodilia"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/869632764",
+        "name": "Yolanda Shanahan",
+        "type": "fish"
+      }
+    ]
+  },
+  "events": {
+    "available": 3007856750100480,
+    "returned": 5203576456478720,
+    "collectionURI": "https://gateway-marvel|com/v1/public/comics/2097/events",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/events/582",
+        "name": "Penny Crona"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/events/707538483",
+        "name": "Fred Schneider"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/events/9856057860",
+        "name": "Mr. Brian Dickens"
+      }
+    ]
+  }
+}
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Fetched 1 results. Total fetched: 1/1. Remaining: 0.
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - No more results found
+
+2024-09-21 08:29:12 [VERBOSE] (Q2220) - Results processed sucessfully.
+
+
+
+
+2024-09-21 08:29:12 [VERBOSE] (Q2266) - Fetching a single result.
+
+2024-09-21 08:29:12 [VERBOSE] (Q2266) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-21 08:29:12 [VERBOSE] (Q2266) - Generated hash: ade10abdfebd86fec382daf364120fdd
+
+2024-09-21 08:29:12 [VERBOSE] (Q2266) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932552266&hash=ade10abdfebd86fec382daf364120fdd&offset=0&limit=1&name=Peter+Parker
+
+2024-09-21 08:29:12 [VERBOSE] (Q2266) - Sending request to endpoint: characters
+
+2024-09-21 08:29:12 [VERBOSE] (Q2266) - API Request Complete. Duration: 3.71ms
+
+
+2024-09-21 08:29:12 [VERBOSE] (Q2266) - Validation failed for result at index 0:
+{
+  "_errors": [],
+  "series": {
+    "_errors": [],
+    "collectionURI": {
+      "_errors": [
+        "Invalid url"
+      ]
+    }
+  }
+}
+
+2024-09-21 08:29:12 [VERBOSE] - 
+----- Failed Result at Index 0 -----
+{
+  "id": 186600583593984,
+  "modified": "stultus",
+  "resourceURI": "https://kindhearted-renaissance.com/",
+  "thumbnail": {
+    "path": "https://official-musculature.name",
+    "extension": "votum"
+  },
+  "name": "Kendra Moen Sr.",
+  "description": "aptus",
+  "urls": [
+    {
+      "type": "insect",
+      "url": "https://excellent-catalysis.biz/"
+    },
+    {
+      "type": "fish",
+      "url": "https://imperturbable-visit.info/"
+    },
+    {
+      "type": "dog",
+      "url": "https://violet-duster.net/"
+    }
+  ],
+  "comics": {
+    "available": 2579969957953536,
+    "returned": 1472483444129792,
+    "collectionURI": "https://gatewayQmarvel~com/v1/public/characters/876/comics",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/comics/61640518",
+        "name": "Cassandra Sanford"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/comics/663",
+        "name": "Louis Von"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/comics/15288124",
+        "name": "Freddie Morissette"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/comics/3063",
+        "name": "Wanda Pollich"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/comics/502302700",
+        "name": "Kimberly Corwin"
+      }
+    ]
+  },
+  "stories": {
+    "available": 6593506111913984,
+    "returned": 3614547636125696,
+    "collectionURI": "https://gatewayfmarvel.com/v1/public/characters/70/stories",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/92852895",
+        "name": "Emmett Tillman",
+        "type": "bear"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/83683680",
+        "name": "Ms. Daisy Simonis",
+        "type": "insect"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/760",
+        "name": "Alexander Davis III",
+        "type": "cow"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/stories/92007",
+        "name": "Clinton Emmerich-Goyette",
+        "type": "cow"
+      }
+    ]
+  },
+  "events": {
+    "available": 3343134626938880,
+    "returned": 6259417695649792,
+    "collectionURI": "https://gateway=marvelPcom/v1/public/characters/3/events",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/events/2956145986",
+        "name": "Melody Paucek"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/events/81",
+        "name": "Andre Jacobs"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/events/208",
+        "name": "Freddie Rempel"
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/events/48",
+        "name": "Willis Treutel"
+      }
+    ]
+  },
+  "series": {
+    "available": 6975103149539328,
+    "returned": 6844871847444480,
+    "collectionURI": "https://gatewayqmarvel%com/v1/public/characters/7406067/series",
+    "items": [
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/series/2921515864",
+        "name": "Patty Cummings Sr."
+      },
+      {
+        "resourceURI": "https://gateway.marvel.com/v1/public/series/6",
+        "name": "Freddie Rosenbaum III"
+      }
+    ]
+  }
+}
+
+
+
+
+
+
+
+
+
+2024-09-21 08:29:12 [VERBOSE] (Q2280) - Generated hash: 1685149a05b9690e8d33c9c15bc5b151
+
+2024-09-21 08:29:12 [VERBOSE] (Q2280) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932552281&hash=1685149a05b9690e8d33c9c15bc5b151&offset=0&limit=1&name=Peter+Parker
+
+
+2024-09-21 08:29:12 [VERBOSE] (Q2280) - API Request Complete. Duration: 4.74ms
+
+
+
+
+
+
+
+
+2024-09-21 08:33:07 [VERBOSE] - Initializing MarvelQuery. Setting up global config...
+
+
+2024-09-21 08:33:07 [VERBOSE] (Q7917) - Created new query for endpoint: characters
+{
+  "name": "Peter Parker"
+}
+2024-09-21 08:33:07 [VERBOSE] (Q7917) - Data type: characters
+
+2024-09-21 08:33:07 [VERBOSE] (Q7917) - Validating parameters for 'characters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+2024-09-21 08:33:07 [VERBOSE] (Q7922) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "name": "Peter Parker"
+}
+2024-09-21 08:33:07 [VERBOSE] (Q7922) - Generated hash: defdb878269c046e81b610fccde2b0b2
+
+2024-09-21 08:33:07 [VERBOSE] (Q7922) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932787922&hash=defdb878269c046e81b610fccde2b0b2&offset=0&limit=50&name=Peter+Parker
+
+
+
+
+
+2024-09-21 08:33:07 [VERBOSE] (Q7923) - Generated hash: 6b381f018931f3881cf5cff527c9b5d0
+
+2024-09-21 08:33:07 [VERBOSE] (Q7923) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932787924&hash=6b381f018931f3881cf5cff527c9b5d0&offset=0&limit=50&name=Peter+Parker
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Created new query for endpoint: comics
+{
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Data type: comics
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Validating parameters for 'comics'
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Building URL for comics with parameters:
+{
+  "offset": 0,
+  "limit": 50,
+  "titleStartsWith": "Amazing"
+}
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Generated hash: 2547f4abc63d36433f7b0a01ce016589
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Built URL: https://gateway.marvel.com/v1/public/comics?apikey=mockPublicKey&ts=1726932787925&hash=2547f4abc63d36433f7b0a01ce016589&offset=0&limit=50&titleStartsWith=Amazing
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Sending request to endpoint: comics
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - API Request Complete. Duration: 11.38ms
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Validating query results
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - All results validated successfully
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Fetched 1 results. Total fetched: 1/1. Remaining: 0.
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - No more results found
+
+2024-09-21 08:33:07 [VERBOSE] (Q7924) - Results processed sucessfully.
+
+
+
+
+2024-09-21 08:33:07 [VERBOSE] (Q7939) - Fetching a single result.
+
+2024-09-21 08:33:07 [VERBOSE] (Q7939) - Building URL for characters with parameters:
+{
+  "offset": 0,
+  "limit": 1,
+  "name": "Peter Parker"
+}
+2024-09-21 08:33:07 [VERBOSE] (Q7939) - Generated hash: 4033c843c601ad09a376ca7681beae49
+
+2024-09-21 08:33:07 [VERBOSE] (Q7939) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932787939&hash=4033c843c601ad09a376ca7681beae49&offset=0&limit=1&name=Peter+Parker
+
+2024-09-21 08:33:07 [VERBOSE] (Q7939) - Sending request to endpoint: characters
+
+2024-09-21 08:33:07 [VERBOSE] (Q7939) - API Request Complete. Duration: 3.58ms
+
+
+
+
+
+
+
+
+
+
+
+2024-09-21 08:33:07 [VERBOSE] (Q7944) - Generated hash: 9e170d4f65e80ba982cfae390348941c
+
+2024-09-21 08:33:07 [VERBOSE] (Q7944) - Built URL: https://gateway.marvel.com/v1/public/characters?apikey=mockPublicKey&ts=1726932787944&hash=9e170d4f65e80ba982cfae390348941c&offset=0&limit=1&name=Peter+Parker
+
+
+2024-09-21 08:33:07 [VERBOSE] (Q7944) - API Request Complete. Duration: 3.27ms
+
+
+
+
+
+

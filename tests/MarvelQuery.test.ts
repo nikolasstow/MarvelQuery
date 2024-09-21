@@ -53,7 +53,7 @@ describe("MarvelQuery", () => {
         count: 1,
       }
 
-      console.log(mockData.comics?.items[0]);
+      console.log(mockData.comics, mockData.characters, mockData.creators, mockData.events, mockData.series, mockData.stories);
 
       scope
         .get(path)
