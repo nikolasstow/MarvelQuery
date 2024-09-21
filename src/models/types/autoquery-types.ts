@@ -7,7 +7,6 @@ import {
   NoSameEndpointType,
   CollectionEndpoint,
   EndpointType,
-  EndpointFromType,
   IsEndpoint,
 } from "./endpoint-types";
 import { MarvelQueryInit } from "./interface";

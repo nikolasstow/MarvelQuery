@@ -40,7 +40,9 @@ import { MarvelQueryFetched, MarvelQueryInit } from "./models/types/interface";
  *
  * @template E The endpoint type, extending the base Endpoint type.
  */
-export class MarvelQuery<E extends Endpoint, A extends boolean> implements MarvelQueryInit<E, A> {
+export class MarvelQuery<E extends Endpoint, A extends boolean>
+  implements MarvelQueryInit<E, A>
+{
   /** ********* Static Properties ********* */
   /** Stores the API keys used for authentication with the Marvel API */
   private static apiKeys: APIKeys;
@@ -49,7 +51,7 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
    * These include global parameters, verbosity, HTTP client, and more.
    * The default configuration can be overridden when initializing the class.
    */
-  private static config: Config<boolean>
+  private static config: Config<boolean>;
 
   /**
    * Creates a new instance of the MarvelQuery class.
@@ -59,7 +61,10 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
    * @param params Optional parameters for the query.
    * @returns A new instance of MarvelQueryInterface for the specified endpoint.
    */
-  private static createQuery = <T extends Endpoint | EndpointType, A extends boolean>(
+  private static createQuery = <
+    T extends Endpoint | EndpointType,
+    A extends boolean
+  >(
     endpoint: T,
     params: Params<AsEndpoint<T>> = {}
   ): MarvelQuery<AsEndpoint<T>, A> =>
@@ -91,6 +96,13 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
       omitUndefined: true,
       logOptions: {
         verbose: false,
+      },
+      // All validation is enabled by default
+      validation: {
+        disableAll: false,
+        parameters: true,
+        apiResponse: true,
+        autoQuery: true,
       },
       httpClient: (url) => axios.get(url).then((response) => response.data),
     };
@@ -268,9 +280,7 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
    * @param response The API response containing the results to process.
    * @returns An array of extended results.
    */
-  private processResults(
-    response: APIWrapper<APIResult<E>>
-  ): Result<E, A>[] {
+  private processResults(response: APIWrapper<APIResult<E>>): Result<E, A>[] {
     // Destructure the response to extract data and metadata
     const { data, ...metadata } = response;
     const { results, ...responseData } = data;
@@ -319,7 +329,8 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
       const autoQuery = new AutoQuery<E>(
         MarvelQuery,
         this.endpoint,
-        this.logger
+        this.logger,
+        MarvelQuery.config,
       );
       returnData = autoQuery.inject(results) as Result<E, A>[];
     }
@@ -331,7 +342,12 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
     this.results = returnData;
     this.resultHistory = [...this.resultHistory, ...returnData];
 
-    this.logger.verbose("Results processed " + this.autoQuery ? 'and extended with AutoQuery Injection.' : 'sucessfully.');
+    this.logger.verbose(
+      "Results processed " +
+        (this.autoQuery
+          ? "and extended with AutoQuery Injection."
+          : "sucessfully.")
+    );
     return returnData;
   }
 
@@ -353,7 +369,9 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
    *
    * @param results The processed results to pass to the onResult function.
    */
-  private callOnResult(results: Result<E, typeof MarvelQuery.config.autoQuery>[]): void {
+  private callOnResult(
+    results: Result<E, typeof MarvelQuery.config.autoQuery>[]
+  ): void {
     // Call the onResult function if it is defined
     if (this.onResult) {
       this.logger.verbose(
@@ -389,8 +407,13 @@ export class MarvelQuery<E extends Endpoint, A extends boolean> implements Marve
       // Stop the timer and log the request performance
       timer.stop("API Request Complete");
 
-      // Validate the results in the response
-      new ResultValidator(response.data.results, this.endpoint, this.logger);
+      if (
+        MarvelQuery.config.validation?.disableAll === false &&
+        MarvelQuery.config.validation?.apiResponse === true
+      ) {
+        // Validate the results in the response if validation is enabled
+        new ResultValidator(response.data.results, this.endpoint, this.logger);
+      }
 
       // Return the validated response data
       return response;

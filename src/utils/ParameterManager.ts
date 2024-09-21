@@ -69,6 +69,14 @@ export class ParameterManager {
     params: AnyParams,
     customLogger = logger
   ) {
+    if (
+      ParameterManager.config?.validation?.disableAll === true || 
+      ParameterManager.config?.validation?.parameters === false
+    ) {
+      console.log("Validation is disabled for params"); // remove this
+      return;
+    }
+
     customLogger.verbose(`Validating parameters for '${type}'`);
     try {
       // Confirm there's a validation function for the endpoint type

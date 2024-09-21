@@ -1,5 +1,4 @@
 import { generateMock } from "@anatine/zod-mock";
-import { faker } from "@faker-js/faker";
 import nock from "nock";
 import {
   ResultSchemaMap,
@@ -7,19 +6,27 @@ import {
   MarvelComicSchema,
 } from "../src/models/schemas/data-schemas";
 
-import MarvelQuery from "../src";
+import MarvelQuery, { APIResponseData } from "../src";
+import { verbose } from "winston";
+import { mock } from "node:test";
 
 const mockKeys = {
   publicKey: "mockPublicKey",
   privateKey: "mockPrivateKey",
 };
 
+const logOptions = {
+  verbose: false,
+}
+
 let createQueryWithAQ = MarvelQuery.init(mockKeys,{
   isTestEnv: true,
+  logOptions,
 });
 let createQueryStandard = MarvelQuery.init(mockKeys, {
   isTestEnv: true,
   autoQuery: false,
+  logOptions,
 });
 
 describe("MarvelQuery", () => {
@@ -29,6 +36,8 @@ describe("MarvelQuery", () => {
   ];
 
   beforeAll(() => {
+
+    // Mock the Marvel API
     const marvelAPI = nock("https://gateway.marvel.com/v1/public");
 
     const setupMockEndpoint = (
@@ -36,16 +45,28 @@ describe("MarvelQuery", () => {
       path: string | RegExp,
       mockData: any
     ) => {
+
+      const response: APIResponseData = {
+        offset: 0,
+        limit: 20,
+        total: 1,
+        count: 1,
+      }
+
+      console.log(mockData.comics?.items[0]);
+
       scope
         .get(path)
         .query(true) // Match any query parameters
         .reply(200, {
           data: {
+            ...response,
             results: [mockData],
           },
         });
     };
 
+    // Setup mock endpoints for all possible endpoints with mock data of the correct type
     Object.entries(ResultSchemaMap).forEach(([key, schema]) => {
       const mockData = generateMock(schema);
 
@@ -55,6 +76,7 @@ describe("MarvelQuery", () => {
     });
   });
 
+  //
   afterAll(() => {
     nock.cleanAll();
   });
@@ -89,7 +111,7 @@ describe("MarvelQuery", () => {
     }
   );
 
-  it("should return comics whose title starts with 'Amazing'", async () => {
+  it("should return comics whose title starts with 'Amazing' (standard query)", async () => {
     const query = await createQueryStandard("comics", {
       titleStartsWith: "Amazing",
     }).fetch();
@@ -108,8 +130,25 @@ describe("MarvelQuery", () => {
     });
   });
 
-  it("should return a single character named Peter Parker", async () => {
+  it("should return a single character named Peter Parker (standard query)", async () => {
     const result = await createQueryStandard("characters", {
+      name: "Peter Parker",
+    }).fetchSingle();
+
+    // Validate using zod schema
+    const validationResult = MarvelCharacterSchema.safeParse(result);
+    // Check if the validation passed
+    if (!validationResult.success) {
+      console.error("Validation Errors:", validationResult.error.format());
+      console.error("Schema:", MarvelCharacterSchema);
+      console.error("Data being validated:", result);
+    }
+
+    expect(validationResult.success).toBe(true);
+  });
+
+  it("should return a single character named Peter Parker (AutoQuery)", async () => {
+    const result = await createQueryWithAQ("characters", {
       name: "Peter Parker",
     }).fetchSingle();
 

@@ -8,12 +8,6 @@ import {
   SummarySchema,
   RoleSummarySchema,
   TypeSummarySchema,
-  ComicSummarySchema,
-  StorySummarySchema,
-  SeriesSummarySchema,
-  CreatorSummarySchema,
-  CharacterSummarySchema,
-  EventSummarySchema,
   ListSchema,
   ComicListSchema,
   StoryListSchema,
@@ -129,40 +123,40 @@ export type TypeSummary = z.infer<typeof TypeSummarySchema>;
  * | `resourceURI` | `string` | The path to the individual comic resource. |
  * | `name`        | `string` | The canonical name of the comic.           |
  */
-export type ComicSummary = z.infer<typeof ComicSummarySchema>;
+export type ComicSummary = z.infer<typeof SummarySchema>;
 /**| Property      | Type     | Description                                |
  * | ------------- | -------- | ------------------------------------------ |
  * | `resourceURI` | `string` | The path to the individual resource.       |
  * | `name`        | `string` | The canonical name of the story.           |
  * | `role`        | `string` | The type of the story (interior or cover). |
  */
-export type StorySummary = z.infer<typeof StorySummarySchema>;
+export type StorySummary = z.infer<typeof RoleSummarySchema>;
 /**| Property      | Type     | Description                                 |
  * | ------------- | -------- | ------------------------------------------- |
  * | `resourceURI` | `string` | The path to the individual series resource. |
  * | `name`        | `string` | The canonical name of the series.           |
  */
-export type SeriesSummary = z.infer<typeof SeriesSummarySchema>;
+export type SeriesSummary = z.infer<typeof SummarySchema>;
 /**| Property      | Type     | Description                                   |
  * | ------------- | -------- | --------------------------------------------- |
  * | `resourceURI` | `string` | The path to the individual resource.          |
  * | `name`        | `string` | The full name of the creator.                 |
  * | `role`        | `string` | The role of the creator in the parent entity. |
  */
-export type CreatorSummary = z.infer<typeof CreatorSummarySchema>;
+export type CreatorSummary = z.infer<typeof RoleSummarySchema>;
 /**| Property      | Type     | Description                                     |
  * | ------------- | -------- | ----------------------------------------------- |
  * | `resourceURI` | `string` | The path to the individual resource.            |
  * | `name`        | `string` | The full name of the character.                 |
  * | `role`        | `string` | The role of the character in the parent entity. |
  */
-export type CharacterSummary = z.infer<typeof CharacterSummarySchema>;
+export type CharacterSummary = z.infer<typeof RoleSummarySchema>;
 /**| Property      | Type     | Description                                |
  * | ------------- | -------- | ------------------------------------------ |
  * | `resourceURI` | `string` | The path to the individual event resource. |
  * | `name`        | `string` | The name of the event.                     |
  */
-export type EventSummary = z.infer<typeof EventSummarySchema>;
+export type EventSummary = z.infer<typeof SummarySchema>;
 /**| Property        | Type                  | Description
  * | --------------- | --------------------- | ------------------------------------------------------------
  * | `available`     | `number`              | The number of total available resources in this list. Will always be greater than or equal to the "returned" value.

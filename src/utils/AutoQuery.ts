@@ -28,6 +28,8 @@ import { Params } from "../models/types/param-types";
 import { EndpointBuilder } from "./EndpointBuilder";
 import { InitQuery } from "../models/types/autoquery-types";
 import { MarvelQueryInit } from "../models/types/interface";
+import { AutoQuerySchemaMap } from "../models/schemas/autoquery-schemas";
+import { Config } from "src/models/types/config-types";
 
 /**
  * Utility class for auto-query injection that finds URIs in data and injects query methods
@@ -69,6 +71,7 @@ export class AutoQuery<E extends Endpoint> {
 
   /** The custom logger instance used for logging actions in the query. */
   logger: CustomLogger;
+  config: Config<boolean>;
 
   /**
    * Constructor to initialize the AutoQuery class with a MarvelQuery class, an endpoint descriptor, and a logger.
@@ -82,11 +85,13 @@ export class AutoQuery<E extends Endpoint> {
       params,
     }: InitQuery<N>) => MarvelQueryInit<N, true>,
     endpoint: EndpointDescriptor<E>,
-    logger: CustomLogger
+    logger: CustomLogger,
+    config: Config<boolean>
   ) {
     this.logger = logger;
     this.createQuery = MarvelQueryClass;
     this.endpoint = endpoint;
+    this.config = config;
   }
 
   /**
@@ -102,6 +107,25 @@ export class AutoQuery<E extends Endpoint> {
     // Log a summary of the auto-query injection process
     this.logAutoQueryInjectionSummary(this.resources, this.collections);
     this.logResourcesAndCollections();
+
+    if (
+      this.config.validation?.disableAll === false &&
+      this.config.validation?.autoQuery === true
+    ) {
+      const schema = AutoQuerySchemaMap[this.endpoint.type];
+
+      extendedResults.forEach((item, index) => {
+        const result = schema.safeParse(item);
+
+        if (!result.success) {
+          this.logger.error(
+            `Failed to validate extended result at index ${index}: ${JSON.stringify(
+              result.error.format()
+            )}`
+          );
+        }
+      });
+    }
 
     return extendedResults;
   }
@@ -294,7 +318,7 @@ export class AutoQuery<E extends Endpoint> {
       if (parent) {
         this.resourceNames.set(endpoint, parent);
       }
-      
+
       return (<TEndpoint extends Endpoint>(
         endpoint: TEndpoint
       ): ExtendCollection<TEndpoint, V> => {

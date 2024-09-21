@@ -56,6 +56,17 @@ export interface Config<A extends boolean> {
   httpClient: HTTPClient;
   /** Flag for test enviroment */
   isTestEnv?: boolean;
+  /** Enable/Disable all or some validators (all enabled by default) */
+  validation?: {
+    /** Enable/Disable all validators */
+    disableAll?: boolean;
+    /** Enable/Disable parameter validation */
+    parameters?: boolean;
+    /** Enable/Disable response validation (returned data) */
+    apiResponse?: boolean;
+    /** Enable/Disable AutoQuery validation (if AutoQuery injection is turned on) */
+    autoQuery?: boolean;
+  };
 }
 
 /** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
