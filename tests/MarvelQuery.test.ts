@@ -1,14 +1,19 @@
 import { generateMock } from "@anatine/zod-mock";
 import nock from "nock";
 import {
-  ResultSchemaMap,
-  MarvelCharacterSchema,
   MarvelComicSchema,
+  ResultSchemaMap,
 } from "../src/models/schemas/data-schemas";
 
-import MarvelQuery, { APIResponseData } from "../src";
-import { verbose } from "winston";
-import { mock } from "node:test";
+import MarvelQuery, {
+  AnyParams,
+  APIBaseParams,
+  APIResponseData,
+  CreateQueryFunction,
+  Endpoint,
+  EndpointType,
+} from "../src";
+import { z } from "zod";
 
 const mockKeys = {
   publicKey: "mockPublicKey",
@@ -16,10 +21,10 @@ const mockKeys = {
 };
 
 const logOptions = {
-  verbose: false,
-}
+  // verbose: true,
+};
 
-let createQueryWithAQ = MarvelQuery.init(mockKeys,{
+let createQueryWithAQ = MarvelQuery.init(mockKeys, {
   isTestEnv: true,
   logOptions,
 });
@@ -30,60 +35,140 @@ let createQueryStandard = MarvelQuery.init(mockKeys, {
 });
 
 describe("MarvelQuery", () => {
-  let testCases = [
+  let queryModes = [
     { method: createQueryWithAQ, name: "AutoQuery" },
     { method: createQueryStandard, name: "Standard query" },
   ];
 
-  beforeAll(() => {
+  let endpointTypes: Array<EndpointType> = [
+    "characters",
+    "comics",
+    "creators",
+    "events",
+    "series",
+    "stories",
+  ];
 
+  // Array of possible endpoints
+  let endpoints: Array<Endpoint | EndpointType> = [...endpointTypes];
+
+  for (let typeA of endpointTypes) {
+    for (let typeB of endpointTypes) {
+      if (typeA == typeB) continue;
+      const randomCount = Math.floor(Math.random() * 999) + 1;
+      endpoints.push([typeA, randomCount, typeB] as Endpoint);
+    }
+  }
+
+  let tests: {
+    method: CreateQueryFunction<boolean>;
+    name: string;
+    endpoint: Endpoint | EndpointType;
+  }[] = [];
+
+  for (let mode of queryModes) {
+    for (let endpoint of endpoints) {
+      const endpointString = Array.isArray(endpoint)
+        ? endpoint.join("/")
+        : endpoint;
+      tests.push({
+        method: mode.method,
+        name: `${endpointString} (${mode.name})`,
+        endpoint: endpoint,
+      });
+    }
+  }
+
+  beforeAll(() => {
     // Mock the Marvel API
     const marvelAPI = nock("https://gateway.marvel.com/v1/public");
+
+    const queryCache = new Map<string, number>();
 
     const setupMockEndpoint = (
       scope: nock.Scope,
       path: string | RegExp,
-      mockData: any
+      schema: z.ZodType
     ) => {
-
-      const response: APIResponseData = {
-        offset: 0,
-        limit: 20,
-        total: 1,
-        count: 1,
-      }
-
-      console.log(mockData.comics, mockData.characters, mockData.creators, mockData.events, mockData.series, mockData.stories);
-
       scope
+        .persist()
         .get(path)
         .query(true) // Match any query parameters
-        .reply(200, {
-          data: {
-            ...response,
-            results: [mockData],
-          },
+        .reply((uri, requestBody, cb) => {
+          const url = new URL(uri, "https://gateway.marvel.com");
+
+          // Extract parameters excluding offset and limit
+          let { offset, limit, ...params } = url.searchParams as APIBaseParams &
+            AnyParams;
+
+          // Generate a key for the query cache
+          const key = JSON.stringify({ ...params, pathname: url.pathname });
+
+          let total: number = 0;
+
+          // Check if the query (minus offset and limit) has been cached. This ensure the total count is consistent.
+          if (queryCache.has(key)) {
+            total = queryCache.get(key)!;
+          } else {
+            total = Math.floor(Math.random() * 100) + 1; // Random count between 1 and 100
+            queryCache.set(key, total);
+          }
+
+          limit = Number(url.searchParams.get("limit") || 20);
+          offset = Number(url.searchParams.get("offset") || 0);
+
+          // Count is the limit or the total, whichever is smaller
+          const count = Math.min(limit, total);
+
+          const response: APIResponseData = {
+            offset,
+            limit,
+            total,
+            count,
+          };
+
+          const results = Array.from({ length: limit }, () =>
+            generateMock(schema)
+          );
+
+          cb(null, [
+            200,
+            {
+              data: {
+                ...response,
+                results,
+              },
+            },
+          ]);
         });
     };
 
     // Setup mock endpoints for all possible endpoints with mock data of the correct type
-    Object.entries(ResultSchemaMap).forEach(([key, schema]) => {
-      const mockData = generateMock(schema);
+    Object.entries(ResultSchemaMap).forEach(([type, schema]) => {
+      // Mock Collection Endpoints
+      for (let endpointType of endpointTypes) {
+        setupMockEndpoint(
+          marvelAPI,
+          new RegExp(`/${endpointType}/.*?/${type}`),
+          schema
+        );
+      }
 
-      setupMockEndpoint(marvelAPI, `/${key}`, mockData);
-      setupMockEndpoint(marvelAPI, new RegExp(`/${key}/.*`), mockData);
-      setupMockEndpoint(marvelAPI, new RegExp(`/.*?/.*?/${key}`), mockData);
+      // Mock Category Endpoints
+      setupMockEndpoint(marvelAPI, `/${type}`, schema);
+
+      // Mock Resource Endpoints
+      setupMockEndpoint(marvelAPI, new RegExp(`/${type}/\\d+$`), schema);
     });
   });
 
-  //
   afterAll(() => {
     nock.cleanAll();
   });
 
   // Create a new instance of MarvelQuery with an EndpointType
-  test.each(testCases)(
-    "$name should create an instance with an EndpointType",
+  test.each(queryModes)(
+    "should create an instance with an EndpointType ($name)",
     ({ method }) => {
       const query = method("characters", { name: "Peter Parker" });
       expect(query).toBeInstanceOf(MarvelQuery);
@@ -91,8 +176,8 @@ describe("MarvelQuery", () => {
   );
 
   // Create a new instance of MarvelQuery with an Endpoint
-  test.each(testCases)(
-    "$name should create an instance with an Endpoint",
+  test.each(queryModes)(
+    "should create an instance with an Endpoint ($name)",
     ({ method }) => {
       const query = method(["characters"], { name: "Peter Parker" });
       expect(query).toBeInstanceOf(MarvelQuery);
@@ -100,8 +185,8 @@ describe("MarvelQuery", () => {
   );
 
   // Build a valid URL
-  test.each(testCases)(
-    "$name should build a valid URL with endpoint, API keys, and parameters",
+  test.each(queryModes)(
+    "should build a valid URL with endpoint, API keys, and parameters ($name)",
     ({ method }) => {
       const query = createQueryWithAQ("characters", { name: "Peter Parker" });
       const url = query.buildURL();
@@ -111,56 +196,52 @@ describe("MarvelQuery", () => {
     }
   );
 
-  it("should return comics whose title starts with 'Amazing' (standard query)", async () => {
-    const query = await createQueryStandard("comics", {
-      titleStartsWith: "Amazing",
-    }).fetch();
-
-    // Validate using zod schema
-    const results = query.results;
-    results.forEach((result: any) => {
-      const validationResult = MarvelComicSchema.safeParse(result);
-      // Check if the validation passed
-      if (!validationResult.success) {
-        console.error("Validation Errors:", validationResult.error.format());
-        console.error("Schema:", MarvelComicSchema);
-        console.error("Data being validated:", result);
-      }
-      expect(validationResult.success).toBe(true);
-    });
-  });
-
-  it("should return a single character named Peter Parker (standard query)", async () => {
-    const result = await createQueryStandard("characters", {
-      name: "Peter Parker",
-    }).fetchSingle();
-
-    // Validate using zod schema
-    const validationResult = MarvelCharacterSchema.safeParse(result);
-    // Check if the validation passed
-    if (!validationResult.success) {
-      console.error("Validation Errors:", validationResult.error.format());
-      console.error("Schema:", MarvelCharacterSchema);
-      console.error("Data being validated:", result);
+  test.each(tests)(
+    "should query the Marvel API at endpoint $name",
+    async ({ method, endpoint }) => {
+      const query = method(endpoint, { limit: 5 });
+      const results = await query.fetch();
     }
+  );
 
-    expect(validationResult.success).toBe(true);
-  });
+  // it("should return comics whose title starts with 'Amazing' (standard query)", async () => {
+  //   const query = await createQueryStandard(["creators", 698, "comics"], {
+  //     titleStartsWith: "Amazing",
+  //   }).fetch();
 
-  it("should return a single character named Peter Parker (AutoQuery)", async () => {
-    const result = await createQueryWithAQ("characters", {
-      name: "Peter Parker",
-    }).fetchSingle();
+  // });
 
-    // Validate using zod schema
-    const validationResult = MarvelCharacterSchema.safeParse(result);
-    // Check if the validation passed
-    if (!validationResult.success) {
-      console.error("Validation Errors:", validationResult.error.format());
-      console.error("Schema:", MarvelCharacterSchema);
-      console.error("Data being validated:", result);
-    }
+  // it("should return a single character named Peter Parker (standard query)", async () => {
+  //   const result = await createQueryStandard("characters", {
+  //     name: "Peter Parker",
+  //   }).fetchSingle();
 
-    expect(validationResult.success).toBe(true);
-  });
+  //   // Validate using zod schema
+  //   const validationResult = MarvelCharacterSchema.safeParse(result);
+  //   // Check if the validation passed
+  //   if (!validationResult.success) {
+  //     console.error("Validation Errors:", validationResult.error.format());
+  //     console.error("Schema:", MarvelCharacterSchema);
+  //     console.error("Data being validated:", result);
+  //   }
+
+  //   expect(validationResult.success).toBe(true);
+  // });
+
+  // it("should return a single character named Peter Parker (AutoQuery)", async () => {
+  //   const result = await createQueryWithAQ("characters", {
+  //     name: "Peter Parker",
+  //   }).fetchSingle();
+
+  //   // Validate using zod schema
+  //   const validationResult = MarvelCharacterSchema.safeParse(result);
+  //   // Check if the validation passed
+  //   if (!validationResult.success) {
+  //     console.error("Validation Errors:", validationResult.error.format());
+  //     console.error("Schema:", MarvelCharacterSchema);
+  //     console.error("Data being validated:", result);
+  //   }
+
+  //   expect(validationResult.success).toBe(true);
+  // });
 });

@@ -3,6 +3,7 @@ import { performance } from "perf_hooks";
 import { Config } from "../models/types/config-types";
 import * as winston from "winston";
 import "winston-daily-rotate-file";
+import { stringify as flattedStringify } from 'flatted';
 
 /**
  * Interface for the custom logger that extends Winston's Logger.
@@ -119,7 +120,7 @@ export class Logger {
         winston.format.printf(({ timestamp, level, message, queryId, ...meta }) => {
           const time = new Date().toLocaleTimeString();
           const metaString = Object.keys(meta).length
-            ? JSON.stringify(meta, null, 2)
+            ? flattedStringify(meta, undefined, 2)
             : "";
 
           // Create identifier string with a unique background color based on query ID
@@ -166,8 +167,9 @@ export class Logger {
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
         winston.format.printf(({ timestamp, level, message, queryId, ...meta }) => {
           const { timestamp: _, level: __, message: ___, ...cleanMeta } = meta;
+
           const metaString = Object.keys(cleanMeta).length
-            ? JSON.stringify(cleanMeta, null, 2)
+            ? flattedStringify(cleanMeta, undefined, 2)
             : "";
 
           const identifier = queryId ? ` (Q${queryId})` : "";

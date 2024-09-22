@@ -15,10 +15,8 @@ const DateTimeSchema = z
   );
 
 export const TextObjectSchema = z.object({
-  type: z
-    .string(),
-  language: z
-    .string(),
+  type: z.string(),
+  language: z.string(),
   text: z.string(),
 });
 
@@ -56,40 +54,65 @@ export const TypeSummarySchema = SummarySchema.extend({
 });
 
 export const ComicSummarySchema = SummarySchema.extend({
-  resourceURI: z.string().regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/comics\/\d{1,10}$/),
+  resourceURI: z
+    .string()
+    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/comics\/\d{1,10}$/),
 });
 
 export const StorySummarySchema = TypeSummarySchema.extend({
-  resourceURI: z.string().regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/stories\/\d{1,10}$/),
-});;
+  resourceURI: z
+    .string()
+    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/stories\/\d{1,10}$/),
+});
 
 export const SeriesSummarySchema = SummarySchema.extend({
-  resourceURI: z.string().regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/series\/\d{1,10}$/),
+  resourceURI: z
+    .string()
+    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/series\/\d{1,10}$/),
 });
 
 export const CreatorSummarySchema = RoleSummarySchema.extend({
-  resourceURI: z.string().regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/creators\/\d{1,10}$/),
+  resourceURI: z
+    .string()
+    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/creators\/\d{1,10}$/),
 });
 
 export const CharacterSummarySchema = RoleSummarySchema.extend({
-  resourceURI: z.string().regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/characters\/\d{1,10}$/),
+  resourceURI: z
+    .string()
+    .regex(
+      /^https:\/\/gateway\.marvel\.com\/v1\/public\/characters\/\d{1,10}$/
+    ),
 });
 
 export const EventSummarySchema = SummarySchema.extend({
-  resourceURI: z.string().regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/events\/\d{1,10}$/),
+  resourceURI: z
+    .string()
+    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/events\/\d{1,10}$/),
 });
 
 export const ListSchema = z.object({
-  available: z.number(),
-  returned: z
-    .number(),
+  available: z.number().max(999),
+  returned: z.number().max(20).default(12),
   collectionURI: z.string().url(),
   items: z.array(SummarySchema),
 });
 
-const Collection = (typeA: EndpointType, typeB: EndpointType, schema: z.AnyZodObject) => schema.extend({
-  collectionURI: z.string().regex(new RegExp(`^https://gateway.marvel.com/v1/public/${typeA}/\\d{1,10}/${typeB}$`)),
-});
+const Collection = (
+  typeA: EndpointType,
+  typeB: EndpointType,
+  schema: z.AnyZodObject
+) =>
+  schema.extend({
+    collectionURI: z // Validate the collectionURI
+      .string()
+      .regex(
+        new RegExp(
+          `^https://gateway\\.marvel\\.com/v1/public/${typeA}/\\d{1,10}/${typeB}$`
+        ),
+        { message: "Invalid collectionURI format" }
+      ),
+  });
 
 export const ComicListSchema = ListSchema.extend({
   items: z.array(ComicSummarySchema),
@@ -126,22 +149,11 @@ export const MarvelResultSchema = z.object({
 export const MarvelComicSchema = MarvelResultSchema.extend({
   digitalId: z.number().nullable().optional(),
   title: z.string(),
-  issueNumber: z
-    .number()
-    .default(0),
+  issueNumber: z.number().default(0),
   variantDescription: z.string().nullable().optional(),
-  description: z
-    .string()
-    .nullable()
-    .optional(),
-  isbn: z
-    .string()
-    .nullable()
-    .optional(),
-  upc: z
-    .string()
-    .nullable()
-    .optional(),
+  description: z.string().nullable().optional(),
+  isbn: z.string().nullable().optional(),
+  upc: z.string().nullable().optional(),
   diamondCode: z.string().nullable().optional(),
   ean: z.string().nullable().optional(),
   issn: z.string().nullable().optional(),
@@ -149,12 +161,9 @@ export const MarvelComicSchema = MarvelResultSchema.extend({
   pageCount: z.number().default(0),
   textObjects: z.array(TextObjectSchema),
   series: SeriesSummarySchema,
-  variants: z
-    .array(ComicSummarySchema),
-  collections: z
-    .array(ComicSummarySchema),
-  collectedIssues: z
-    .array(ComicSummarySchema),
+  variants: z.array(ComicSummarySchema),
+  collections: z.array(ComicSummarySchema),
+  collectedIssues: z.array(ComicSummarySchema),
   dates: z.array(ComicDateSchema),
   prices: z.array(ComicPriceSchema),
   urls: z.array(URLSchema).nullable().optional(),
