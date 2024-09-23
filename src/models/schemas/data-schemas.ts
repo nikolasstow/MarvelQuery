@@ -53,42 +53,33 @@ export const TypeSummarySchema = SummarySchema.extend({
   type: z.string(),
 });
 
+const ResourceURI = (type: EndpointType) => z.string().url().regex(
+  new RegExp(`^https://gateway\\.marvel\\.com/v1/public/${type}/\\d{1,10}$`),
+  { message: "Invalid resourceURI format" }
+);
+
 export const ComicSummarySchema = SummarySchema.extend({
-  resourceURI: z
-    .string()
-    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/comics\/\d{1,10}$/),
+  resourceURI: ResourceURI("comics"),
 });
 
 export const StorySummarySchema = TypeSummarySchema.extend({
-  resourceURI: z
-    .string()
-    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/stories\/\d{1,10}$/),
+  resourceURI: ResourceURI("stories"),
 });
 
 export const SeriesSummarySchema = SummarySchema.extend({
-  resourceURI: z
-    .string()
-    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/series\/\d{1,10}$/),
+  resourceURI: ResourceURI("series"),
 });
 
 export const CreatorSummarySchema = RoleSummarySchema.extend({
-  resourceURI: z
-    .string()
-    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/creators\/\d{1,10}$/),
+  resourceURI: ResourceURI("creators"),
 });
 
 export const CharacterSummarySchema = RoleSummarySchema.extend({
-  resourceURI: z
-    .string()
-    .regex(
-      /^https:\/\/gateway\.marvel\.com\/v1\/public\/characters\/\d{1,10}$/
-    ),
+  resourceURI: ResourceURI("characters"),
 });
 
 export const EventSummarySchema = SummarySchema.extend({
-  resourceURI: z
-    .string()
-    .regex(/^https:\/\/gateway\.marvel\.com\/v1\/public\/events\/\d{1,10}$/),
+  resourceURI: ResourceURI("events"),
 });
 
 export const ListSchema = z.object({
@@ -147,6 +138,7 @@ export const MarvelResultSchema = z.object({
 });
 
 export const MarvelComicSchema = MarvelResultSchema.extend({
+  resourceURI: ResourceURI("comics"),
   digitalId: z.number().nullable().optional(),
   title: z.string(),
   issueNumber: z.number().default(0),
@@ -175,6 +167,7 @@ export const MarvelComicSchema = MarvelResultSchema.extend({
 });
 
 export const MarvelEventSchema = MarvelResultSchema.extend({
+  resourceURI: ResourceURI("events"),
   title: z.string(),
   description: z.string().nullable().optional(),
   start: DateTimeSchema,
@@ -190,6 +183,7 @@ export const MarvelEventSchema = MarvelResultSchema.extend({
 });
 
 export const MarvelSeriesSchema = MarvelResultSchema.extend({
+  resourceURI: ResourceURI("series"),
   title: z.string(),
   description: z.union([z.string(), z.null()]).nullable().optional(),
   startYear: YearSchema,
@@ -206,6 +200,7 @@ export const MarvelSeriesSchema = MarvelResultSchema.extend({
 });
 
 export const MarvelCreatorSchema = MarvelResultSchema.extend({
+  resourceURI: ResourceURI("creators"),
   firstName: z.string(),
   middleName: z.string().nullable().optional(),
   lastName: z.string(),
@@ -219,6 +214,7 @@ export const MarvelCreatorSchema = MarvelResultSchema.extend({
 });
 
 export const MarvelCharacterSchema = MarvelResultSchema.extend({
+  resourceURI: ResourceURI("characters"),
   name: z.string(),
   description: z.string().nullable().optional(),
   urls: z.array(URLSchema).nullable().optional(),
@@ -229,6 +225,7 @@ export const MarvelCharacterSchema = MarvelResultSchema.extend({
 });
 
 export const MarvelStorySchema = MarvelResultSchema.extend({
+  resourceURI: ResourceURI("stories"),
   title: z.string(),
   description: z.string().nullable().optional(),
   type: z.string().nullable().optional(),

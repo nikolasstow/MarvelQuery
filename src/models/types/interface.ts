@@ -27,6 +27,10 @@ export interface MarvelQueryInit<E extends Endpoint, A extends boolean> {
   request(url: string): Promise<APIWrapper<APIResult<E>>>;
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
   fetchSingle(): Promise<Result<E, A>>;
+    /** Validation success/failures */
+    validated: {
+      parameters: boolean;
+    }
 }
 
 export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
@@ -59,7 +63,12 @@ export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
   results: Result<E, A>[];
   /** The conjunction of all results from this query instance. */
   resultHistory: Result<E, A>[];
-
+  /** Validation success/failures */
+  validated: {
+    parameters: boolean;
+    results: boolean;
+    autoQuery: boolean;
+  }
   /** The query is complete when all results have been fetched. */
   isComplete: boolean;
 }

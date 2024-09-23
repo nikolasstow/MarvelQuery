@@ -120,7 +120,7 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
   /** ********* Instance Properties ********* */
   /** Query identifier for logging */
   queryId: string;
-
+  /** AutoQuery Injection */
   autoQuery: A;
   /** Modified logger instance with query identifier */
   private logger: CustomLogger;
@@ -132,6 +132,11 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
     | OnResultFunction<ResultMap[EndpointType]>
     | AnyResultFunction;
 
+  validated = {
+    parameters: false,
+    results: false,
+    autoQuery: false,
+  };
   /**
    * Endpoint path as a tuple, and the type of the endpoint
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
@@ -178,10 +183,15 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
 
     // Setup and Validate the endpoint and parameters
     this.endpoint = new EndpointBuilder(endpoint, this.logger);
-    this.params = new ParameterManager(this.logger).query(
+
+    const paramManager = new ParameterManager(this.logger);
+
+    this.params = paramManager.query(
       this.endpoint,
       params
     );
+
+    this.validated.parameters = true;
 
     // Set the onResult function for the specific type, or the 'any' type if not provided.
     if (MarvelQuery.config.onResult) {
@@ -330,7 +340,7 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
         MarvelQuery,
         this.endpoint,
         this.logger,
-        MarvelQuery.config,
+        MarvelQuery.config
       );
       returnData = autoQuery.inject(results) as Result<E, A>[];
     }
@@ -412,7 +422,11 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
         MarvelQuery.config.validation?.apiResponse === true
       ) {
         // Validate the results in the response if validation is enabled
-        new ResultValidator(response.data.results, this.endpoint, this.logger);
+        this.validated.results = new ResultValidator(
+          response.data.results,
+          this.endpoint,
+          this.logger
+        ).allValid;
       }
 
       // Return the validated response data

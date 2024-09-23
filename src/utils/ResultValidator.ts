@@ -12,6 +12,7 @@ import { ZodError } from "zod";
 export class ResultValidator<E extends Endpoint> {
   /** The custom logger instance used for logging actions */
   logger: CustomLogger;
+  allValid: boolean = true;
 
   /**
    * Constructor to initialize the ResultValidator class.
@@ -39,7 +40,7 @@ export class ResultValidator<E extends Endpoint> {
       }
 
       const errorMap = new Map<string, number[]>();
-      let allValid = true;
+
 
       // Array to collect log messages for failed result items
       const failedItemsLogs: string[] = [];
@@ -49,7 +50,7 @@ export class ResultValidator<E extends Endpoint> {
         const result = resultSchema.safeParse(item);
 
         if (!result.success) {
-          allValid = false;
+          this.allValid = false;
           const currentError = JSON.stringify(result.error.format());
 
           // Add the error and index to the error map

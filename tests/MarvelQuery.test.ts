@@ -1,147 +1,69 @@
 import { generateMock } from "@anatine/zod-mock";
 import nock from "nock";
-import {
-  MarvelComicSchema,
-  ResultSchemaMap,
-} from "../src/models/schemas/data-schemas";
 
 import MarvelQuery, {
-  AnyParams,
-  APIBaseParams,
-  APIResponseData,
+  Config,
   CreateQueryFunction,
   Endpoint,
   EndpointType,
 } from "../src";
-import { z } from "zod";
+
+import { ResultSchemaMap } from "../src/models/schemas/data-schemas";
+import { EndpointBuilder } from "../src/utils/EndpointBuilder";
+import { ValidateParams } from "../src/models/schemas/param-schemas";
+import { setupMockEndpoint } from "./setupMockEndpoint";
+import { AsEndpoint } from "../src/models/types/endpoint-types";
+import { MarvelQueryFetched } from "../src/models/types/interface";
 
 const mockKeys = {
   publicKey: "mockPublicKey",
   privateKey: "mockPrivateKey",
 };
 
-const logOptions = {
-  // verbose: true,
+const config: Partial<Config<boolean>> = {
+  isTestEnv: true,
+  logOptions: {
+    // verbose: true,
+  },
 };
 
-let createQueryWithAQ = MarvelQuery.init(mockKeys, {
-  isTestEnv: true,
-  logOptions,
-});
-let createQueryStandard = MarvelQuery.init(mockKeys, {
-  isTestEnv: true,
-  autoQuery: false,
-  logOptions,
-});
+const Query = {
+  autoQuery: MarvelQuery.init(mockKeys, config),
+  standard: MarvelQuery.init(mockKeys, {
+    ...config,
+    autoQuery: false,
+  }),
+};
+
+const queryModes = [
+  { method: Query.autoQuery, name: "AutoQuery" },
+  { method: Query.standard, name: "Standard Query" },
+];
+
+let endpointTypes: Array<EndpointType> = [
+  "characters",
+  "comics",
+  "creators",
+  "events",
+  "series",
+  "stories",
+];
+
+let endpoints: Array<Endpoint | EndpointType> = [...endpointTypes];
+
+// Create a list of all possible endpoints (excluding id's)
+for (let typeA of endpointTypes) {
+  for (let typeB of endpointTypes) {
+    if (typeA == typeB) continue;
+    const randomCount = Math.floor(Math.random() * 999) + 1;
+    endpoints.push([typeA, randomCount, typeB] as Endpoint);
+  }
+}
 
 describe("MarvelQuery", () => {
-  let queryModes = [
-    { method: createQueryWithAQ, name: "AutoQuery" },
-    { method: createQueryStandard, name: "Standard query" },
-  ];
-
-  let endpointTypes: Array<EndpointType> = [
-    "characters",
-    "comics",
-    "creators",
-    "events",
-    "series",
-    "stories",
-  ];
-
-  // Array of possible endpoints
-  let endpoints: Array<Endpoint | EndpointType> = [...endpointTypes];
-
-  for (let typeA of endpointTypes) {
-    for (let typeB of endpointTypes) {
-      if (typeA == typeB) continue;
-      const randomCount = Math.floor(Math.random() * 999) + 1;
-      endpoints.push([typeA, randomCount, typeB] as Endpoint);
-    }
-  }
-
-  let tests: {
-    method: CreateQueryFunction<boolean>;
-    name: string;
-    endpoint: Endpoint | EndpointType;
-  }[] = [];
-
-  for (let mode of queryModes) {
-    for (let endpoint of endpoints) {
-      const endpointString = Array.isArray(endpoint)
-        ? endpoint.join("/")
-        : endpoint;
-      tests.push({
-        method: mode.method,
-        name: `${endpointString} (${mode.name})`,
-        endpoint: endpoint,
-      });
-    }
-  }
-
   beforeAll(() => {
     // Mock the Marvel API
     const marvelAPI = nock("https://gateway.marvel.com/v1/public");
-
-    const queryCache = new Map<string, number>();
-
-    const setupMockEndpoint = (
-      scope: nock.Scope,
-      path: string | RegExp,
-      schema: z.ZodType
-    ) => {
-      scope
-        .persist()
-        .get(path)
-        .query(true) // Match any query parameters
-        .reply((uri, requestBody, cb) => {
-          const url = new URL(uri, "https://gateway.marvel.com");
-
-          // Extract parameters excluding offset and limit
-          let { offset, limit, ...params } = url.searchParams as APIBaseParams &
-            AnyParams;
-
-          // Generate a key for the query cache
-          const key = JSON.stringify({ ...params, pathname: url.pathname });
-
-          let total: number = 0;
-
-          // Check if the query (minus offset and limit) has been cached. This ensure the total count is consistent.
-          if (queryCache.has(key)) {
-            total = queryCache.get(key)!;
-          } else {
-            total = Math.floor(Math.random() * 100) + 1; // Random count between 1 and 100
-            queryCache.set(key, total);
-          }
-
-          limit = Number(url.searchParams.get("limit") || 20);
-          offset = Number(url.searchParams.get("offset") || 0);
-
-          // Count is the limit or the total, whichever is smaller
-          const count = Math.min(limit, total);
-
-          const response: APIResponseData = {
-            offset,
-            limit,
-            total,
-            count,
-          };
-
-          const results = Array.from({ length: limit }, () =>
-            generateMock(schema)
-          );
-
-          cb(null, [
-            200,
-            {
-              data: {
-                ...response,
-                results,
-              },
-            },
-          ]);
-        });
-    };
 
     // Setup mock endpoints for all possible endpoints with mock data of the correct type
     Object.entries(ResultSchemaMap).forEach(([type, schema]) => {
@@ -153,10 +75,8 @@ describe("MarvelQuery", () => {
           schema
         );
       }
-
       // Mock Category Endpoints
       setupMockEndpoint(marvelAPI, `/${type}`, schema);
-
       // Mock Resource Endpoints
       setupMockEndpoint(marvelAPI, new RegExp(`/${type}/\\d+$`), schema);
     });
@@ -188,7 +108,7 @@ describe("MarvelQuery", () => {
   test.each(queryModes)(
     "should build a valid URL with endpoint, API keys, and parameters ($name)",
     ({ method }) => {
-      const query = createQueryWithAQ("characters", { name: "Peter Parker" });
+      const query = method("characters", { name: "Peter Parker" });
       const url = query.buildURL();
       expect(url).toContain("/characters");
       expect(url).toContain("apikey=mockPublicKey");
@@ -196,13 +116,51 @@ describe("MarvelQuery", () => {
     }
   );
 
-  test.each(tests)(
-    "should query the Marvel API at endpoint $name",
-    async ({ method, endpoint }) => {
-      const query = method(endpoint, { limit: 5 });
-      const results = await query.fetch();
-    }
-  );
+  describe("Testing each unique endpoint type for categories and collections", () => {
+    // Test each endpoint type
+    endpoints.forEach((endpoint) => {
+      // Print the endpoint
+      describe(`Querying Endpoint: ${
+        Array.isArray(endpoint) ? `${endpoint[0]}/#/${endpoint[2]}` : endpoint
+      }`, () => {
+        queryModes.forEach(({ method, name }) => {
+          describe(name, () => {
+            // Create a new instance of MarvelQuery with an Endpoint
+            const origin = method(endpoint);
+            test("created MarvelQuery instance", () =>
+              expect(origin).toBeInstanceOf(MarvelQuery));
+
+            test(`query parameters are valid`, () => {
+              expect(origin.validated.parameters).toBe(true);
+            });
+
+            // Fetch the query
+            let query: MarvelQueryFetched<Endpoint, boolean>;
+
+            test("fetchSingle", async () => {
+              const result = await origin.fetchSingle();
+              expect(result).toBeDefined();
+            });
+
+            test("fetch", async () => {
+              query = await origin.fetch();
+
+              expect(query).toBeDefined();
+              expect(query.metadata.code).toBe(200);
+            });
+
+            test(`API response data is valid`, () => {
+              expect(query.validated.results).toBe(true);
+            });
+          });
+
+          if (name === "AutoQuery") {
+            // More tests for AutoQuery only
+          }
+        });
+      });
+    });
+  });
 
   // it("should return comics whose title starts with 'Amazing' (standard query)", async () => {
   //   const query = await createQueryStandard(["creators", 698, "comics"], {
