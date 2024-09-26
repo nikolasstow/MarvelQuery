@@ -3,4 +3,4 @@ lib
 .env
 tests/QueryBuilderTest.ts
 logs
-logs/.4d7f94e329bda9f8a78ee12caaa70fd55f27d048-audit.json
+tests/data

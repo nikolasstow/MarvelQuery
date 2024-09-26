@@ -53,57 +53,45 @@ export const TypeSummarySchema = SummarySchema.extend({
   type: z.string(),
 });
 
-const ResourceURI = (type: EndpointType) => z.string().url().regex(
-  new RegExp(`^https://gateway\\.marvel\\.com/v1/public/${type}/\\d{1,10}$`),
-  { message: "Invalid resourceURI format" }
-);
+// const ResourceURI = (type: EndpointType) => z.string().url().regex(
+//   new RegExp(`^https://gateway\\.marvel\\.com/v1/public/${type}/\\d{1,10}$`),
+//   { message: "Invalid resourceURI format" }
+// );
 
-export const ComicSummarySchema = SummarySchema.extend({
-  resourceURI: ResourceURI("comics"),
-});
+export const ComicSummarySchema = SummarySchema;
 
-export const StorySummarySchema = TypeSummarySchema.extend({
-  resourceURI: ResourceURI("stories"),
-});
+export const StorySummarySchema = TypeSummarySchema;
 
-export const SeriesSummarySchema = SummarySchema.extend({
-  resourceURI: ResourceURI("series"),
-});
+export const SeriesSummarySchema = SummarySchema;
 
-export const CreatorSummarySchema = RoleSummarySchema.extend({
-  resourceURI: ResourceURI("creators"),
-});
+export const CreatorSummarySchema = RoleSummarySchema;
 
-export const CharacterSummarySchema = RoleSummarySchema.extend({
-  resourceURI: ResourceURI("characters"),
-});
+export const CharacterSummarySchema = RoleSummarySchema;
 
-export const EventSummarySchema = SummarySchema.extend({
-  resourceURI: ResourceURI("events"),
-});
+export const EventSummarySchema = SummarySchema;
 
 export const ListSchema = z.object({
-  available: z.number().max(999),
-  returned: z.number().max(20).default(12),
+  available: z.number(),
+  returned: z.number(),
   collectionURI: z.string().url(),
   items: z.array(SummarySchema),
 });
 
-const Collection = (
-  typeA: EndpointType,
-  typeB: EndpointType,
-  schema: z.AnyZodObject
-) =>
-  schema.extend({
-    collectionURI: z // Validate the collectionURI
-      .string()
-      .regex(
-        new RegExp(
-          `^https://gateway\\.marvel\\.com/v1/public/${typeA}/\\d{1,10}/${typeB}$`
-        ),
-        { message: "Invalid collectionURI format" }
-      ),
-  });
+// const Collection = (
+//   typeA: EndpointType,
+//   typeB: EndpointType,
+//   schema: z.AnyZodObject
+// ) =>
+//   schema.extend({
+//     collectionURI: z // Validate the collectionURI
+//       .string()
+//       .regex(
+//         new RegExp(
+//           `^https://gateway\\.marvel\\.com/v1/public/${typeA}/\\d{1,10}/${typeB}$`
+//         ),
+//         { message: "Invalid collectionURI format" }
+//       ),
+//   });
 
 export const ComicListSchema = ListSchema.extend({
   items: z.array(ComicSummarySchema),
@@ -138,7 +126,6 @@ export const MarvelResultSchema = z.object({
 });
 
 export const MarvelComicSchema = MarvelResultSchema.extend({
-  resourceURI: ResourceURI("comics"),
   digitalId: z.number().nullable().optional(),
   title: z.string(),
   issueNumber: z.number().default(0),
@@ -160,80 +147,75 @@ export const MarvelComicSchema = MarvelResultSchema.extend({
   prices: z.array(ComicPriceSchema),
   urls: z.array(URLSchema).nullable().optional(),
   images: z.array(ImageSchema),
-  creators: Collection("comics", "creators", CreatorListSchema),
-  characters: Collection("comics", "characters", CharacterListSchema),
-  stories: Collection("comics", "stories", StoryListSchema),
-  events: Collection("comics", "events", EventListSchema),
+  creators: CreatorListSchema,
+  characters:  CharacterListSchema,
+  stories: StoryListSchema,
+  events: EventListSchema,
 });
 
 export const MarvelEventSchema = MarvelResultSchema.extend({
-  resourceURI: ResourceURI("events"),
   title: z.string(),
   description: z.string().nullable().optional(),
-  start: DateTimeSchema,
-  end: DateTimeSchema,
-  comics: Collection("events", "comics", ComicListSchema),
-  stories: Collection("events", "stories", StoryListSchema),
-  series: Collection("events", "series", SeriesListSchema),
-  characters: Collection("events", "characters", CharacterListSchema),
-  creators: Collection("events", "creators", CreatorListSchema),
+  start: DateTimeSchema.nullable().optional(),
+  end: DateTimeSchema.nullable().optional(),
+  comics: ComicListSchema,
+  stories: StoryListSchema,
+  series: SeriesListSchema,
+  characters: CharacterListSchema,
+  creators: CreatorListSchema,
   urls: z.array(URLSchema).nullable().optional(),
   next: EventSummarySchema.nullable().optional(),
   previous: EventSummarySchema.nullable().optional(),
 });
 
 export const MarvelSeriesSchema = MarvelResultSchema.extend({
-  resourceURI: ResourceURI("series"),
   title: z.string(),
   description: z.union([z.string(), z.null()]).nullable().optional(),
   startYear: YearSchema,
   endYear: z.union([YearSchema, z.literal(2099)]),
   rating: z.string(),
-  comics: Collection("series", "comics", ComicListSchema),
-  stories: Collection("series", "stories", StoryListSchema),
-  events: Collection("series", "events", EventListSchema),
-  characters: Collection("series", "characters", CharacterListSchema),
-  creators: Collection("series", "creators", CreatorListSchema),
+  comics: ComicListSchema,
+  stories: StoryListSchema,
+  events: EventListSchema,
+  characters: CharacterListSchema,
+  creators: CreatorListSchema,
   urls: z.array(URLSchema).nullable().optional(),
   next: SeriesSummarySchema.nullable().optional(),
   previous: SeriesSummarySchema.nullable().optional(),
 });
 
 export const MarvelCreatorSchema = MarvelResultSchema.extend({
-  resourceURI: ResourceURI("creators"),
   firstName: z.string(),
   middleName: z.string().nullable().optional(),
-  lastName: z.string(),
+  lastName: z.union([z.string(), z.number()]),
   suffix: z.string().nullable().optional(),
   fullName: z.string(),
   urls: z.array(URLSchema).nullable().optional(),
-  series: Collection("creators", "series", SeriesListSchema),
-  stories: Collection("creators", "stories", StoryListSchema),
-  comics: Collection("creators", "comics", ComicListSchema),
-  events: Collection("creators", "events", EventListSchema),
+  series: SeriesListSchema,
+  stories: StoryListSchema,
+  comics: ComicListSchema,
+  events: EventListSchema,
 });
 
 export const MarvelCharacterSchema = MarvelResultSchema.extend({
-  resourceURI: ResourceURI("characters"),
   name: z.string(),
   description: z.string().nullable().optional(),
   urls: z.array(URLSchema).nullable().optional(),
-  comics: Collection("characters", "comics", ComicListSchema),
-  stories: Collection("characters", "stories", StoryListSchema),
-  events: Collection("characters", "events", EventListSchema),
-  series: Collection("characters", "series", SeriesListSchema),
+  comics: ComicListSchema,
+  stories: StoryListSchema,
+  events: EventListSchema,
+  series: SeriesListSchema,
 });
 
 export const MarvelStorySchema = MarvelResultSchema.extend({
-  resourceURI: ResourceURI("stories"),
   title: z.string(),
   description: z.string().nullable().optional(),
   type: z.string().nullable().optional(),
-  comics: Collection("stories", "comics", ComicListSchema),
-  series: Collection("stories", "series", SeriesListSchema),
-  events: Collection("stories", "events", EventListSchema),
-  characters: Collection("stories", "characters", CharacterListSchema),
-  creators: Collection("stories", "creators", CreatorListSchema),
+  comics: ComicListSchema,
+  series: SeriesListSchema,
+  events: EventListSchema,
+  characters: CharacterListSchema,
+  creators: CreatorListSchema,
   originalIssue: ComicSummarySchema.nullable().optional(),
 });
 

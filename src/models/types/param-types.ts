@@ -189,7 +189,8 @@ export type EventParams = OrderBy<z.input<typeof EventsSchema>, "events">;
  * | `limit`           | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`          | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type SeriesParams = z.input<typeof SeriesSchema>;
+export type SeriesParams = OrderBy<z.input<typeof SeriesSchema>, "series">;
+
 /**| Property        | Type                                                                                                    | Description
  * |-----------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------
  * | `comics`        | [`IDList`](https://github.com/nikolasstow/MarvelQuery/blob/init-and-docs/docs/api-parameters.md#idlist) | Return only stories contained in the specified (accepts id or array of ids).
@@ -202,7 +203,7 @@ export type SeriesParams = z.input<typeof SeriesSchema>;
  * | `limit`         | `number`                                                                                                | Limit the result set to the specified number of resources.
  * | `offset`        | `number`                                                                                                | Skip the specified number of resources in the result set.
  */
-export type StoryParams = z.input<typeof StoriesSchema>;
+export type StoryParams = OrderBy<z.input<typeof StoriesSchema>, "stories">;
 /** Return comics within a predefined date range.
  * `lastWeek` `thisWeek` `nextWeek` `thisMonth`
  */

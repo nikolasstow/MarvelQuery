@@ -6,7 +6,7 @@ import { Endpoint } from "./endpoint-types";
 import { EndpointDescriptor } from "./endpoint-types";
 
 export interface MarvelQueryInit<E extends Endpoint, A extends boolean> {
-  autoQuery: A;
+  autoQuery: boolean;
   /** Query identifier for logging */
   queryId: string;
   /** Endpoint of the query
@@ -27,10 +27,13 @@ export interface MarvelQueryInit<E extends Endpoint, A extends boolean> {
   request(url: string): Promise<APIWrapper<APIResult<E>>>;
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
   fetchSingle(): Promise<Result<E, A>>;
-    /** Validation success/failures */
-    validated: {
-      parameters: boolean;
-    }
+  /** Validation success/failures */
+  validated: {
+    parameters: boolean;
+  };
+
+  /** The query is complete when all results have been fetched. */
+  isComplete: boolean;
 }
 
 export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
@@ -68,7 +71,5 @@ export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
     parameters: boolean;
     results: boolean;
     autoQuery: boolean;
-  }
-  /** The query is complete when all results have been fetched. */
-  isComplete: boolean;
+  };
 }

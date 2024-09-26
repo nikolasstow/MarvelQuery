@@ -17,7 +17,7 @@ import { AnyParams } from "../models/types/param-types";
 export class ParameterManager {
   /** Configuration object for managing global and specific query settings */
   static config: Partial<Config<boolean>>;
-  static isValid: any;
+  isValid: any;
 
   /**
    * Sets the global configuration for parameter management.
@@ -85,7 +85,7 @@ export class ParameterManager {
         throw new Error(`Could not find validation schema for type '${type}'`);
       }
       // Validate the parameters for the endpoint type
-      this.isValid = ValidateParams[type].parse(params);
+      return ValidateParams[type].safeParse(params).success;
     } catch (error) {
       customLogger.error(
         `Parameter validation error for type '${type}': ${error.message}`,
@@ -122,7 +122,7 @@ export class ParameterManager {
     }
 
     // Validate the cleaned parameters
-    ParameterManager.validate(endpoint.type, cleanParams, this.logger);
+    this.isValid = ParameterManager.validate(endpoint.type, cleanParams, this.logger);
 
     // Construct the final parameters object by merging global, default, and specific parameters
     const finalParams = {

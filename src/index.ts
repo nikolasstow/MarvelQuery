@@ -121,7 +121,7 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
   /** Query identifier for logging */
   queryId: string;
   /** AutoQuery Injection */
-  autoQuery: A;
+  autoQuery: boolean;
   /** Modified logger instance with query identifier */
   private logger: CustomLogger;
   /**
@@ -184,6 +184,8 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
     // Setup and Validate the endpoint and parameters
     this.endpoint = new EndpointBuilder(endpoint, this.logger);
 
+    this.autoQuery = MarvelQuery.config.autoQuery;
+
     const paramManager = new ParameterManager(this.logger);
 
     this.params = paramManager.query(
@@ -191,7 +193,7 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
       params
     );
 
-    this.validated.parameters = true;
+    this.validated.parameters = paramManager.isValid;
 
     // Set the onResult function for the specific type, or the 'any' type if not provided.
     if (MarvelQuery.config.onResult) {
@@ -235,6 +237,7 @@ export class MarvelQuery<E extends Endpoint, A extends boolean>
     const processedResults = this.processResults(response);
     // Call the onResult function if it is defined
     this.callOnResult(processedResults);
+
     // Return the MarvelQuery instance for method chaining
     return this as MarvelQueryFetched<E, A>;
   }
