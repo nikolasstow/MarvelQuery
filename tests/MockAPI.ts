@@ -1,7 +1,12 @@
 import * as fs from "fs";
 import * as path from "path";
 import nock from "nock";
-import { Endpoint, EndpointFromType, EndpointType, IsEndpointType } from "../src/models/types/endpoint-types";
+import {
+  Endpoint,
+  EndpointFromType,
+  EndpointType,
+  IsEndpointType,
+} from "../src/models/types/endpoint-types";
 import { generateMock } from "@anatine/zod-mock";
 import MarvelQuery, {
   APIBaseParams,
@@ -11,15 +16,17 @@ import MarvelQuery, {
   APIResult,
   APIResponseResults,
   MarvelResult,
-	Params,
+  Params,
 } from "../src";
 
 const DATA_DIR = path.join(__dirname, "../tests/data");
 const MAX_DATA_LENGTH = 1000; // Example value, replace with actual limit
 
-interface SampleData<T extends EndpointType> {
+type SampleData<T extends EndpointType> = ResultMap[T][];
+
+interface DataFile<T extends EndpointType> {
   timestamp: number;
-  data: APIResult<EndpointFromType<T>>[];
+  data: SampleData<T>;
 }
 
 export const endpointTypes: Array<EndpointType> = [
@@ -43,102 +50,104 @@ export class MockAPI {
     etag: "666Mephisto666",
   };
 
-  static queryCache = new Map<string, APIResult<Endpoint>[]>();
+  static queryCache: {
+    [T in keyof ResultMap]: Map<string, SampleData<T>>;
+  } = {
+    characters: new Map(),
+    comics: new Map(),
+    creators: new Map(),
+    events: new Map(),
+    series: new Map(),
+    stories: new Map(),
+  }
 
   static sampleData: {
-		[T in keyof ResultMap]: APIResult<EndpointFromType<T>>[];
-	}// Map<EndpointType, APIResult<Endpoint>[]> = new Map();
+    [T in keyof ResultMap]: SampleData<T>;
+  } = {
+    characters: [],
+    comics: [],
+    creators: [],
+    events: [],
+    series: [],
+    stories: [],
+  }
   static fileMetadata: Map<
     EndpointType,
     { filename: string; timestamp: number }[]
   > = new Map();
 
-	static async loadFileData<T extends EndpointType>(type: T, data: SampleData<T>) {
-		console.log(`File type: ${type}`);
-		if (!MockAPI.sampleData[type]) {
-			MockAPI.sampleData[type] = [];
-			MockAPI.fileMetadata.set(type, []);
-			console.log(`Initialized data and metadata arrays for type: ${type}`);
-		}
+  static async loadFileData<T extends EndpointType>(
+    type: T,
+    data: DataFile<T>
+  ) {
+    MockAPI.sampleData[type].push(...data.data);
+  }
 
-		MockAPI.sampleData[type].push(...data.data);
+  static start: boolean = false;
 
-		console.log(`Data combined for type: ${type}`);
-
-	}
+  static async startServer() {
+    if (!MockAPI.start) {
+      await MockAPI.loadSampleData();
+      MockAPI.start = true;
+    }
+    return new MockAPI();
+  }
 
   /**
    * Loads sample data from the data directory and populates the sampleData map.
    * Ensures that the number of data entries for each type does not exceed MAX_DATA_LENGTH.
    */
   static async loadSampleData() {
-    console.log("Reading files from data directory...");
     const files = fs.readdirSync(DATA_DIR);
-    console.log(`Found ${files.length} files in data directory.`);
 
     files.forEach((file) => {
-      console.log(`Processing file: ${file}`);
       const filePath = path.join(DATA_DIR, file);
-      console.log(`File path: ${filePath}`);
-
-      try {
-        const fileContent = fs.readFileSync(filePath, "utf-8");
-        console.log(`File content read successfully.`);
-				const type: EndpointType = file.split("-")[0] as EndpointType;
-				const jsonData = JSON.parse(fileContent);
-				
-				MockAPI.loadFileData(type, jsonData);
-        // const jsonData: SampleData<typeof type> = JSON.parse(fileContent);
-        // console.log(`File content parsed successfully.`);
-
-        
-        // console.log(`File type: ${type}`);
-        // if (!MockAPI.sampleData[type]) {
-        //   MockAPI.sampleData[type] = [];
-        //   MockAPI.fileMetadata.set(type, []);
-        //   console.log(`Initialized data and metadata arrays for type: ${type}`);
-        // }
-
-        const dataArray = MockAPI.sampleData[type];
-        const fileMetadataArray = MockAPI.fileMetadata.get(type)!;
-
-        // Combine data
-        // MockAPI.sampleData[type].push(...jsonData.data);
-        fileMetadataArray.push({
-          filename: file,
-          timestamp: jsonData.timestamp,
-        });
-        console.log(`Data combined for type: ${type}`);
-
-        // Check if the combined data array exceeds the maximum length
-        if (dataArray.length > MAX_DATA_LENGTH) {
-          console.log(
-            `Data array for type ${type} exceeds maximum length. Removing oldest files...`
-          );
-          // Sort file metadata by timestamp and remove the oldest files
-          fileMetadataArray.sort((a, b) => a.timestamp - b.timestamp);
-          while (dataArray.length > MAX_DATA_LENGTH) {
-            const oldestFileMetadata = fileMetadataArray.shift();
-            if (oldestFileMetadata) {
-              const oldestFilePath = path.join(
-                DATA_DIR,
-                oldestFileMetadata.filename
-              );
-              fs.unlinkSync(oldestFilePath);
-              console.log(
-                `Deleted oldest file: ${oldestFileMetadata.filename}`
-              );
-            }
-          }
-        }
-      } catch (error) {
-        console.error(`Error processing file ${file}:`, error);
-      }
+      MockAPI.processFile(filePath, file);
     });
-    console.log("Finished loading sample data.");
   }
 
-  static endAll() {
+  private static processFile(filePath: string, file: string) {
+    try {
+      const fileContent = fs.readFileSync(filePath, "utf-8");
+      const type: EndpointType = file.split("-")[0] as EndpointType;
+      const jsonData = JSON.parse(fileContent);
+
+      MockAPI.loadFileData(type, jsonData);
+
+      const dataCount = MockAPI.sampleData[type].length;
+
+      if (!MockAPI.fileMetadata.has(type)) {
+        MockAPI.fileMetadata.set(type, []);
+      }
+
+      const fileMetadataArray = MockAPI.fileMetadata.get(type)!;
+
+      fileMetadataArray.push({
+        filename: file,
+        timestamp: jsonData.timestamp,
+      });
+
+      // Check if the combined data array exceeds the maximum length
+      if (dataCount > MAX_DATA_LENGTH) {
+        // Sort file metadata by timestamp and remove the oldest files
+        fileMetadataArray.sort((a, b) => a.timestamp - b.timestamp);
+        while (dataCount > MAX_DATA_LENGTH) {
+          const oldestFileMetadata = fileMetadataArray.shift();
+          if (oldestFileMetadata) {
+            const oldestFilePath = path.join(
+              DATA_DIR,
+              oldestFileMetadata.filename
+            );
+            fs.unlinkSync(oldestFilePath);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error processing file ${file}:`, error);
+    }
+  }
+
+  endAll() {
     nock.cleanAll();
   }
 
@@ -162,9 +171,9 @@ export class MockAPI {
     }
   }
 
-  private getMockResults<T extends keyof ResultMap,>(
-    type: T,
-    parameters: Params<EndpointFromType<T>>,
+  private getMockResults<D extends keyof ResultMap>(
+    type: D,
+    parameters: Params<EndpointFromType<D>>,
     pathname: string
   ) {
     let { offset, limit, ...params } = parameters;
@@ -173,40 +182,31 @@ export class MockAPI {
     limit = Number(limit ?? 20);
     offset = Number(offset ?? 0);
 
-    let results: APIResult<EndpointFromType<T>>[] = [];
+    let results: SampleData<D> = [];
     let total: number = 0;
 
-    // Has the query been cached? Meaning the mock data has already been generated.
-    if (MockAPI.queryCache.has(key)) {
-      // Retrieve cached results
-      results = MockAPI.queryCache.get(key) as APIResult<EndpointFromType<T>>[];
-      console.log(`Retrieved cached results for key: ${key}`);
-    } else {
-      // Generate mock data of the correct type
-      let dataArray = MockAPI.sampleData[type] || [] as APIResult<EndpointFromType<T>>[];
-      console.log(`Data array length before filtering: ${dataArray.length}`);
+    try {
+      // Check if their is a cache for this data type
+      if (!MockAPI.queryCache) throw new Error(`No query cache found`);
 
-      // Fisher-Yates shuffle algorithm
-      // for (let i = dataArray.length - 1; i > 0; i--) {
-      //   const j = Math.floor(Math.random() * (i + 1));
-      //   [dataArray[i], dataArray[j]] = [
-      //     dataArray[j],
-      //     dataArray[i],
-      //   ];
-      // }
-      console.log(`Data array shuffled`);
+      // Has the query been cached? Meaning the mock data has already been generated.
+      if (MockAPI.queryCache[type].has(key)) {
+        // Retrieve cached results
+        results = MockAPI.queryCache[type].get(key)! as SampleData<D>;
+      } else {
+        // Generate mock data of the correct type
+        let dataArray = this.shuffle(MockAPI.sampleData[type] || []);
 
+        total = Math.min(limit, dataArray.length);
 
-      total = Math.min(limit, dataArray.length);
-      console.log(`Total items to return: ${total}`);
+        // Slice the array to the desired length
+        results = dataArray.slice(0, total);
 
-      // Slice the array to the desired length
-      results = dataArray.slice(0, total);
-      console.log(`Results array length: ${results.length}`);
-
-      // Cache the results
-      // MockAPI.queryCache.set(key, results);
-      console.log(`Cached results for key: ${key}`);
+        // Cache the results
+        MockAPI.queryCache[type].set(key, results);
+      }
+    } catch (error) {
+      console.error(`Error getting mock results for key: ${key}`, error);
     }
 
     return {
@@ -214,14 +214,34 @@ export class MockAPI {
       limit,
       total,
       count: results.length,
-      results,
+      results: results,
     };
   }
 
-  setupMockEndpoint(
+  private shuffle<T>(array: T[]): T[] {
+    let currentIndex = array.length,
+      randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+      // Pick a remaining element.
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element.
+      [array[currentIndex] as T, array[randomIndex] as T] = [
+        array[randomIndex] as T,
+        array[currentIndex] as T,
+      ];
+    }
+
+    return array;
+  }
+
+  setupMockEndpoint<D extends EndpointType>(
     scope: nock.Scope,
     path: string | RegExp,
-    type: EndpointType
+    type: D
   ) {
     scope
       .persist()
@@ -230,41 +250,9 @@ export class MockAPI {
       .reply((uri, requestBody, cb) => {
         const url = new URL(uri, "https://gateway.marvel.com");
 
-        // Extract parameters excluding offset and limit
-        // let { offset, limit, ...params } = url.searchParams as APIBaseParams &
-        //   AnyParams;
-
-        // // Generate a key for the query cache
-        // const key = JSON.stringify({ ...params, pathname: url.pathname });
-
-        // let total: number = 0;
-
-        // // Check if the query (minus offset and limit) has been cached. This ensure the total count is consistent.
-        // if (MockAPI.queryCache.has(key)) {
-        //   total = MockAPI.queryCache.get(key)!;
-        // } else {
-        //   total = Math.floor(Math.random() * 100) + 1; // Random count between 1 and 100
-        //   MockAPI.queryCache.set(key, total);
-        // }
-
-        // limit = Number(url.searchParams.get("limit") || 20);
-        // offset = Number(url.searchParams.get("offset") || 0);
-
-        // // Count is the limit or the total, whichever is smaller
-        // const count = Math.min(limit, total);
-
-        // const response: APIResponseData = {
-        //   offset,
-        //   limit,
-        //   total,
-        //   count,
-        // };
-
-        // const results = [];
-
         const data = this.getMockResults(
           type,
-          url.searchParams as APIBaseParams & AnyParams,
+          url.searchParams as Params<EndpointFromType<D>>,
           url.pathname
         );
 
@@ -277,21 +265,4 @@ export class MockAPI {
         ]);
       });
   }
-
-  // private getRandomItems<T>(array: T[], num: number): T[] {
-  //   if (num >= array.length) {
-  //     return array;
-  //   }
-
-  //   const shuffledArray = array.slice();
-  //   for (let i = shuffledArray.length - 1; i > 0; i--) {
-  //     const j = Math.floor(Math.random() * (i + 1));
-  //     [shuffledArray[i], shuffledArray[j]] = [
-  //       shuffledArray[j],
-  //       shuffledArray[i],
-  //     ];
-  //   }
-
-  //   return shuffledArray.slice(0, num);
-  // }
 }
