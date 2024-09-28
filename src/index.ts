@@ -475,3 +475,12 @@ export {
   EndpointType,
   EndpointDescriptor,
 } from "./models/types/endpoint-types";
+
+export const TYPES: Array<EndpointType> = [
+  "characters",
+  "comics",
+  "creators",
+  "events",
+  "series",
+  "stories",
+];

@@ -2,20 +2,11 @@ import * as fs from "fs";
 import * as path from "path";
 import nock from "nock";
 import {
-  Endpoint,
   EndpointFromType,
   EndpointType,
-  IsEndpointType,
 } from "../src/models/types/endpoint-types";
-import { generateMock } from "@anatine/zod-mock";
-import MarvelQuery, {
-  APIBaseParams,
-  AnyParams,
-  APIResponseData,
+import {
   ResultMap,
-  APIResult,
-  APIResponseResults,
-  MarvelResult,
   Params,
 } from "../src";
 
@@ -39,7 +30,7 @@ export const endpointTypes: Array<EndpointType> = [
 ];
 
 export class MockAPI {
-  static metadata = {
+  private metadata = {
     code: 200,
     status: "Ok",
     copyright: "© 2024 MOOVEL",
@@ -50,18 +41,13 @@ export class MockAPI {
     etag: "666Mephisto666",
   };
 
-  static queryCache: {
+  private queryCache = Object.fromEntries(
+    endpointTypes.map(type => [type, new Map()])
+  ) as {
     [T in keyof ResultMap]: Map<string, SampleData<T>>;
-  } = {
-    characters: new Map(),
-    comics: new Map(),
-    creators: new Map(),
-    events: new Map(),
-    series: new Map(),
-    stories: new Map(),
-  }
+  };
 
-  static sampleData: {
+  private sampleData: {
     [T in keyof ResultMap]: SampleData<T>;
   } = {
     characters: [],
@@ -71,56 +57,56 @@ export class MockAPI {
     series: [],
     stories: [],
   }
-  static fileMetadata: Map<
+  private fileMetadata: Map<
     EndpointType,
     { filename: string; timestamp: number }[]
   > = new Map();
 
-  static async loadFileData<T extends EndpointType>(
+  private async loadFileData<T extends EndpointType>(
     type: T,
     data: DataFile<T>
   ) {
-    MockAPI.sampleData[type].push(...data.data);
+    this.sampleData[type].push(...data.data);
   }
 
-  static start: boolean = false;
+  static instance: MockAPI;
 
-  static async startServer() {
-    if (!MockAPI.start) {
-      await MockAPI.loadSampleData();
-      MockAPI.start = true;
-    }
-    return new MockAPI();
+  static startServer() {
+      if (!MockAPI.instance) {
+        MockAPI.instance = new MockAPI();
+        // await MockAPI.loadSampleData();
+      }
+      return MockAPI.instance;
   }
 
   /**
    * Loads sample data from the data directory and populates the sampleData map.
    * Ensures that the number of data entries for each type does not exceed MAX_DATA_LENGTH.
    */
-  static async loadSampleData() {
+  async loadSampleData() {
     const files = fs.readdirSync(DATA_DIR);
 
     files.forEach((file) => {
       const filePath = path.join(DATA_DIR, file);
-      MockAPI.processFile(filePath, file);
+      this.processFile(filePath, file);
     });
   }
 
-  private static processFile(filePath: string, file: string) {
+  private processFile(filePath: string, file: string) {
     try {
       const fileContent = fs.readFileSync(filePath, "utf-8");
       const type: EndpointType = file.split("-")[0] as EndpointType;
       const jsonData = JSON.parse(fileContent);
 
-      MockAPI.loadFileData(type, jsonData);
+      this.loadFileData(type, jsonData);
 
-      const dataCount = MockAPI.sampleData[type].length;
+      const dataCount = this.sampleData[type].length;
 
-      if (!MockAPI.fileMetadata.has(type)) {
-        MockAPI.fileMetadata.set(type, []);
+      if (!this.fileMetadata.has(type)) {
+        this.fileMetadata.set(type, []);
       }
 
-      const fileMetadataArray = MockAPI.fileMetadata.get(type)!;
+      const fileMetadataArray = this.fileMetadata.get(type)!;
 
       fileMetadataArray.push({
         filename: file,
@@ -148,7 +134,7 @@ export class MockAPI {
   }
 
   endAll() {
-    nock.cleanAll();
+    // nock.cleanAll();
   }
 
   constructor() {
@@ -187,15 +173,15 @@ export class MockAPI {
 
     try {
       // Check if their is a cache for this data type
-      if (!MockAPI.queryCache) throw new Error(`No query cache found`);
+      if (!this.queryCache) throw new Error(`No query cache found`);
 
       // Has the query been cached? Meaning the mock data has already been generated.
-      if (MockAPI.queryCache[type].has(key)) {
+      if (this.queryCache[type].has(key)) {
         // Retrieve cached results
-        results = MockAPI.queryCache[type].get(key)! as SampleData<D>;
+        results = this.queryCache[type].get(key)! as SampleData<D>;
       } else {
         // Generate mock data of the correct type
-        let dataArray = this.shuffle(MockAPI.sampleData[type] || []);
+        let dataArray = this.shuffle(this.sampleData[type] || []);
 
         total = Math.min(limit, dataArray.length);
 
@@ -203,7 +189,7 @@ export class MockAPI {
         results = dataArray.slice(0, total);
 
         // Cache the results
-        MockAPI.queryCache[type].set(key, results);
+        this.queryCache[type].set(key, results);
       }
     } catch (error) {
       console.error(`Error getting mock results for key: ${key}`, error);
@@ -233,6 +219,10 @@ export class MockAPI {
         array[randomIndex] as T,
         array[currentIndex] as T,
       ];
+      // Note: TypeScript does not like shuffling in this way, so type assertions are used.
+      // The following error is produced:
+      // error TS2322: Type 'T | undefined' is not assignable to type 'T'.
+      // 'T' could be instantiated with an arbitrary type which could be unrelated to 'T | undefined'.
     }
 
     return array;
@@ -259,10 +249,14 @@ export class MockAPI {
         cb(null, [
           200,
           {
-            ...MockAPI.metadata,
+            ...this.metadata,
             data,
           },
         ]);
       });
   }
 }
+
+const API = MockAPI.startServer;
+export default API;
+

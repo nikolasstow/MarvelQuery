@@ -1,10 +1,4 @@
-import { generateMock } from "@anatine/zod-mock";
-import nock from "nock";
-
-import MarvelQuery, { Config, Endpoint, EndpointType } from "../src";
-
-import { endpointTypes, MockAPI } from "./MockAPI";
-import { MarvelQueryFetched } from "../src/models/types/interface";
+import MarvelQuery, { Config } from "../src";
 
 export const mockKeys = {
   publicKey: "mockPublicKey",
@@ -32,17 +26,7 @@ export const queryModes = [
   { method: createStandardQuery, name: "Standard Query" },
 ];
 
-let mock: MockAPI;
-
 describe("MarvelQuery", () => {
-  beforeAll(async () => {
-    mock = await MockAPI.startServer();
-  });
-
-  afterAll(() => {
-    mock.endAll();
-  });
-
   // Create a new instance of MarvelQuery with an EndpointType
   test.each(queryModes)(
     "should create an instance with an EndpointType ($name)",
