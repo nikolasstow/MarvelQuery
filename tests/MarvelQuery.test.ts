@@ -1,11 +1,12 @@
-import MarvelQuery, { Config } from "../src";
+import MarvelQuery, { Config, DisableAutoQuery, ShowHiddenProperties } from "../src";
 
 export const mockKeys = {
   publicKey: "mockPublicKey",
   privateKey: "mockPrivateKey",
 };
 
-export const config: Partial<Config<boolean>> = {
+export const config: Partial<Config<DisableAutoQuery, ShowHiddenProperties>> = {
+  showHiddenProperties: true,
   isTestEnv: true,
   logOptions: {
     // verbose: true,

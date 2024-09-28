@@ -99,6 +99,6 @@ export type InitQuery<E extends Endpoint> = {
 export type ExtendResult<E extends Endpoint> = ExtendType<E> &
   ExtendResourceProperties<E>;
 
-export type Result<E extends Endpoint, A extends boolean> = A extends true
+export type Result<E extends Endpoint, AQ extends boolean> = AQ extends true
   ? ExtendResult<E>
   : APIResult<E>;

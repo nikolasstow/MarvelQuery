@@ -5,7 +5,7 @@ import { Params } from "./param-types";
 import { Endpoint } from "./endpoint-types";
 import { EndpointDescriptor } from "./endpoint-types";
 
-export interface MarvelQueryInit<E extends Endpoint, A extends boolean> {
+export interface MarvelQueryInit<E extends Endpoint, AQ extends boolean> {
   autoQuery: boolean;
   /** Query identifier for logging */
   queryId: string;
@@ -22,11 +22,11 @@ export interface MarvelQueryInit<E extends Endpoint, A extends boolean> {
    * Then create a MarvelQueryResult with all the properties of the MarvelQuery object,
    * now with the results of the query, and offset adjusted to request the next page of results.
    */
-  fetch(): Promise<MarvelQueryFetched<E, A>>;
+  fetch(): Promise<MarvelQueryFetched<E, AQ>>;
   /** Send the request to the API, and validate the response. */
   request(url: string): Promise<APIWrapper<APIResult<E>>>;
   /** Fetch a single result of the query. This will override the parameters to set the limit to 1 and offset to 0 */
-  fetchSingle(): Promise<Result<E, A>>;
+  fetchSingle(): Promise<Result<E, AQ>>;
   /** Validation success/failures */
   validated: {
     parameters: boolean;
@@ -36,16 +36,20 @@ export interface MarvelQueryInit<E extends Endpoint, A extends boolean> {
   isComplete: boolean;
 }
 
-export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
-  extends MarvelQueryInit<E, A> {
+export interface MarvelQueryFetched<E extends Endpoint, AQ extends boolean>
+  extends MarvelQueryInit<E, AQ> {
   /** The URL of the query
    * @example ```https://gateway.marvel.com/v1/public/characters?apikey=5379d18afd202d5c4bba6b58417240fb&ts=171234567391456&hash=2270ae1a72023bdf71235da7fdbf2352&offset=0&limit=100&name=Peter+Parker```
    */
   url: string;
-  /** The number of results returned by the query. */
-  count: number;
+  /** The offset for the query results, used for pagination. */
+  offset: number;
+  /** The limit for the number of results returned by the query. */
+  limit: number;
   /** The total number of results available for the query. */
   total: number;
+  /** The number of results returned by the query. */
+  count: number;
   /** Metadata included in the API response.
    * @property code: The HTTP status code of the returned result.
    * @property status: A string description of the call status.
@@ -55,17 +59,10 @@ export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
    * @property etag: A digest value of the content returned by the call.
    */
   metadata: Metadata;
-  /** Data for the API response.
-   * @property offset: The requested offset (number of skipped results) of the call.
-   * @property limit: The requested result limit.
-   * @property total: The total number of resources available given the current filter set.
-   * @property count: The total number of results returned by this call.
-   */
-  responseData: APIResponseData;
   /** The results of the query. */
-  results: Result<E, A>[];
+  results: Result<E, AQ>[];
   /** The conjunction of all results from this query instance. */
-  resultHistory: Result<E, A>[];
+  resultHistory: Result<E, AQ>[];
   /** Validation success/failures */
   validated: {
     parameters: boolean;
@@ -73,3 +70,9 @@ export interface MarvelQueryFetched<E extends Endpoint, A extends boolean>
     autoQuery: boolean;
   };
 }
+
+export type MarvelQueryInstance<
+  E extends Endpoint,
+  AQ extends boolean,
+  HP extends boolean
+> = HP extends true ? MarvelQueryFetched<E, AQ> : MarvelQueryInit<E, AQ>;

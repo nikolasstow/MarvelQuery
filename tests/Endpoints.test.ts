@@ -14,6 +14,8 @@ for (let typeA of TYPES) {
   }
 }
 
+// endpoints = endpoints.slice(0, 10); // Limit the number of endpoints for testing
+
 describe("Testing each unique endpoint type", () => {
   // Test each endpoint type
   endpoints.forEach((endpoint) => {
@@ -22,7 +24,22 @@ describe("Testing each unique endpoint type", () => {
       : endpoint;
     describe(`Querying Endpoint: ${endpointString}`, () => {
       queryModes.forEach(({ method, name }) => {
-        test(name, async () => {
+				test(`fetchSingle ${name}`, async () => {
+					// Create a new instance of MarvelQuery with an Endpoint
+          const origin = method(endpoint);
+					const result = await origin.fetchSingle(); // Returns result object
+					expect(result).toBeDefined();
+					// Instances of MarvelQuery update with new data, we can use that to verify certain things
+					// const fetched = origin as MarvelQueryFetched<Endpoint, false>; // Despite fetchSingle() returning a single result, 
+					// we can still access the instance, and check if the data is there
+					expect(origin.results).toBeDefined();
+					expect(origin.results).toEqual([result]);
+					expect(origin.count).toBe(1);
+					expect(origin.limit).toBe(1);
+					expect(origin.offset).toBe(0);
+
+				})
+        test(`Fetch ${name}`, async () => {
           // Pick a random number for the query limit
           const limit = Math.floor(Math.random() * 100) + 1;
 
@@ -34,10 +51,6 @@ describe("Testing each unique endpoint type", () => {
           // Are parameters valid?
           expect(origin.validated.parameters).toBe(true);
 
-          // Fetch a single result (changes limit to 1, and offset to 0)
-          const result = await origin.fetchSingle(); // Returns result object
-          expect(result).toBeDefined();
-
           // Queries the api at the given endpoint with the set parameters
           const query = await origin.fetch(); // Returns instance of MarvelQuery, now with results
 
@@ -46,13 +59,18 @@ describe("Testing each unique endpoint type", () => {
           // If the query was recieved, the API should reply with code 200
           expect(query.metadata.code).toBe(200);
 
-          // Did we get the expected amount of results?
-          // const expectedCount = query.total // > limit ? limit : query.total;
-          // const apiResponseCount = query.count;
-          // const actualCount = query.results.length;
+					// Check if the limit is the same as the query
+					expect(limit).toBe(query.limit);
+					
 
-          // expect(actualCount).toEqual(expectedCount);
-          // expect(actualCount).toEqual(apiResponseCount);
+          // Did we get the expected amount of results?
+          const expectedCount = query.total > limit ? limit : query.total;
+          const apiResponseCount = query.count;
+          const actualCount = query.results.length;
+
+					expect(expectedCount).toEqual(apiResponseCount);
+          expect(actualCount).toEqual(expectedCount);
+          expect(actualCount).toEqual(apiResponseCount);
         });
       });
       test(`AutoQuery Injection for ${endpointString}`, async () => {

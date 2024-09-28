@@ -16,7 +16,7 @@ import { AnyParams } from "../models/types/param-types";
  */
 export class ParameterManager {
   /** Configuration object for managing global and specific query settings */
-  static config: Partial<Config<boolean>>;
+  static config: Partial<Config<boolean, boolean>>;
   isValid: any;
 
   /**
@@ -24,7 +24,7 @@ export class ParameterManager {
    * Validates global parameters if provided.
    * @param config - A partial configuration object.
    */
-  static setConfig<A extends boolean>(config: Partial<Config<A>>) {
+  static setConfig<AQ extends boolean, HP extends boolean>(config: Partial<Config<AQ, HP>>) {
     ParameterManager.config = config;
 
     if (config.globalParams) {

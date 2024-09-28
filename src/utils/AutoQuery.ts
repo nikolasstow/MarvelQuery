@@ -71,7 +71,7 @@ export class AutoQuery<E extends Endpoint> {
 
   /** The custom logger instance used for logging actions in the query. */
   logger: CustomLogger;
-  config: Config<boolean>;
+  config: Config<boolean, boolean>;
 
   /**
    * Constructor to initialize the AutoQuery class with a MarvelQuery class, an endpoint descriptor, and a logger.
@@ -86,7 +86,7 @@ export class AutoQuery<E extends Endpoint> {
     }: InitQuery<N>) => MarvelQueryInit<N, true>,
     endpoint: EndpointDescriptor<E>,
     logger: CustomLogger,
-    config: Config<boolean>
+    config: Config<boolean, boolean>
   ) {
     this.logger = logger;
     this.createQuery = MarvelQueryClass;

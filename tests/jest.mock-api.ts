@@ -91,9 +91,9 @@ async function loadFileData<T extends EndpointType>(
   type: T,
   data: DataFile<T>
 ) {
-	if (!sampleData[type] || !Array.isArray(sampleData[type])) {
-		sampleData[type] = [];
-	}
+  if (!sampleData[type] || !Array.isArray(sampleData[type])) {
+    sampleData[type] = [];
+  }
   sampleData[type].push(...data.data);
 }
 
@@ -105,6 +105,9 @@ function getMockResults<D extends keyof ResultMap>(
   let { offset, limit, ...params } = parameters;
 
   const key = JSON.stringify({ ...params, pathname });
+  if (!limit || !offset) {
+    throw new Error(`Limit and offset are required parameters: ${parameters}`);
+  }
   limit = Number(limit ?? 20);
   offset = Number(offset ?? 0);
 
@@ -115,14 +118,15 @@ function getMockResults<D extends keyof ResultMap>(
     // Check if their is a cache for this data type
     if (!queryCache) throw new Error(`No query cache found`);
 
-		if (!queryCache[type]) {
-			queryCache[type] = new Map();
-		}
+    if (!queryCache[type]) {
+      queryCache[type] = new Map();
+    }
 
     // Has the query been cached? Meaning the mock data has already been generated.
     if (queryCache[type].has(key)) {
       // Retrieve cached results
       results = queryCache[type].get(key)! as SampleData<D>;
+      total = results.length;
     } else {
       // Generate mock data of the correct type
       let dataArray = shuffle(sampleData[type] || []);
@@ -139,13 +143,21 @@ function getMockResults<D extends keyof ResultMap>(
     console.error(`Error getting mock results for key: ${key}`, error);
   }
 
-  return {
+  results = results.slice(offset, offset + limit);
+
+  const count = results.length;
+
+  const response = {
     offset,
     limit,
     total,
-    count: results.length,
-    results: results,
-  };
+    count,
+    results,
+  }
+
+  if (count < 1) console.log(response);
+
+  return response;
 }
 
 function shuffle<T>(array: T[]): T[] {
@@ -186,7 +198,7 @@ function setupMockEndpoint<D extends EndpointType>(
 
       const data = getMockResults(
         type,
-        url.searchParams as Params<EndpointFromType<D>>,
+        Object.fromEntries(url.searchParams.entries()),
         url.pathname
       );
 

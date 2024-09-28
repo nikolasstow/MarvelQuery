@@ -13,7 +13,7 @@ import { ResultMap } from "./data-types";
 import { ParameterMap } from "./param-types";
 import { APIResult } from "./data-types";
 import { AsEndpoint, Endpoint, EndpointType } from "./endpoint-types";
-import { MarvelQueryInit } from "./interface";
+import { MarvelQueryInit, MarvelQueryInstance } from "./interface";
 
 /** The public and private keys for the API. */
 export interface APIKeys {
@@ -23,8 +23,17 @@ export interface APIKeys {
   privateKey: string;
 }
 
+export type EnableAutoQuery = true;
+export type DisableAutoQuery = false;
+export type ShowHiddenProperties = true;
+
 /** Arguments for initialization of the API */
-export interface Config<A extends boolean> {
+export interface Config<A extends boolean, H extends boolean> {
+  /** By default properties that relate to results of a query are hidden, 
+   * and the fetch() method returns the instance with those properties now visible.
+   * Enable this option to always show these properties. */
+  showHiddenProperties: H;
+  /** Is AutoQuery Enabled? */
   autoQuery: A;
   /** Global parameters to be applied to all queries, or all queries of a specific type.
    * @example ```globalParams: {
@@ -135,7 +144,7 @@ export type HTTPClient = <E extends Endpoint>(
  * @param params Optional parameters for the query.
  * @returns A new instance of MarvelQueryInterface for the specified endpoint.
  */
-export type CreateQueryFunction<A extends boolean> = <T extends Endpoint | EndpointType>(
+export type CreateQueryFunction<AQ extends boolean, HP extends boolean> = <T extends Endpoint | EndpointType>(
   endpoint: T,
   params?: Params<AsEndpoint<T>>
-) => MarvelQueryInit<AsEndpoint<T>, A>
+) => MarvelQueryInstance<AsEndpoint<T>, AQ, HP>
