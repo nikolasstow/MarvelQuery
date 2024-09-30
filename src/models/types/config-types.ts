@@ -13,7 +13,7 @@ import { ResultMap } from "./data-types";
 import { ParameterMap } from "./param-types";
 import { APIResult } from "./data-types";
 import { AsEndpoint, Endpoint, EndpointType } from "./endpoint-types";
-import { MarvelQueryInit, MarvelQueryInstance } from "./interface";
+import { MarvelQueryInstance } from "./interface";
 
 /** The public and private keys for the API. */
 export interface APIKeys {

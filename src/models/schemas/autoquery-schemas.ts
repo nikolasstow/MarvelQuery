@@ -29,23 +29,27 @@ const EndpointTypeSchema = z.enum([
   "stories",
 ]);
 
-// The obvious solution
-const firstAttempt = z.tuple([
-  EndpointTypeSchema,
-  z.number().optional(),
-  EndpointTypeSchema.optional(),
-]);
-// but that doesn't work, what about a union of the three possible tuples?
-const secondAttempt = z.union([
-  z.tuple([EndpointTypeSchema]),
-  z.tuple([EndpointTypeSchema, z.number()]),
-  z.tuple([EndpointTypeSchema, z.number(), EndpointTypeSchema]),
-]);
-// Nope, that doesn't work either. What about an array with the type as a union of the two possible types?
-// It wont validate order, but it's better than nothing. Except it doesn't work either.
-const thirdAttempt = z.array(z.union([EndpointTypeSchema, z.number()]));
-// so what will work? This does, and it's not good.
-const EndpointSchema = z.array(z.any());
+const EndpointSchema = z
+  .array(z.any())
+  .refine((val) => val.length >= 1 && val.length <= 3, {
+    message: "Endpoint must have between 1 and 3 elements",
+  })
+  .refine(
+    (val) => EndpointTypeSchema.safeParse(val[0]).success,
+    (val) => ({
+      message: `First element must be a valid endpoint type, got ${val[0]}`,
+    })
+  )
+  .refine(
+    (val) => val.length === 1 || typeof val[1] === "number",
+    (val) => ({ message: `Second element must be a number, got ${val[1]}` })
+  )
+  .refine(
+    (val) => val.length === 2 || EndpointTypeSchema.safeParse(val[2]).success,
+    (val) => ({
+      message: `Third element must be a valid endpoint type, got ${val[2]}`,
+    })
+  );
 
 const QueryResourceSchema = z
   .function()

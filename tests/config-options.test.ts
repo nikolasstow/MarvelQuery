@@ -18,7 +18,7 @@ describe("Testing config options", () => {
 		expect(result).toBeDefined();
 ;
 		const ppEndpoint = result.endpoint
-		expect(ppEndpoint).toBe(["characters", result.id]);
+		expect(ppEndpoint).toStrictEqual(["characters", result.id]);
 
 		const comicsEndpoint = result.comics.endpoint;
 		expect(comicsEndpoint).toBeDefined();

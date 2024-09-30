@@ -143,7 +143,7 @@ export class AutoQuery<E extends Endpoint> {
    * @returns The extended result object with query methods added.
    */
   extendResult(result: APIResult<E>): ExtendResult<E> {
-    const endpoint: ResourceEndpoint<E> = [this.endpoint.type, result.id] as ResourceEndpoint<E>;
+    const endpoint: ResourceEndpoint<E> = [this.endpoint.type, Number(result.id)] as ResourceEndpoint<E>;
     // const resultName = this.findResourceName(result);
 
     /** Extend the properties of the result based on its structure. */
@@ -439,7 +439,12 @@ export class AutoQuery<E extends Endpoint> {
    */
   private extractEndpointFromURI(url: string): Endpoint {
     const cleanedUrl = url.replace(/^.*\/public\//, "");
-    const endpoint = cleanedUrl.split("/");
+    const endpoint = cleanedUrl.split("/").map((value, index) => {
+      if (index === 1) {
+        return Number(value);
+      }
+      return value
+    });
 
     EndpointBuilder.assertsEndpoint(endpoint);
 
