@@ -93,7 +93,7 @@ export class EndpointBuilder<E extends Endpoint>
    * @returns The validated endpoint path.
    * @throws Will throw an error if the endpoint is invalid or missing.
    */
-  static assertsEndpoint(endpoint: unknown): asserts endpoint is Endpoint {
+  static assertsEndpoint<E extends Endpoint>(endpoint: unknown): asserts endpoint is E {
     if (!Array.isArray(endpoint)) {
       throw new Error(`Invalid endpoint: ${endpoint}`);
     }

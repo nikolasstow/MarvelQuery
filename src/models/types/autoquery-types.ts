@@ -61,6 +61,7 @@ type ExtendResourceArray<E extends Endpoint, V> = V extends Array<Resource>
 /** AutoQuery properties for a resource */
 export type ExtendResourceProperties<E extends Endpoint> = {
   endpoint: E;
+  id: number;
   query: QueryResource<E>;
   fetch: () => Promise<MarvelQueryInit<E, true>>;
   fetchSingle: () => Promise<ExtendResult<E>>;

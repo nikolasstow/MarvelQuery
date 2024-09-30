@@ -58,6 +58,7 @@ const QueryResourceSchema = z
 const QueryCollectionSchema = z.function().args(ParameterSchema);
 
 const ResourceProperties = z.object({
+  id: z.number(),
   endpoint: EndpointSchema,
   query: QueryResourceSchema,
   fetch: z.function(),

@@ -180,6 +180,7 @@ export class AutoQuery<E extends Endpoint> {
     // Add result-level properties for fetching and querying
     const resultExtendingProperties: ExtendResourceProperties<ResourceEndpoint<E>> = {
       endpoint,
+      id: endpoint[1],
       fetch: () => {
         const query = new this.createQuery<ResourceEndpoint<E>>({
           endpoint,
@@ -227,12 +228,17 @@ export class AutoQuery<E extends Endpoint> {
       const endpoint = this.extractEndpointFromURI(value.resourceURI);
       this.assertResourceEndpoint<NEndpoint>(type, endpoint);
 
+      if(endpoint[1] === undefined) {
+        throw new Error(`Invalid resource endpoint: ${endpoint}`);
+      }
+
       // Add the resource to the resources map
       this.resources[type].push(endpoint);
       this.resourceNames.set(endpoint, this.findResourceName(value));
 
       const additionalProps: ExtendResourceProperties<NEndpoint> = {
         endpoint,
+        id: endpoint[1],
         fetch: () => {
           const query = new this.createQuery({
             endpoint,
@@ -437,7 +443,7 @@ export class AutoQuery<E extends Endpoint> {
    * @returns The constructed endpoint tuple.
    * @throws Will throw an error if the URI is invalid.
    */
-  private extractEndpointFromURI(url: string): Endpoint {
+  private extractEndpointFromURI<E extends Endpoint>(url: string): E {
     const cleanedUrl = url.replace(/^.*\/public\//, "");
     const endpoint = cleanedUrl.split("/").map((value, index) => {
       if (index === 1) {
@@ -446,7 +452,7 @@ export class AutoQuery<E extends Endpoint> {
       return value
     });
 
-    EndpointBuilder.assertsEndpoint(endpoint);
+    EndpointBuilder.assertsEndpoint<E>(endpoint);
 
     return endpoint;
   }
