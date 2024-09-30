@@ -27,8 +27,10 @@ export type EnableAutoQuery = true;
 export type DisableAutoQuery = false;
 export type ShowHiddenProperties = true;
 
+export type Config = ConfigOptions<boolean, boolean>;
+
 /** Arguments for initialization of the API */
-export interface Config<A extends boolean, H extends boolean> {
+export interface ConfigOptions<A extends boolean, H extends boolean> {
   /** By default properties that relate to results of a query are hidden, 
    * and the fetch() method returns the instance with those properties now visible.
    * Enable this option to always show these properties. */

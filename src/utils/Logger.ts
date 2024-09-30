@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { performance } from "perf_hooks";
-import { Config } from "../models/types/config-types";
+import { ConfigOptions } from "../models/types/config-types";
 import * as winston from "winston";
 import "winston-daily-rotate-file";
 import { stringify as flattedStringify } from 'flatted';
@@ -258,7 +258,7 @@ export class Logger {
     Logger.instance.logger.level = verbose ? "verbose" : "info";
   }
 
-  static setConfig<AQ extends boolean, HP extends boolean>(config: Config<AQ, HP>) {
+  static setConfig<AQ extends boolean, HP extends boolean>(config: ConfigOptions<AQ, HP>) {
     Logger.maxLines = config.logOptions?.maxLines ?? 23;
     Logger.maxLineLength = config.logOptions?.maxLineLength ?? 500;
     Logger.setVerbose(config.logOptions?.verbose ?? false);

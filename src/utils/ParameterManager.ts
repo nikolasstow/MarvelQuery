@@ -2,7 +2,7 @@ import { Params } from "../models/types/param-types";
 import { ValidateParams } from "../models/schemas/param-schemas";
 import logger, { CustomLogger } from "./Logger";
 import { EndpointBuilder } from "./EndpointBuilder";
-import { Config } from "../models/types/config-types";
+import { Config, ConfigOptions } from "../models/types/config-types";
 import {
   Endpoint,
   EndpointDescriptor,
@@ -16,7 +16,7 @@ import { AnyParams } from "../models/types/param-types";
  */
 export class ParameterManager {
   /** Configuration object for managing global and specific query settings */
-  static config: Partial<Config<boolean, boolean>>;
+  static config: Partial<Config>;
   isValid: any;
 
   /**
@@ -24,7 +24,7 @@ export class ParameterManager {
    * Validates global parameters if provided.
    * @param config - A partial configuration object.
    */
-  static setConfig<AQ extends boolean, HP extends boolean>(config: Partial<Config<AQ, HP>>) {
+  static setConfig<AQ extends boolean, HP extends boolean>(config: Partial<ConfigOptions<AQ, HP>>) {
     ParameterManager.config = config;
 
     if (config.globalParams) {

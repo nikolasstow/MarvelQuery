@@ -1,5 +1,4 @@
 import MarvelQuery, { Endpoint, EndpointType, TYPES } from "../src";
-import { MarvelQueryFetched } from "../src/models/types/interface";
 import { queryModes, mockKeys, config } from "./MarvelQuery.test";
 
 let endpoints: Array<Endpoint | EndpointType> = [...TYPES];
@@ -27,11 +26,15 @@ describe("Testing each unique endpoint type", () => {
 				test(`fetchSingle ${name}`, async () => {
 					// Create a new instance of MarvelQuery with an Endpoint
           const origin = method(endpoint);
+
+					// Verify it's an instance of MarvelQuery
+          expect(origin).toBeInstanceOf(MarvelQuery);
+
+					// Fetch a single result
 					const result = await origin.fetchSingle(); // Returns result object
 					expect(result).toBeDefined();
 					// Instances of MarvelQuery update with new data, we can use that to verify certain things
-					// const fetched = origin as MarvelQueryFetched<Endpoint, false>; // Despite fetchSingle() returning a single result, 
-					// we can still access the instance, and check if the data is there
+					// Despite fetchSingle() returning a single result, we can still access the instance, and check if the data is there
 					expect(origin.results).toBeDefined();
 					expect(origin.results).toEqual([result]);
 					expect(origin.count).toBe(1);
@@ -52,21 +55,23 @@ describe("Testing each unique endpoint type", () => {
           expect(origin.validated.parameters).toBe(true);
 
           // Queries the api at the given endpoint with the set parameters
-          const query = await origin.fetch(); // Returns instance of MarvelQuery, now with results
+          const result = await origin.fetch(); // fetch() returns the instance, but it also updates the instance with the data
 
-          // Verify it's a MarvelQuery instance
-          expect(query).toBeInstanceOf(MarvelQuery);
+					// Are results valid?
+          expect(origin.validated.results).toBe(true);
+
+          // Because fetch returns the same instance, 
+          expect(result).toEqual(origin); // we can compare it to the original and see if they are the same
           // If the query was recieved, the API should reply with code 200
-          expect(query.metadata.code).toBe(200);
+          expect(origin.metadata.code).toBe(200);
 
 					// Check if the limit is the same as the query
-					expect(limit).toBe(query.limit);
-					
+					expect(limit).toBe(origin.limit);
 
           // Did we get the expected amount of results?
-          const expectedCount = query.total > limit ? limit : query.total;
-          const apiResponseCount = query.count;
-          const actualCount = query.results.length;
+          const expectedCount = origin.total > limit ? limit : origin.total;
+          const apiResponseCount = origin.count;
+          const actualCount = origin.results.length;
 
 					expect(expectedCount).toEqual(apiResponseCount);
           expect(actualCount).toEqual(expectedCount);
@@ -84,6 +89,7 @@ describe("Testing each unique endpoint type", () => {
         expect(query.autoQuery).toBe(true);
         const result = await query.results[0];
         if (result) {
+					expect(query.validated.autoQuery).toBe(true);
           const secondary = await result.fetch();
           // Is it an instance of MarvelQuery?
           expect(secondary).toBeInstanceOf(MarvelQuery);

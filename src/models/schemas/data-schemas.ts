@@ -136,7 +136,7 @@ export const MarvelComicSchema = MarvelResultSchema.extend({
   diamondCode: z.string().nullable().optional(),
   ean: z.string().nullable().optional(),
   issn: z.string().nullable().optional(),
-  format: FormatSchema.nullable(),
+  format: z.string().nullable().optional(),
   pageCount: z.number().default(0),
   textObjects: z.array(TextObjectSchema),
   series: SeriesSummarySchema,

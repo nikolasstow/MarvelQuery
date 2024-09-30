@@ -22,14 +22,13 @@ import {
   Collection,
   Resource,
   APIResult,
-  DataType,
 } from "../models/types/data-types";
 import { Params } from "../models/types/param-types";
 import { EndpointBuilder } from "./EndpointBuilder";
 import { InitQuery } from "../models/types/autoquery-types";
 import { MarvelQueryInit } from "../models/types/interface";
 import { AutoQuerySchemaMap } from "../models/schemas/autoquery-schemas";
-import { Config } from "src/models/types/config-types";
+import { Config } from "../models/types/config-types";
 
 /**
  * Utility class for auto-query injection that finds URIs in data and injects query methods
@@ -71,7 +70,8 @@ export class AutoQuery<E extends Endpoint> {
 
   /** The custom logger instance used for logging actions in the query. */
   logger: CustomLogger;
-  config: Config<boolean, boolean>;
+  config: Config;
+  allValid: boolean = true;
 
   /**
    * Constructor to initialize the AutoQuery class with a MarvelQuery class, an endpoint descriptor, and a logger.
@@ -86,7 +86,7 @@ export class AutoQuery<E extends Endpoint> {
     }: InitQuery<N>) => MarvelQueryInit<N, true>,
     endpoint: EndpointDescriptor<E>,
     logger: CustomLogger,
-    config: Config<boolean, boolean>
+    config: Config
   ) {
     this.logger = logger;
     this.createQuery = MarvelQueryClass;
@@ -118,10 +118,11 @@ export class AutoQuery<E extends Endpoint> {
         const result = schema.safeParse(item);
 
         if (!result.success) {
+          this.allValid = false;
           this.logger.error(
             `Failed to validate extended result at index ${index}: ${JSON.stringify(
               result.error.format()
-            )}`
+            )} \n\n${JSON.stringify(item)}`
           );
         }
       });
@@ -142,8 +143,8 @@ export class AutoQuery<E extends Endpoint> {
    * @returns The extended result object with query methods added.
    */
   extendResult(result: APIResult<E>): ExtendResult<E> {
-    const endpoint = this.endpoint.path;
-    const resultName = this.findResourceName(result);
+    const endpoint: ResourceEndpoint<E> = [this.endpoint.type, result.id] as ResourceEndpoint<E>;
+    // const resultName = this.findResourceName(result);
 
     /** Extend the properties of the result based on its structure. */
     const propertiesExtended: ExtendType<E> = Object.keys(result).reduce<
@@ -177,27 +178,27 @@ export class AutoQuery<E extends Endpoint> {
     }, {} as ExtendType<E>);
 
     // Add result-level properties for fetching and querying
-    const resultExtendingProperties: ExtendResourceProperties<E> = {
+    const resultExtendingProperties: ExtendResourceProperties<ResourceEndpoint<E>> = {
       endpoint,
       fetch: () => {
-        const query = new this.createQuery<E>({
+        const query = new this.createQuery<ResourceEndpoint<E>>({
           endpoint,
           params: {},
         });
         return query.fetch();
       },
       fetchSingle: () => {
-        const query = new this.createQuery<E>({
+        const query = new this.createQuery<ResourceEndpoint<E>>({
           endpoint,
           params: {},
         });
         return query.fetchSingle();
       },
-      query: <TType extends NoSameEndpointType<E>>(
+      query: <TType extends NoSameEndpointType<ResourceEndpoint<E>>>(
         type: TType,
-        params: Params<Extendpoint<E, TType>>
-      ): MarvelQueryInit<Extendpoint<E, TType>, true> =>
-        new this.createQuery<Extendpoint<E, TType>>({
+        params: Params<Extendpoint<ResourceEndpoint<E>, TType>>
+      ): MarvelQueryInit<Extendpoint<ResourceEndpoint<E>, TType>, true> =>
+        new this.createQuery<Extendpoint<ResourceEndpoint<E>, TType>>({
           endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
           params,
         }),

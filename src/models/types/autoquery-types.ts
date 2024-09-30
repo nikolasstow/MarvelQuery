@@ -97,7 +97,7 @@ export type InitQuery<E extends Endpoint> = {
  * and adds the AutoQuery properties to the result itself.
  */
 export type ExtendResult<E extends Endpoint> = ExtendType<E> &
-  ExtendResourceProperties<E>;
+  ExtendResourceProperties<ResourceEndpoint<E>>;
 
 export type Result<E extends Endpoint, AQ extends boolean> = AQ extends true
   ? ExtendResult<E>

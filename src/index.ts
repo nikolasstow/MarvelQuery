@@ -5,12 +5,13 @@ import { AutoQuery } from "./utils/AutoQuery";
 import { EndpointBuilder } from "./utils/EndpointBuilder";
 import { ParameterManager } from "./utils/ParameterManager";
 import { ResultValidator } from "./utils/ResultValidator";
-import { Config, EnableAutoQuery } from "./models/types/config-types";
-import { Params } from "./models/types/param-types";
 import {
-  InitQuery,
-  Result,
-} from "./models/types/autoquery-types";
+  Config,
+  ConfigOptions,
+  EnableAutoQuery,
+} from "./models/types/config-types";
+import { Params } from "./models/types/param-types";
+import { InitQuery, Result } from "./models/types/autoquery-types";
 import {
   APIKeys,
   CreateQueryFunction,
@@ -29,7 +30,11 @@ import {
   EndpointDescriptor,
   AsEndpoint,
 } from "./models/types/endpoint-types";
-import { MarvelQueryFetched, MarvelQueryInit, MarvelQueryInstance } from "./models/types/interface";
+import {
+  MarvelQueryFetched,
+  MarvelQueryInit,
+  MarvelQueryInstance,
+} from "./models/types/interface";
 
 /**
  * The MarvelQuery class is responsible for handling requests to the Marvel API.
@@ -49,7 +54,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    * These include global parameters, verbosity, HTTP client, and more.
    * The default configuration can be overridden when initializing the class.
    */
-  private static config: Config<boolean, boolean>;
+  static config: Config;
 
   /**
    * Creates a new instance of the MarvelQuery class.
@@ -62,7 +67,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
   private static createQuery = <
     T extends Endpoint | EndpointType,
     AQ extends boolean,
-    HP extends boolean,
+    HP extends boolean
   >(
     endpoint: T,
     params: Params<AsEndpoint<T>> = {}
@@ -83,13 +88,13 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    */
   static init<AQ extends boolean = true, HP extends boolean = false>(
     apiKeys: APIKeys,
-    config: Partial<Config<AQ, HP>> = {}
+    config: Partial<ConfigOptions<AQ, HP>> = {}
   ): CreateQueryFunction<AQ, HP> {
     // Set verbose logging based on the configuration
     logger.setConfig(config);
     logger.verbose("Initializing MarvelQuery. Setting up global config...");
 
-    const defaultConfig: Config<EnableAutoQuery, false> = {
+    const defaultConfig: ConfigOptions<EnableAutoQuery, false> = {
       showHiddenProperties: false,
       autoQuery: true,
       globalParams: {},
@@ -309,11 +314,9 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     this.total = total;
     this.offset = offset;
     this.limit = limit;
-    
+
     // Update the offset parameter for the next request
     this.params.offset = fetched;
- 
-
 
     this.logger.verbose(
       `Fetched ${count} results. Total fetched: ${fetched}/${total}. Remaining: ${remaining}.`
@@ -353,6 +356,8 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
         this.logger,
         MarvelQuery.config
       );
+
+      this.validated.autoQuery = autoQuery.allValid;
       returnData = autoQuery.inject(results) as Result<E, AQ>[];
     }
 
@@ -427,17 +432,19 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
       // Stop the timer and log the request performance
       timer.stop("API Request Complete");
 
+      // Skip validation if it is disabled in the configuration
       if (
-        MarvelQuery.config.validation?.disableAll === false &&
-        MarvelQuery.config.validation?.apiResponse === true
+        MarvelQuery.config.validation?.disableAll === true ||
+        MarvelQuery.config.validation?.apiResponse === false
       ) {
-        // Validate the results in the response if validation is enabled
-        this.validated.results = new ResultValidator(
-          response.data.results,
-          this.endpoint,
-          this.logger
-        ).allValid;
+        return response;
       }
+
+      this.validated.results = new ResultValidator(
+        response.data.results,
+        this.endpoint,
+        this.logger
+      ).allValid;
 
       // Return the validated response data
       return response;
