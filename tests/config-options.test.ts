@@ -41,6 +41,17 @@ describe("Testing config options", () => {
       "comics",
     ]);
 
+		// Let's test the query() method that has been injected into the collection
+		const comics = await result.comics.query({
+			/** Note that the query method is missing the first argument, which is usually the endpoint when creating a new 
+			 * MarvelQuery instance, or as you'll see below in querying from a resource, the type of the collection.
+			 */
+			dateRange: ["1976-01-01", "1989-12-31"],
+		}).fetch(); // fetch() and fetchSingle() are the same as in the main MarvelQuery instance.
+
+		/** In the method above we can query the entire collection and filter it with the parameters we provide.
+		 * But what if we already have the resource we want from it's collection in the original query?
+		 */
     const spiderComic = result.comics.items[0];
 		
     if (spiderComic) {
@@ -60,6 +71,35 @@ describe("Testing config options", () => {
        * but the rest of the testing will be done in a separate test file. Here, let's try a few of the methods
        * injected into the resource mentioned above.
        */
+
+			// fetch() and fetchSingle() what's the difference since both are querying a single resource?
+			const instance = await spiderComic.fetch();
+			// fetch() returns an instance of MarvelQuery which includes the data
+			expect(instance).toBeInstanceOf(MarvelQuery);
+			// fetchSingle() returns the data directly
+			const comic = await spiderComic.fetchSingle();
+			expect(comic).toBeDefined();
+			
+			/**
+			 * Now since we have the endpoint from the original resource, it should match the endpoint in the result, right?
+			 * expect(query.endpoint).toStrictEqual(spiderComic.endpoint); <- This should be true, but it's not.
+			 * This is the limitation of the Mock API. Unfortunately recreating the real API would be extremely difficult.
+			 * Instead, the mock API only sends data that matches the expected schema, and not actual data that matches 
+			 * the endpoint and parameters of the query.
+			 * 
+			 * Man I am writing a lot of comments no one will ever read.
+			 * Oh well, let's continue testing the methods added to the resource.
+			 */
+
+			/** The final method added to resources is the query method, similar to the one in the main MarvelQuery instance.
+			 * The main difference is that you are essentially querying a collection, the first parameter is the type of 
+			 * the collection, and the second is an object with the parameters to filter the collection.
+			 */
+			const trueBeliever = await spiderComic.query("creators", { // .query() returns a new instance of MarvelQuery
+				firstName: "Stan",
+			}).fetch(); // and Like any other query, fetch() returns the instance and updates it with the data.
+			// .fetchSingle() returns just the first result.
+			expect(trueBeliever).toBeInstanceOf(MarvelQuery);
     }
   });
 

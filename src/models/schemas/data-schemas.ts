@@ -77,22 +77,6 @@ export const ListSchema = z.object({
   items: z.array(SummarySchema),
 });
 
-// const Collection = (
-//   typeA: EndpointType,
-//   typeB: EndpointType,
-//   schema: z.AnyZodObject
-// ) =>
-//   schema.extend({
-//     collectionURI: z // Validate the collectionURI
-//       .string()
-//       .regex(
-//         new RegExp(
-//           `^https://gateway\\.marvel\\.com/v1/public/${typeA}/\\d{1,10}/${typeB}$`
-//         ),
-//         { message: "Invalid collectionURI format" }
-//       ),
-//   });
-
 export const ComicListSchema = ListSchema.extend({
   items: z.array(ComicSummarySchema),
 });
