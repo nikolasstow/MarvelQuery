@@ -1,8 +1,9 @@
 import { Endpoint, EndpointDescriptor } from "../models/types/endpoint-types";
-import { APIResult } from "../models/types/data-types";
+import { APIResult, APIWrapper } from "../models/types/data-types";
 import { CustomLogger } from "./Logger";
-import { ResultSchemaMap } from "../models/schemas/data-schemas";
+import { APIWrapperSchema, ResultSchemaMap } from "../models/schemas/data-schemas";
 import { ZodError } from "zod";
+import { MarvelResult } from "lib";
 
 /**
  * Class responsible for validating the query results against predefined schemas.
@@ -13,6 +14,12 @@ export class ResultValidator<E extends Endpoint> {
   /** The custom logger instance used for logging actions */
   logger: CustomLogger;
   allValid: boolean = true;
+
+  static assertAPIResponse<T extends MarvelResult>(response: unknown): asserts response is APIWrapper<T> {
+    if (!APIWrapperSchema.safeParse(response).success) {
+      throw new Error("Invalid API response");
+    }
+  }
 
   /**
    * Constructor to initialize the ResultValidator class.

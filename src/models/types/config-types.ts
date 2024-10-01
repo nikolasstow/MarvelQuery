@@ -133,7 +133,7 @@ export type AnyResultFunction = OnResultFunction<
 /** Replace the default HTTP client with one of your choosing. */
 export type HTTPClient = <E extends Endpoint>(
   url: string
-) => Promise<APIWrapper<APIResult<E>>>;
+) => Promise<unknown>;
 
 /**
  * Creates a new instance of the MarvelQuery class.

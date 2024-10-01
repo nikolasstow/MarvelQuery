@@ -3,7 +3,23 @@ import { EndpointMap } from "../types/endpoint-types";
 import { FormatSchema, YearSchema } from "./schema-utilities";
 import { EndpointType } from "lib";
 
-// Use .nullable() to allow null values
+// API Wrapper Schema
+export const APIWrapperSchema = z.object({
+  code: z.number(),
+  status: z.string(),
+  copyright: z.string(),
+  attributionText: z.string(),
+  attributionHTML: z.string(),
+  etag: z.string(),
+  data: z.object({
+    offset: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    count: z.number(),
+    results: z.array(z.any()), // Adjust the schema for MarvelResult if needed
+  }),
+});
+
 
 /** For some unknown reason, the start and end dates of Events are in a different format than the rest of the data */
 const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -52,11 +68,6 @@ export const RoleSummarySchema = SummarySchema.extend({
 export const TypeSummarySchema = SummarySchema.extend({
   type: z.string(),
 });
-
-// const ResourceURI = (type: EndpointType) => z.string().url().regex(
-//   new RegExp(`^https://gateway\\.marvel\\.com/v1/public/${type}/\\d{1,10}$`),
-//   { message: "Invalid resourceURI format" }
-// );
 
 export const ComicSummarySchema = SummarySchema;
 

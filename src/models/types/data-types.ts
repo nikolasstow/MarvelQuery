@@ -398,3 +398,19 @@ export interface APIResponseResults<R extends MarvelResult>
 export interface APIWrapper<R extends MarvelResult> extends Metadata {
   data: APIResponseResults<R>;
 }
+
+type APIResponse<R> = {
+  code: number;
+  status: string;
+  copyright: string;
+  attributionText: string;
+  attributionHTML: string;
+  etag: string;
+  data: {
+    offset: number;
+    limit: number;
+    total: number;
+    count: number;
+    results: R[];
+  }
+}

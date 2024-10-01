@@ -426,7 +426,10 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
       }
 
       // Send the HTTP request using the configured HTTP client and await the response
-      const response = await MarvelQuery.config.httpClient<E>(url);
+      const response = await MarvelQuery.config.httpClient(url);
+
+      // Validate the API response using the schema
+      ResultValidator.assertAPIResponse<APIResult<E>>(response);
 
       // Stop the timer and log the request performance
       timer.stop("API Request Complete");
