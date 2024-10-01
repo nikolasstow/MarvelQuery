@@ -44,9 +44,6 @@ export interface ConfigOptions<A extends boolean, H extends boolean> {
    * }```
    */
   globalParams: GlobalParams;
-  /** Remove undefined parameters from the query */
-  omitUndefined: boolean; // set to true (by default) this will remove undefined values from the query
-
   /** An optional function that will be called before the request is sent.
    * You can use it to log the request or track the number of requests to the API. */
   onRequest?: OnRequestFunction;

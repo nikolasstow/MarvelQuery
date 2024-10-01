@@ -98,7 +98,6 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
       showHiddenProperties: false,
       autoQuery: true,
       globalParams: {},
-      omitUndefined: true,
       logOptions: {
         verbose: false,
       },

@@ -23,7 +23,6 @@ const createQuery = MarvelQuery.init({
 | Property        | Type                           | Description                                                  |
 | --------------- | ------------------------------ | ------------------------------------------------------------ |
 | `globalParams`  | `GlobalParams`                 | Global parameters to be applied to all queries, or all queries of a specific type. |
-| `omitUndefined` | `boolean`                      | Remove undefined parameters from queries.                    |
 | `onResult`      | `OnResultMap`                  | A map of functions to be called when all results, or results of a specific type, are returned. |
 | `onRequest`     | ` (url: string) => void`       | A function that is called for each request. Useful for monitoring your API usage. |
 | `logOptions`    | `LogOptions`                   | Options for logging: verbose, maxLines, maxLineLength        |

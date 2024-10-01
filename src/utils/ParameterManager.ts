@@ -106,10 +106,7 @@ export class ParameterManager {
     endpoint: EndpointDescriptor<E>,
     params: Params<E>
   ) {
-    // Remove undefined parameters unless 'omitUndefined' is false.
-    const cleanParams = ParameterManager.config.omitUndefined
-      ? this.omitUndefined(params)
-      : params;
+    const cleanParams = this.omitUndefined(params);
 
     const numberOfParamsRemoved =
       Object.keys(params).length - Object.keys(cleanParams).length;

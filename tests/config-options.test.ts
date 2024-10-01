@@ -1,4 +1,5 @@
-import MarvelQuery, { APIKeys } from "../src";
+import exp from "constants";
+import MarvelQuery, { APIKeys, Params } from "../src";
 
 const apiKeys: APIKeys = {
   publicKey: "mockPublicKey",
@@ -106,5 +107,45 @@ describe("Testing config options", () => {
   test("Configuration option: autoQuery = false", async () => {
     const query = MarvelQuery.init(apiKeys, { ...config, autoQuery: false });
     expect(MarvelQuery.config.autoQuery).toBe(false);
+
+		// Fetch a single character
+		const result = await query("characters", {
+      name: "Peter Parker",
+    }).fetchSingle() as any;
+    expect(result).toBeDefined();
+
+		// The result should not have the endpoint property
+		expect(result.endpoint).toBeUndefined();
   });
+
+	test("Configuration option: globalParams", async () => {
+		const query = MarvelQuery.init(apiKeys, {
+			...config,
+			autoQuery: true,
+			globalParams: {
+				all: { limit: 10 },
+				characters: { nameStartsWith: "Spider" },
+				comics: { noVariants: true },
+			},
+		});
+
+		const q1 = await query("characters");
+		// query.params should have the global parameters for characters and all
+		expect(q1.params).toHaveProperty("limit", 10);
+		expect(q1.params).toHaveProperty("nameStartsWith", "Spider");
+		expect((q1.params as any).noVariants).toBeUndefined();
+
+		const result = await q1.fetch();
+		expect(result).toBeDefined();
+		expect(result.count).toBeGreaterThan(0);
+		expect(result.count).toBeLessThanOrEqual(10);
+		expect(result.results.length).toBe(result.count);
+
+		const q2 = await query("characters", { nameStartsWith: "Peter" });
+		// The global parameters should be overridden by the specific parameters
+		expect(q2.params).toHaveProperty("limit", 10);
+		expect(q2.params).toHaveProperty("nameStartsWith", "Peter");
+	});
+
+
 });
