@@ -29,7 +29,7 @@ export interface MarvelQueryInit<E extends Endpoint, AQ extends boolean> {
   fetchSingle(): Promise<Result<E, AQ>>;
   /** Validation success/failures */
   validated: {
-    parameters: boolean;
+    parameters: boolean | undefined;
   };
 
   /** The query is complete when all results have been fetched. */
@@ -65,9 +65,9 @@ export interface MarvelQueryFetched<E extends Endpoint, AQ extends boolean>
   resultHistory: Result<E, AQ>[];
   /** Validation success/failures */
   validated: {
-    parameters: boolean;
-    results: boolean;
-    autoQuery: boolean;
+    parameters: boolean | undefined;
+    results: boolean | undefined;
+    autoQuery: boolean | undefined;
   };
 }
 

@@ -18,11 +18,7 @@ import {
   ExtendType,
   ResourceEndpointFromKey,
 } from "../models/types/autoquery-types";
-import {
-  Collection,
-  Resource,
-  APIResult,
-} from "../models/types/data-types";
+import { Collection, Resource, APIResult } from "../models/types/data-types";
 import { Params } from "../models/types/param-types";
 import { EndpointBuilder } from "./EndpointBuilder";
 import { InitQuery } from "../models/types/autoquery-types";
@@ -71,7 +67,7 @@ export class AutoQuery<E extends Endpoint> {
   /** The custom logger instance used for logging actions in the query. */
   logger: CustomLogger;
   config: Config;
-  allValid: boolean = true;
+  allValid: boolean | undefined = undefined;
 
   /**
    * Constructor to initialize the AutoQuery class with a MarvelQuery class, an endpoint descriptor, and a logger.
@@ -109,24 +105,29 @@ export class AutoQuery<E extends Endpoint> {
     this.logResourcesAndCollections();
 
     if (
-      this.config.validation?.disableAll === false &&
-      this.config.validation?.autoQuery === true
+      this.config.validation?.disableAll === true ||
+      this.config.validation?.autoQuery === false
     ) {
-      const schema = AutoQuerySchemaMap[this.endpoint.type];
-
-      extendedResults.forEach((item, index) => {
-        const result = schema.safeParse(item);
-
-        if (!result.success) {
-          this.allValid = false;
-          this.logger.error(
-            `Failed to validate extended result at index ${index}: ${JSON.stringify(
-              result.error.format()
-            )} \n\n${JSON.stringify(item)}`
-          );
-        }
-      });
+      this.allValid = undefined;
+      return extendedResults;
     }
+
+    this.allValid = true;
+
+    const schema = AutoQuerySchemaMap[this.endpoint.type];
+
+    extendedResults.forEach((item, index) => {
+      const result = schema.safeParse(item);
+
+      if (!result.success) {
+        this.allValid = false;
+        this.logger.error(
+          `Failed to validate extended result at index ${index}: ${JSON.stringify(
+            result.error.format()
+          )} \n\n${JSON.stringify(item)}`
+        );
+      }
+    });
 
     return extendedResults;
   }
@@ -143,7 +144,10 @@ export class AutoQuery<E extends Endpoint> {
    * @returns The extended result object with query methods added.
    */
   extendResult(result: APIResult<E>): ExtendResult<E> {
-    const endpoint: ResourceEndpoint<E> = [this.endpoint.type, Number(result.id)] as ResourceEndpoint<E>;
+    const endpoint: ResourceEndpoint<E> = [
+      this.endpoint.type,
+      Number(result.id),
+    ] as ResourceEndpoint<E>;
     // const resultName = this.findResourceName(result);
 
     /** Extend the properties of the result based on its structure. */
@@ -178,7 +182,9 @@ export class AutoQuery<E extends Endpoint> {
     }, {} as ExtendType<E>);
 
     // Add result-level properties for fetching and querying
-    const resultExtendingProperties: ExtendResourceProperties<ResourceEndpoint<E>> = {
+    const resultExtendingProperties: ExtendResourceProperties<
+      ResourceEndpoint<E>
+    > = {
       endpoint,
       id: endpoint[1],
       fetch: () => {
@@ -228,7 +234,7 @@ export class AutoQuery<E extends Endpoint> {
       const endpoint = this.extractEndpointFromURI(value.resourceURI);
       this.assertResourceEndpoint<NEndpoint>(type, endpoint);
 
-      if(endpoint[1] === undefined) {
+      if (endpoint[1] === undefined) {
         throw new Error(`Invalid resource endpoint: ${endpoint}`);
       }
 
@@ -449,7 +455,7 @@ export class AutoQuery<E extends Endpoint> {
       if (index === 1) {
         return Number(value);
       }
-      return value
+      return value;
     });
 
     EndpointBuilder.assertsEndpoint<E>(endpoint);

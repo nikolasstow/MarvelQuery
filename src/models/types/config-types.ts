@@ -131,7 +131,7 @@ export type AnyResultFunction = OnResultFunction<
 >;
 
 /** Replace the default HTTP client with one of your choosing. */
-export type HTTPClient = <E extends Endpoint>(
+export type HTTPClient = (
   url: string
 ) => Promise<unknown>;
 

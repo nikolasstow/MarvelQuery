@@ -1,5 +1,6 @@
+import superagent from "superagent";
+import MarvelQuery, { APIKeys } from "../src";
 import exp from "constants";
-import MarvelQuery, { APIKeys, HTTPClient, Params } from "../src";
 
 const apiKeys: APIKeys = {
   publicKey: "mockPublicKey",
@@ -140,12 +141,14 @@ describe("Testing config options", () => {
     expect(q1.params).toHaveProperty("nameStartsWith", "Spider");
     expect((q1.params as any).noVariants).toBeUndefined();
 
+    // Verify no more than 10 results are returned
     const result = await q1.fetch();
     expect(result).toBeDefined();
     expect(result.count).toBeGreaterThan(0);
     expect(result.count).toBeLessThanOrEqual(10);
     expect(result.results.length).toBe(result.count);
 
+    // Lets override the global parameters
     const q2 = await query("characters", { nameStartsWith: "Peter" });
     // The global parameters should be overridden by the specific parameters
     expect(q2.params).toHaveProperty("limit", 10);
@@ -153,33 +156,49 @@ describe("Testing config options", () => {
   });
 
   test("Configuration option: onRequest", async () => {
+    // Create a mock function to be called when a request is made
     const onRequest = jest.fn();
     const query = MarvelQuery.init(apiKeys, {
       ...config,
+      autoQuery: true,
       onRequest,
     });
 
-    const result = await query("characters").fetch();
+    await query("characters").fetch();
 
     // Check that the onRequest callback was called
     expect(onRequest).toHaveBeenCalled();
     // Optionally, check the arguments passed to the onRequest callback
     expect(onRequest).toHaveBeenCalledWith(
-			expect.any(String), // url
-			["characters"], // endpoint
-			expect.any(Object) // params
+      expect.any(String), // url
+      ["characters"], // endpoint
+      expect.any(Object) // params
     );
   });
 
-	test("Configuration option: httpClient", async () => {
-		const httpClient: HTTPClient = async (url: string) => {
-			return await fetch(url);
-		}
-		const query = MarvelQuery.init(apiKeys, {
+  test("Configuration option: httpClient", async () => {
+    // Swap the default http client with superagent
+    const query = MarvelQuery.init(apiKeys, {
+      ...config,
+      httpClient: (url: string) => superagent.get(url).then((res) => res.body),
+    });
+
+    const result = await query("characters").fetch();
+    expect(result.validated.results).toBe(true);
+  });
+
+	test("Configuration option: validation - disableAll", async () => {
+		const createQuery = MarvelQuery.init(apiKeys, {
 			...config,
-			httpClient: async (url: string) => {
-				return await fetch(url);
-			},
+      autoQuery: true,
+			validation: { disableAll: true },
 		});
+
+		const query = createQuery("events");
+		expect(query.validated.parameters).toBeUndefined();
+		
+		const result = await query.fetch();
+		expect(result.validated.results).toBeUndefined();
+		expect(result.validated.autoQuery).toBeUndefined();
 	})
 });

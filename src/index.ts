@@ -136,10 +136,10 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     | OnResultFunction<ResultMap[EndpointType]>
     | AnyResultFunction;
 
-  validated = {
-    parameters: false,
-    results: false,
-    autoQuery: false,
+  validated: MarvelQueryFetched<E, AQ>["validated"] = {
+    parameters: undefined,
+    results: undefined,
+    autoQuery: undefined,
   };
   /**
    * Endpoint path as a tuple, and the type of the endpoint
@@ -411,7 +411,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    * @param url The URL to send the request to.
    * @returns A promise that resolves to the API response wrapped in an APIWrapper.
    */
-  async request(url: string): Promise<APIWrapper<APIResult<E>>> {
+  async request<T extends APIResult<E>>(url: string): Promise<APIWrapper<T>> {
     // Create a timer for the request to measure performance
     const timer = logger.performance(
       `Sending request to endpoint: ${this.endpoint.path.join("/")}`,
@@ -429,7 +429,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
       const response = await MarvelQuery.config.httpClient(url);
 
       // Validate the API response using the schema
-      ResultValidator.assertAPIResponse<APIResult<E>>(response);
+      ResultValidator.assertAPIResponse<T>(response);
 
       // Stop the timer and log the request performance
       timer.stop("API Request Complete");
@@ -439,6 +439,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
         MarvelQuery.config.validation?.disableAll === true ||
         MarvelQuery.config.validation?.apiResponse === false
       ) {
+        this.validated.results = undefined;
         return response;
       }
 

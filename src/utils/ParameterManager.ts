@@ -17,7 +17,7 @@ import { AnyParams } from "../models/types/param-types";
 export class ParameterManager {
   /** Configuration object for managing global and specific query settings */
   static config: Partial<Config>;
-  isValid: any;
+  isValid: boolean | undefined = undefined;
 
   /**
    * Sets the global configuration for parameter management.
@@ -74,8 +74,7 @@ export class ParameterManager {
       ParameterManager.config?.validation?.disableAll === true || 
       ParameterManager.config?.validation?.parameters === false
     ) {
-      console.log("Validation is disabled for params"); // remove this
-      return;
+      return undefined;
     }
 
     customLogger.verbose(`Validating parameters for '${type}'`);
