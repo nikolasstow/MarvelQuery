@@ -356,8 +356,8 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
         MarvelQuery.config
       );
 
-      this.validated.autoQuery = autoQuery.allValid;
       returnData = autoQuery.inject(results) as Result<E, AQ>[];
+      this.validated.autoQuery = autoQuery.allValid;
     }
 
     // Update the MarvelQuery instance properties

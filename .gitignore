@@ -3,4 +3,4 @@ lib
 .env
 tests/QueryBuilderTest.ts
 logs
-tests/data
+tests/data-backup

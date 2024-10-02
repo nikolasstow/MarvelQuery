@@ -10,10 +10,7 @@ export const config: Partial<ConfigOptions<DisableAutoQuery, ShowHiddenPropertie
   isTestEnv: true,
   logOptions: {
     // verbose: true,
-  },
-  validation: {
-    autoQuery: false,
-  },
+  }
 };
 
 let createAutoQuery = MarvelQuery.init(mockKeys, config);

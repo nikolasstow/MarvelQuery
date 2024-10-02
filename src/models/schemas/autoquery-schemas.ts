@@ -70,9 +70,9 @@ const CollectionProperties = z.object({
   query: QueryCollectionSchema,
 });
 
-const ExtendedSummarySchema = SummarySchema.merge(ResourceProperties);
-const ExtendedRoleSummarySchema = RoleSummarySchema.merge(ResourceProperties);
-const ExtendedTypeSummarySchema = TypeSummarySchema.merge(ResourceProperties);
+const ExtendedSummarySchema = SummarySchema.merge(ResourceProperties).nullable();
+const ExtendedRoleSummarySchema = RoleSummarySchema.merge(ResourceProperties).nullable();
+const ExtendedTypeSummarySchema = TypeSummarySchema.merge(ResourceProperties).nullable();
 
 const ExtendedComicListSchema = ListSchema.merge(CollectionProperties).extend({
   items: z.array(ExtendedSummarySchema),

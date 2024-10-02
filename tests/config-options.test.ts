@@ -201,4 +201,75 @@ describe("Testing config options", () => {
 		expect(result.validated.results).toBeUndefined();
 		expect(result.validated.autoQuery).toBeUndefined();
 	})
+
+	test("Configuration option: validation - parameters = false", async () => {
+		const createQuery = MarvelQuery.init(apiKeys, {
+			...config,
+			autoQuery: true,
+			validation: { parameters: false },
+		});
+
+		const query = createQuery("events");
+		expect(query.validated.parameters).toBeUndefined();
+	});
+
+	test("Configuration option: validation - parameters = true", async () => {
+		const createQuery = MarvelQuery.init(apiKeys, {
+			...config,
+			autoQuery: true,
+			validation: { parameters: true },
+		});
+
+		const query = createQuery("events");
+		expect(query.validated.parameters).toBeDefined();
+	});
+
+	test("Configuration option: validation - apiResponse = false", async () => {
+		const createQuery = MarvelQuery.init(apiKeys, {
+			...config,
+			autoQuery: true,
+			validation: { apiResponse: false },
+		});
+
+		const query = createQuery("events");
+		const result = await query.fetch();
+		expect(result.validated.results).toBeUndefined();
+	});
+
+	test("Configuration option: validation - apiResponse = true", async () => {
+		const createQuery = MarvelQuery.init(apiKeys, {
+			...config,
+			autoQuery: true,
+			validation: { apiResponse: true },
+		});
+
+		const query = createQuery("events");
+		const result = await query.fetch();
+		expect(result.validated.results).toBeDefined();
+	});
+
+
+	test("Configuration option: validation - autoQuery = false", async () => {
+		const createQuery = MarvelQuery.init(apiKeys, {
+			...config,
+			autoQuery: true,
+			validation: { autoQuery: false },
+		});
+
+		const query = createQuery("events");
+		const result = await query.fetch();
+		expect(result.validated.autoQuery).toBeUndefined();
+	});
+
+	test("Configuration option: validation - autoQuery = true", async () => {
+		const createQuery = MarvelQuery.init(apiKeys, {
+			...config,
+			autoQuery: true,
+			validation: { autoQuery: true },
+		});
+
+		const query = createQuery("events");
+		const result = await query.fetch();
+		expect(result.validated.autoQuery).toBeDefined();
+	});
 });
