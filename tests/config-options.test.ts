@@ -1,6 +1,5 @@
 import superagent from "superagent";
 import MarvelQuery, { APIKeys } from "../src";
-import exp from "constants";
 
 const apiKeys: APIKeys = {
   publicKey: "mockPublicKey",

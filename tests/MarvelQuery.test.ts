@@ -13,8 +13,8 @@ export const config: Partial<ConfigOptions<DisableAutoQuery, ShowHiddenPropertie
   }
 };
 
-let createAutoQuery = MarvelQuery.init(mockKeys, config);
-let createStandardQuery = MarvelQuery.init(mockKeys, {
+export const createAutoQuery = MarvelQuery.init(mockKeys, config);
+export const createStandardQuery = MarvelQuery.init(mockKeys, {
   ...config,
   autoQuery: false,
 });
