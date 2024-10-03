@@ -56,13 +56,13 @@ describe("MarvelQuery", () => {
   );
 
   describe("Testing for specific data types, with AutoQuery enabled", () => {
-    const createQuery = MarvelQuery.init(mockKeys, {
+    const query = MarvelQuery.init(mockKeys, {
       ...config,
       autoQuery: true,
     });
     test("Searching for Comics", async () => {
-      const query = createQuery(["comics"], { titleStartsWith: "Spider" });
-      const result = (await query.fetch()).results[0];
+      const spiderQuery = query(["comics"], { titleStartsWith: "Spider" });
+      const result = (await spiderQuery.fetch()).results[0];
       // result.characters.
     });
   });

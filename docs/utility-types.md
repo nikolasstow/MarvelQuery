@@ -22,14 +22,14 @@ By using this tuple structure, the library provides a more organized way to defi
  */
 
 // For example, fetching the latest comics:
-const comics = await createQuery(['comics'], {
+const comics = await query(['comics'], {
   dateDescriptor: "thisWeek"
 })
   .fetch()
   .then(api => api.results); // returns Comic[]
 
 // Or finding your favorite character:
-const stiltMan = await createQuery(['characters'], {
+const stiltMan = await query(['characters'], {
   nameStartsWith: "Stilt-Man"
 })
   .fetchSingle()
@@ -44,7 +44,7 @@ const comicsEndpoint = ['characters', 1009627, 'comics'];
 // Or all of the events the character appears in:
 const eventsEndpoint = ['characters', 1009627, 'events'];
 
-const eventsWithStilts = await createQuery(eventsEndpoint, params)
+const eventsWithStilts = await query(eventsEndpoint, params)
   .fetch()
   .then(api => api.results); // returns Event[]
 ```

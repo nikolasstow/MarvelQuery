@@ -187,88 +187,88 @@ describe("Testing config options", () => {
   });
 
 	test("Configuration option: validation - disableAll", async () => {
-		const createQuery = MarvelQuery.init(apiKeys, {
+		const query = MarvelQuery.init(apiKeys, {
 			...config,
       autoQuery: true,
 			validation: { disableAll: true },
 		});
 
-		const query = createQuery("events");
-		expect(query.validated.parameters).toBeUndefined();
+		const events = query("events");
+		expect(events.validated.parameters).toBeUndefined();
 		
-		const result = await query.fetch();
+		const result = await events.fetch();
 		expect(result.validated.results).toBeUndefined();
 		expect(result.validated.autoQuery).toBeUndefined();
 	})
 
 	test("Configuration option: validation - parameters = false", async () => {
-		const createQuery = MarvelQuery.init(apiKeys, {
+		const query = MarvelQuery.init(apiKeys, {
 			...config,
 			autoQuery: true,
 			validation: { parameters: false },
 		});
 
-		const query = createQuery("events");
-		expect(query.validated.parameters).toBeUndefined();
+		const events = query("events");
+		expect(events.validated.parameters).toBeUndefined();
 	});
 
 	test("Configuration option: validation - parameters = true", async () => {
-		const createQuery = MarvelQuery.init(apiKeys, {
+		const query = MarvelQuery.init(apiKeys, {
 			...config,
 			autoQuery: true,
 			validation: { parameters: true },
 		});
 
-		const query = createQuery("events");
-		expect(query.validated.parameters).toBeDefined();
+		const events = query("events");
+		expect(events.validated.parameters).toBeDefined();
 	});
 
 	test("Configuration option: validation - apiResponse = false", async () => {
-		const createQuery = MarvelQuery.init(apiKeys, {
+		const query = MarvelQuery.init(apiKeys, {
 			...config,
 			autoQuery: true,
 			validation: { apiResponse: false },
 		});
 
-		const query = createQuery("events");
-		const result = await query.fetch();
+		const events = query("events");
+		const result = await events.fetch();
 		expect(result.validated.results).toBeUndefined();
 	});
 
 	test("Configuration option: validation - apiResponse = true", async () => {
-		const createQuery = MarvelQuery.init(apiKeys, {
+		const query = MarvelQuery.init(apiKeys, {
 			...config,
 			autoQuery: true,
 			validation: { apiResponse: true },
 		});
 
-		const query = createQuery("events");
-		const result = await query.fetch();
+		const events = query("events");
+		const result = await events.fetch();
 		expect(result.validated.results).toBeDefined();
 	});
 
 
 	test("Configuration option: validation - autoQuery = false", async () => {
-		const createQuery = MarvelQuery.init(apiKeys, {
+		const query = MarvelQuery.init(apiKeys, {
 			...config,
 			autoQuery: true,
 			validation: { autoQuery: false },
 		});
 
-		const query = createQuery("events");
-		const result = await query.fetch();
+		const events = query("events");
+		const result = await events.fetch();
 		expect(result.validated.autoQuery).toBeUndefined();
 	});
 
 	test("Configuration option: validation - autoQuery = true", async () => {
-		const createQuery = MarvelQuery.init(apiKeys, {
+		const query = MarvelQuery.init(apiKeys, {
 			...config,
 			autoQuery: true,
 			validation: { autoQuery: true },
 		});
 
-		const query = createQuery("events");
-		const result = await query.fetch();
+		const events = query("events");
+		const result = await events.fetch();
 		expect(result.validated.autoQuery).toBeDefined();
 	});
 });

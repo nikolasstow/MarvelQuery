@@ -33,7 +33,7 @@ import { Config } from "../models/types/config-types";
  */
 export class AutoQuery<E extends Endpoint> {
   /** The query class used for auto-query injection. */
-  createQuery: new <N extends Endpoint>({
+  query: new <N extends Endpoint>({
     endpoint,
     params,
   }: InitQuery<N>) => MarvelQueryInit<N, true>;
@@ -85,7 +85,7 @@ export class AutoQuery<E extends Endpoint> {
     config: Config
   ) {
     this.logger = logger;
-    this.createQuery = MarvelQueryClass;
+    this.query = MarvelQueryClass;
     this.endpoint = endpoint;
     this.config = config;
   }
@@ -188,14 +188,14 @@ export class AutoQuery<E extends Endpoint> {
       endpoint,
       id: endpoint[1],
       fetch: () => {
-        const query = new this.createQuery<ResourceEndpoint<E>>({
+        const query = new this.query<ResourceEndpoint<E>>({
           endpoint,
           params: {},
         });
         return query.fetch();
       },
       fetchSingle: () => {
-        const query = new this.createQuery<ResourceEndpoint<E>>({
+        const query = new this.query<ResourceEndpoint<E>>({
           endpoint,
           params: {},
         });
@@ -205,7 +205,7 @@ export class AutoQuery<E extends Endpoint> {
         type: TType,
         params: Params<Extendpoint<ResourceEndpoint<E>, TType>>
       ): MarvelQueryInit<Extendpoint<ResourceEndpoint<E>, TType>, true> =>
-        new this.createQuery<Extendpoint<ResourceEndpoint<E>, TType>>({
+        new this.query<Extendpoint<ResourceEndpoint<E>, TType>>({
           endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
           params,
         }),
@@ -246,7 +246,7 @@ export class AutoQuery<E extends Endpoint> {
         endpoint,
         id: endpoint[1],
         fetch: () => {
-          const query = new this.createQuery({
+          const query = new this.query({
             endpoint,
             params: {},
           });
@@ -254,7 +254,7 @@ export class AutoQuery<E extends Endpoint> {
           return query.fetch();
         },
         fetchSingle: () => {
-          const query = new this.createQuery({
+          const query = new this.query({
             endpoint,
             params: {},
           });
@@ -265,7 +265,7 @@ export class AutoQuery<E extends Endpoint> {
           type: TType,
           params: Params<Extendpoint<NEndpoint, TType>> = {}
         ): MarvelQueryInit<Extendpoint<NEndpoint, TType>, true> =>
-          new this.createQuery<Extendpoint<NEndpoint, TType>>({
+          new this.query<Extendpoint<NEndpoint, TType>>({
             endpoint: EndpointBuilder.extendEndpoint(endpoint, type),
             params,
           }),
@@ -346,7 +346,7 @@ export class AutoQuery<E extends Endpoint> {
           query: (
             params: Params<TEndpoint> = {}
           ): MarvelQueryInit<TEndpoint, true> =>
-            new this.createQuery<TEndpoint>({ endpoint, params }),
+            new this.query<TEndpoint>({ endpoint, params }),
         };
 
         return {

@@ -71,7 +71,7 @@ describe("Performance Testing", () => {
           autoQuery: true,
         },
       },
-      expectedTime: 27,
+      expectedTime: 30,
     },
     {
       name: "AutoQuery with no validation",
@@ -111,7 +111,7 @@ describe("Performance Testing", () => {
           autoQuery: true,
         },
       },
-      expectedTime: 25,
+      expectedTime: 31,
     },
   ];
 

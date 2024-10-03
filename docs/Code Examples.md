@@ -3,7 +3,7 @@
 ```ts
 // Do's and Don'ts
 
-const comics = await createQuery("comics", {
+const comics = await query("comics", {
   dateDescriptor: "thisWeek"
 }).fetch();
 

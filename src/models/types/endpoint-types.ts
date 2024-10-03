@@ -43,7 +43,7 @@ export type IsEndpoint<T> = T extends Endpoint ? T : never;
 /** Verifies if T is an EndpointType */
 export type IsEndpointType<T> = T extends EndpointType ? T : never;
 
-/** Converts an EndpointType to an Endpoint and is used in createQuery function so that Endpoints
+/** Converts an EndpointType to an Endpoint and is used in query function so that Endpoints
  * can be written as "comics" instead of ["comics"], reducing boilerplate */
 export type EndpointFromType<T extends EndpointType> = IsEndpoint<[T]>;
 

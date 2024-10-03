@@ -47,7 +47,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
   implements MarvelQueryInit<E, AQ>
 {
   /** ********* Static Properties ********* */
-  /** Stores the API keys used for authentication with the Marvel API */
+  /** Stores the API keys used for authentication with the Marvel API, assigned during initialization. */
   private static apiKeys: APIKeys;
   /**
    * Configuration settings for the MarvelQuery class.
@@ -64,7 +64,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    * @param params Optional parameters for the query.
    * @returns A new instance of MarvelQueryInterface for the specified endpoint.
    */
-  private static createQuery = <
+  private static query = <
     T extends Endpoint | EndpointType,
     AQ extends boolean,
     HP extends boolean
@@ -80,11 +80,13 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     }) as MarvelQueryInstance<AsEndpoint<T>, AQ, HP>;
 
   /**
-   * Initializes the MarvelQuery class with API keys and configuration settings.
+   * Initializes the MarvelQuery class with API keys and configuration settings. This method 
+   * should be called before creating any query instances. It sets up the global configuration 
+   * for the class, and passes the configuration to the Logger and ParameterManager classes.
    *
    * @param apiKeys The API keys for authentication.
    * @param config Optional configuration overrides.
-   * @returns The createQuery function for creating new query instances.
+   * @returns The query function for creating new query instances.
    */
   static init<AQ extends boolean = true, HP extends boolean = false>(
     apiKeys: APIKeys,
@@ -118,12 +120,12 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     // Set config as static property on ParameterManager class
     ParameterManager.setConfig(config);
 
-    return MarvelQuery.createQuery;
+    return MarvelQuery.query;
   }
 
   /** ********* Instance Properties ********* */
-  /** Query identifier for logging */
-  queryId: string;
+  /** Unique query identifier for logging */
+  queryId: string = this.createUniqueId();
   /** AutoQuery Injection */
   autoQuery: boolean;
   /** Modified logger instance with query identifier */
@@ -175,12 +177,11 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
   /**
    * Constructs a new instance of the MarvelQuery class.
    * Validates the endpoint and parameters, and inserts default parameters if not provided.
+   * Sets the onResult function if provided in the configuration.
    *
    * @param initQuery An object containing the endpoint and parameters for the query.
    */
   constructor({ endpoint, params }: InitQuery<E>) {
-    // Create a unique identifier for the query
-    this.queryId = this.createUniqueId();
     // Create a modified logger instance with the query identifier
     this.logger = logger.identify(this.queryId);
 
@@ -230,6 +231,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
   /**
    * Fetches the results for the query, processes them, and calls the onResult function.
+   * Returns the MarvelQuery instance for method chaining.
    *
    * @returns A promise that resolves to the MarvelQuery instance.
    */
@@ -249,6 +251,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
   /**
    * Builds the URL for the query using the api keys, the endpoint and parameters.
+   * Generates an MD5 hash using the timestamp, private key, and public key.
    *
    * @returns The URL for the query.
    */
@@ -294,6 +297,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
   /**
    * Processes the results returned by the API, extending them with additional properties.
+   * Checks for duplicate results and updates the query instance properties.
    *
    * @param response The API response containing the results to process.
    * @returns An array of extended results.
@@ -407,6 +411,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
   /**
    * Sends the request to the API and validates the response.
+   * Executes the onRequest function if defined in the configuration.
    *
    * @param url The URL to send the request to.
    * @returns A promise that resolves to the API response wrapped in an APIWrapper.

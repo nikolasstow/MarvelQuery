@@ -4,14 +4,14 @@
 
 | Function                                         | Arguments                                                | Returns                         | Description                                                  |
 | ------------------------------------------------ | -------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
-| `init`                                           | [`keys: APIKeys`](#apikeys), [`config: Config`](#config) | [`createQuery()`](#createquery) | Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. |
-| `createQuery<T extends Endpoint | EndpointType>` | `endpoint: T, params: Params<AsEndpoint<T>>`             | `MarvelQuery<T>`                | Private function to create a new query instance. Must be accessed via init() initialization. |
+| `init`                                           | [`keys: APIKeys`](#apikeys), [`config: Config`](#config) | [`query()`](#createquery) | Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. |
+| `query<T extends Endpoint | EndpointType>` | `endpoint: T, params: Params<AsEndpoint<T>>`             | `MarvelQuery<T>`                | Private function to create a new query instance. Must be accessed via init() initialization. |
 
 ### Instance Properties
 
 | Property        | Type                                  | Description                                                |
 | --------------- | ------------------------------------- | ---------------------------------------------------------- |
-| `endpoint`      | [`Endpoint`](#endpoint)               | The endpoint as passed in createQuery().                   |
+| `endpoint`      | [`Endpoint`](#endpoint)               | The endpoint as passed in query().                   |
 | `params`        | [`ParamsType<E>`]()                   | Parameters of the query, determined by the Endpoint (E)    |
 | `type`          | [`EndpointType`](#endpointtypes)      | The data type of the results returned by the query .       |
 | `url`           | `string`                              | The URL generated for the API request.                     |

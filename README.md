@@ -27,7 +27,7 @@ npm i marvelquery axios
 ```ts
 import MarvelQuery from "marvelquery";
 
-const createQuery = MarvelQuery.init({
+const query = MarvelQuery.init({
   publicKey: "your-public-key",
   privateKey: "your-private-key",
 });
@@ -35,14 +35,14 @@ const createQuery = MarvelQuery.init({
 // Let's find out what Spider-Man is currently up to in the comics.
 
 // First we need to find his id using his name.
-const peterParker = await createQuery(["characters"], {
+const peterParker = await query(["characters"], {
   name: "Peter Parker",
 })
   .fetchSingle()
   .then((query) => query.result.id); // Returns '1009491'
 
 // The we can use that id to create a new query to get the latest comics he appears in.
-const spiderComics = await createQuery(["characters", peterParker, "comics"], {
+const spiderComics = await query(["characters", peterParker, "comics"], {
   format: "comic",
   noVariants: true,
   dateDescriptor: "nextWeek",

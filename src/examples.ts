@@ -20,7 +20,7 @@ import MarvelQuery, {
  * Initialize the Marvel API with your public and private keys.
  * Optionally, you can add functions for logging requests and saving results.
  */
-const createQuery = MarvelQuery.init({
+const query = MarvelQuery.init({
   publicKey: "your-public-key",
   privateKey: "your-private-key",
 }, {
@@ -32,11 +32,11 @@ const createQuery = MarvelQuery.init({
  * Calls the API to get data about the character "Peter Parker" and handles pagination automatically.
  */
 async function spiderMan() {
-  const spiderMan = await createQuery(["characters"], {
+  const spiderMan = await query(["characters"], {
     name: "Peter Parker",
   }).fetchSingle();
 
-  const story = await createQuery(["stories"]).fetchSingle()
+  const story = await query(["stories"]).fetchSingle()
     .then( story => story.originalIssue);
 
     story?.fetchSingle().then(comic => comic)
@@ -44,7 +44,7 @@ async function spiderMan() {
   // spiderMan.fetch("comics",{
   //   format: "comic",
   // });
-  const spiderManComics = await createQuery(["comics"], {
+  const spiderManComics = await query(["comics"], {
     format: "comic",
   }).fetch();
 
@@ -62,7 +62,7 @@ async function spiderMan() {
   // - Return from fetch on a chained query is the wrong data type. Showing first result type from the previous query.
   // - The conditional type for extending the results need to be different from collectionURI and resourceURI.
 
-  createQuery(["comics"], {
+  query(["comics"], {
     dateDescriptor: "thisWeek",
   })
     .fetchSingle() // Can't use fetch on an array because it is not a collection
@@ -81,7 +81,7 @@ async function spiderMan() {
 
   // Need more results? Just call fetch again
 
-  const BloodHunt = await createQuery(["events"], {
+  const BloodHunt = await query(["events"], {
     name: "Blood Hunt",
   })
     .fetchSingle()
@@ -113,13 +113,13 @@ async function spiderMan() {
   //   });
   // }
 
-  // const spiderMoan = await createQuery(["characters"], {
+  // const spiderMoan = await query(["characters"], {
   //     name: "Peter Parker",
   //   }).query("comics", {
 
   //   })
 
-  // const comics = createQuery(endpoint, {
+  // const comics = query(endpoint, {
   //   format: "comic",
   // })
   // The library automatically handles pagination for you, updating the offset parameter to get the next batch
@@ -128,13 +128,13 @@ async function spiderMan() {
 
 // Below is outdated example
 // First we need to find his id using his name.
-// const peterParker = await createQuery(["characters"], {
+// const peterParker = await query(["characters"], {
 //   name: "Peter Parker", // Note to self, are states still needed?
 // })
 //   .fetchSingle()
 //   .then((query) => query.result?.id); // Returns '1009491'
 // // The we can use that id to create a new query to get the latest comics he appears in.
-// const spiderComics = await createQuery(["characters", peterParker, "comics"], {
+// const spiderComics = await query(["characters", peterParker, "comics"], {
 //   format: "comic", // We only want the latest comic issues, so lets exclude everything else.
 //   noVariants: true, // Exclude variants, because we only want unique issues.
 //   dateDescriptor: "nextWeek", // Get the next week's issues.
@@ -151,7 +151,7 @@ export async function series(
   title: string,
   startYear: number
 ): Promise<Series[]> {
-  return await createQuery(["series"], {
+  return await query(["series"], {
     title,
     startYear,
   })
@@ -189,7 +189,7 @@ export async function comics(
     params.dateRange = createRange(parsedDate);
   }
 
-  return await createQuery(["comics"], params)
+  return await query(["comics"], params)
     .fetch()
     .then((api) => api.results);
 }
@@ -201,7 +201,7 @@ export async function comics(
  * @returns A promise that resolves to an array of MarvelEvent objects.
  */
 export async function events(name: string): Promise<Event[]> {
-  return createQuery(["events"], {
+  return query(["events"], {
     name,
   })
     .fetch()
@@ -223,7 +223,7 @@ export async function creators(
   middleName?: string,
   suffix?: string
 ): Promise<Creator[]> {
-  return await createQuery(["creators"], {
+  return await query(["creators"], {
     lastName,
     firstName,
     middleName,
@@ -240,7 +240,7 @@ export async function creators(
  * @returns A promise that resolves to an array of MarvelCharacter objects.
  */
 export async function characters(name: string): Promise<Character[]> {
-  return createQuery(["characters"], {
+  return query(["characters"], {
     name,
   })
     .fetch()
@@ -258,7 +258,7 @@ export async function catalog(
   dateDescriptor: DateDescriptor, // options: "lastWeek" | "thisWeek" | "nextWeek" | "thisMonth"
   params?: Record<string, unknown>
 ): Promise<Comic[]> {
-  const catalog = await createQuery(["comics"], {
+  const catalog = await query(["comics"], {
     ...params,
     format: "comic",
     formatType: "comic",
@@ -284,7 +284,7 @@ export async function latest(): Promise<Comic[]> {
   const futureDate = new Date();
   futureDate.setMonth(currentDate.getMonth() + 5);
 
-  return createQuery(["comics"], {
+  return query(["comics"], {
     dateRange: [formattedDate(pastDate), formattedDate(futureDate)],
     orderBy: "-modified",
     format: "comic",
@@ -295,7 +295,7 @@ export async function latest(): Promise<Comic[]> {
 }
 
 export async function comicsWithCharacter(name: string): Promise<Comic[]> {
-  return createQuery(["characters"], { name })
+  return query(["characters"], { name })
     .fetchSingle()
     .then((character) => character.comics.query({ format: "comic" }).fetch())
     .then((comics) => comics.results);
