@@ -20,6 +20,7 @@ export const APIWrapperSchema = z.object({
   }),
 });
 
+/** Schemas of the building blocks that form to create the different data types. */
 
 /** For some unknown reason, the start and end dates of Events are in a different format than the rest of the data */
 const dateTimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -56,6 +57,8 @@ export const ComicPriceSchema = z.object({
   price: z.number(),
 });
 
+/** Schemas for "Summaries", resources related to the return data */
+
 export const SummarySchema = z.object({
   resourceURI: z.string().url(),
   name: z.string(),
@@ -80,6 +83,10 @@ export const CreatorSummarySchema = RoleSummarySchema;
 export const CharacterSummarySchema = RoleSummarySchema;
 
 export const EventSummarySchema = SummarySchema;
+
+/** Schema's for "Lists", collections related to the data object they are found in.
+ * Collected in the items array are the summaries of the related resources.
+ */
 
 export const ListSchema = z.object({
   available: z.number(),
@@ -111,6 +118,8 @@ export const CreatorListSchema = ListSchema.extend({
 export const CharacterListSchema = ListSchema.extend({
   items: z.array(CharacterSummarySchema),
 });
+
+/** Base schema upon which all data types are built. */
 
 export const MarvelResultSchema = z.object({
   id: z.number(),

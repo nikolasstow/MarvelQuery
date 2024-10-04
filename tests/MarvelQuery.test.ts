@@ -66,4 +66,20 @@ describe("MarvelQuery", () => {
       // result.characters.
     });
   });
+
+  describe("Verify that resultHistory is working as expected", () => {
+    const query = MarvelQuery.init(mockKeys, {
+      ...config,
+      autoQuery: true,
+      globalParams: { all: { limit: 10 } },
+    });
+    test("Should store the results of a query", async () => {
+      const spiderQuery = query(["comics"], { titleStartsWith: "Spider" });
+      const resultA = (await spiderQuery.fetch()).results;
+      const resultB = (await spiderQuery.fetch()).results;
+
+      expect(spiderQuery.resultHistory).toHaveLength(resultA.length + resultB.length);
+      expect(spiderQuery.resultHistory).toEqual([...resultA, ...resultB]);
+    });
+  });
 });

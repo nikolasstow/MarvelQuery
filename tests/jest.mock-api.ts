@@ -131,7 +131,10 @@ function getMockResults<D extends keyof ResultMap>(
       // Generate mock data of the correct type
       let dataArray = shuffle(sampleData[type] || []);
 
-      total = Math.min(limit, dataArray.length);
+      // Random multiplier between 2 and 5 to simulate different data sizes and pagination
+      const multiplier = Math.floor(Math.random() * 4) + 2;
+
+      total = Math.min(limit * multiplier, dataArray.length);
 
       // Slice the array to the desired length
       results = dataArray.slice(0, total);
@@ -154,8 +157,6 @@ function getMockResults<D extends keyof ResultMap>(
     count,
     results,
   }
-
-  if (count < 1) console.log(response);
 
   return response;
 }

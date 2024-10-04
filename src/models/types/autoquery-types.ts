@@ -100,6 +100,7 @@ export type InitQuery<E extends Endpoint> = {
 export type ExtendResult<E extends Endpoint> = ExtendType<E> &
   ExtendResourceProperties<ResourceEndpoint<E>>;
 
+/** Result type for an endpoint, depending on whether AutoQuery Injection is enabled. */
 export type Result<E extends Endpoint, AQ extends boolean> = AQ extends true
   ? ExtendResult<E>
   : APIResult<E>;

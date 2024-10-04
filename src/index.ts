@@ -165,8 +165,6 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
   count: number = 0;
   /** Metadata included in the API response. */
   metadata: Metadata;
-  /** Data for the API response. */
-  // responseData: APIResponseData;
   /** The results of the query. */
   results: Result<E, typeof MarvelQuery.config.autoQuery>[];
   /** A history of all results returned by this query instance.. */

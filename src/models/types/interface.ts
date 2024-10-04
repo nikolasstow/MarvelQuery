@@ -1,4 +1,4 @@
-import { Metadata, APIResponseData, APIWrapper } from "./data-types";
+import { Metadata, APIWrapper } from "./data-types";
 import { ExtendResult, Result } from "./autoquery-types";
 import { APIResult } from "./data-types";
 import { Params } from "./param-types";

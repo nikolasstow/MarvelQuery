@@ -11,6 +11,7 @@ The Metadata interface represents key information included in the API response f
 | `copyright`       | `string`        | The copyright notice for the returned result.                |
 | `attributionText` | `string`        | The attribution notice for this result. Please display either this notice or the contents of the attributionHTML field on all screens which contain data from the Marvel Comics API. |
 | `attributionHTML` | `string` `HTML` | An HTML representation of the attribution notice for this result. Please display either this notice or the contents of the attributionText field on all screens which contain data from the Marvel Comics API. |
+| `etag`            | `string`        | A digest value of the content returned by the call.          |
 
 **Common Status Codes:** 
 
@@ -22,14 +23,15 @@ The Metadata interface represents key information included in the API response f
 
 These codes indicate the success or failure of the request and provide insights into why a request might not have succeeded.
 
-## `APIResponseData`
+## `APIResponse<R extends MarvelResult>`
 
-| Property | Type     | Description                                                  |
-| -------- | -------- | ------------------------------------------------------------ |
-| `offset` | `number` | The requested offset (number of skipped results) of the call. |
-| `limit`  | `number` | The requested result limit.                                  |
-| `total`  | `number` | The total number of resources available given the current filter set. |
-| `count`  | `number` | The total number of results returned by this call            |
+| Property  | Type     | Description                                                  |
+| --------- | -------- | ------------------------------------------------------------ |
+| `offset`  | `number` | The requested offset (number of skipped results) of the call. |
+| `limit`   | `number` | The requested result limit.                                  |
+| `total`   | `number` | The total number of resources available given the current filter set. |
+| `count`   | `number` | The total number of results returned by this call.           |
+| `results` | `R[]`    | The results of the query.                                  |
 
 ## `MarvelComic`
 

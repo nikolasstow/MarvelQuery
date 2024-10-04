@@ -14,13 +14,8 @@ import {
 } from "./data-schemas";
 import { EndpointMap } from "../types/endpoint-types";
 
-// Notes for tomorrow:
-// - log configuration anytime it changes (file only)
-// - add flags for enable/disable validation (for all and for each type)
-// - move AQ schemas to new file
-// - Inject the new schemas, extending the existing ones (extending full schemas, adding props after the fact)
-
-const EndpointTypeSchema = z.enum([
+// Different data types for the Marvel API
+export const EndpointTypeSchema = z.enum([
   "comics",
   "characters",
   "creators",
@@ -29,6 +24,7 @@ const EndpointTypeSchema = z.enum([
   "stories",
 ]);
 
+// Schema for the endpoint
 const EndpointSchema = z
   .array(z.any())
   .refine((val) => val.length >= 1 && val.length <= 3, {
@@ -51,12 +47,15 @@ const EndpointSchema = z
     })
   );
 
+// Schema for the query function injected into each resource
 const QueryResourceSchema = z
   .function()
   .args(EndpointTypeSchema, ParameterSchema);
 
+// Schema for the query function injected into each collection
 const QueryCollectionSchema = z.function().args(ParameterSchema);
 
+// Schema for the properties injected into each resource
 const ResourceProperties = z.object({
   id: z.number(),
   endpoint: EndpointSchema,
@@ -65,42 +64,45 @@ const ResourceProperties = z.object({
   fetchSingle: z.function(),
 });
 
+// Schema for the properties injected into each collection
 const CollectionProperties = z.object({
   endpoint: EndpointSchema,
   query: QueryCollectionSchema,
 });
 
-const ExtendedSummarySchema = SummarySchema.merge(ResourceProperties).nullable();
-const ExtendedRoleSummarySchema = RoleSummarySchema.merge(ResourceProperties).nullable();
-const ExtendedTypeSummarySchema = TypeSummarySchema.merge(ResourceProperties).nullable();
+// Extended schemas for each resource summary
+const ExtendedSummarySchema =
+  SummarySchema.merge(ResourceProperties).nullable();
+const ExtendedRoleSummarySchema =
+  RoleSummarySchema.merge(ResourceProperties).nullable();
+const ExtendedTypeSummarySchema =
+  TypeSummarySchema.merge(ResourceProperties).nullable();
 
+// Extended schemas for each collection type
 const ExtendedComicListSchema = ListSchema.merge(CollectionProperties).extend({
   items: z.array(ExtendedSummarySchema),
 });
-
 const ExtendedStoryListSchema = ListSchema.merge(CollectionProperties).extend({
   items: z.array(ExtendedTypeSummarySchema),
 });
-
 const ExtendedSeriesListSchema = ListSchema.merge(CollectionProperties).extend({
   items: z.array(ExtendedSummarySchema),
 });
-
 const ExtendedEventListSchema = ListSchema.merge(CollectionProperties).extend({
   items: z.array(ExtendedSummarySchema),
 });
-
 const ExtendedCreatorListSchema = ListSchema.merge(CollectionProperties).extend(
   {
     items: z.array(ExtendedRoleSummarySchema),
   }
 );
-
 const ExtendedCharacterListSchema = ListSchema.merge(
   CollectionProperties
 ).extend({
   items: z.array(ExtendedRoleSummarySchema),
 });
+
+/** Extended schemas for each data type, replacing the default properties with the extended properties. */
 
 const ExtendedComicSchema = MarvelComicSchema.merge(ResourceProperties).extend({
   series: ExtendedSummarySchema,
@@ -164,6 +166,7 @@ const ExtendedStorySchema = MarvelStorySchema.merge(ResourceProperties).extend({
   originalIssue: ExtendedSummarySchema,
 });
 
+// Map of endpoint types to their corresponding schemas
 export const AutoQuerySchemaMap: EndpointMap<z.ZodType> = {
   comics: ExtendedComicSchema,
   events: ExtendedEventsSchema,

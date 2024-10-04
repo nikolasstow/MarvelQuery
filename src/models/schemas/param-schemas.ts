@@ -9,12 +9,14 @@ import {
 } from "./schema-utilities";
 import { EndpointMap } from "../types/endpoint-types";
 
+// Schema of parameters that are common to all endpoints
 export const APISchema = z.object({
   modifiedSince: ModifiedSince.optional(),
   limit: z.number().positive().default(100).optional(),
   offset: z.number().nonnegative().default(0).optional(),
 });
 
+// Parameters for characters
 export const CharactersSchema = APISchema.extend({
   name: z.string().optional(),
   nameStartsWith: z.string().optional(),
@@ -33,6 +35,7 @@ export const DateDescriptorSchema = z.enum([
   "thisMonth",
 ]);
 
+// Parameters for comics
 export const ComicsSchema = APISchema.extend({
   format: z.string().optional(),
   formatType: FormatTypeSchema.optional(),
@@ -60,6 +63,7 @@ export const ComicsSchema = APISchema.extend({
   orderBy: OrderBy("comics").optional(),
 });
 
+// Parameters for creators
 export const CreatorsSchema = APISchema.extend({
   firstName: z.string().optional(),
   middleName: z.string().optional(),
@@ -76,6 +80,7 @@ export const CreatorsSchema = APISchema.extend({
   orderBy: OrderBy("creators").optional(),
 });
 
+// Parameters for events
 export const EventsSchema = APISchema.extend({
   name: z.string().optional(),
   nameStartsWith: z.string().optional(),
@@ -87,6 +92,7 @@ export const EventsSchema = APISchema.extend({
   orderBy: OrderBy("events").optional(),
 });
 
+// Parameters for series
 export const SeriesSchema = APISchema.extend({
   title: z.string().optional(),
   titleStartsWith: z.string().optional(),
@@ -103,6 +109,7 @@ export const SeriesSchema = APISchema.extend({
   orderBy: OrderBy("series").optional(),
 });
 
+// Parameters for stories
 export const StoriesSchema = APISchema.extend({
   comics: IDListSchema.optional(),
   series: IDListSchema.optional(),
@@ -112,21 +119,7 @@ export const StoriesSchema = APISchema.extend({
   orderBy: OrderBy("stories").optional(),
 });
 
-const dataTypes = z.enum([
-  "comics",
-  "characters",
-  "creators",
-  "events",
-  "stories",
-  "series",
-]);
-
-export const EndpointSchema = z.tuple([
-  dataTypes,
-  z.number().optional(),
-  dataTypes.optional(),
-]);
-
+// Union of all parameter schemas
 export const ParameterSchema = z.union([
   CharactersSchema,
   ComicsSchema,
@@ -136,7 +129,7 @@ export const ParameterSchema = z.union([
   StoriesSchema,
 ]);
 
-/** Validation schemas for each endpoint parameters */
+// Validation schemas for each endpoint parameters
 export const ValidateParams: EndpointMap<z.ZodType> & { all: z.ZodType } = {
   characters: CharactersSchema,
   comics: ComicsSchema,
