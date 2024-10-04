@@ -7,7 +7,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rm -rf ./lib/*",
-    "build": "tsup",
+    "build": "tsup && node scripts/inject-links.js",
     "build:watch": "tsup --watch",
     "lint": "tsc",
     "release": "changeset publish",

@@ -40,7 +40,7 @@ These codes indicate the success or failure of the request and provide insights 
 | `id`                 | `number`                            | The unique ID of the comic resource.                         |
 | `resourceURI`        | `string`                            | The canonical URL identifier for this resource.              |
 | `modified`           | `string`                            | The date the resource was most recently modified.            |
-| `urls`               | [`URI[]`](configuration.md#url)     | A set of public web site URLs for the resource.              |
+| `urls`               | [`URL[]`](#url)                     | A set of public web site URLs for the resource.              |
 | `thumbnail`          | [`Image`](#image)                   | The representative image for this comic.                     |
 | `digitalId`          | `number`                            | The ID of the digital comic representation of this comic. Will be 0 if the comic is not available digitally. |
 | `title`              | `string`                            | The canonical title of the comic.                            |
