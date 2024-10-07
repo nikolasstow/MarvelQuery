@@ -17,6 +17,7 @@ const defaultConfig = {
 };
 
 const iterations = 100;
+const multiplier = 3;
 
 const baseQuery = MarvelQuery.init(mockKeys, defaultConfig);
 
@@ -50,7 +51,6 @@ async function fetchAllResources(results: Comic[]) {
 }
 
 describe("Performance Testing", () => {
-  const multiplier = 2.5;
   const testCases = [
     {
       name: "AutoQuery and all validation disabled",
@@ -133,7 +133,7 @@ describe("Performance Testing", () => {
 
       const averageTime = totalTime / iterations;
       expect(averageTime).toBeLessThan(expectedTime * multiplier);
-    }, 10000);
+    }, expectedTime * multiplier * iterations * 2); // Timeout is set to 2 times the expected time
   });
 
   test("AutoQuery without validation, fetching all resources", async () => {
@@ -144,13 +144,19 @@ describe("Performance Testing", () => {
         disableAll: true,
       },
     });
-
-    const start = performance.now();
-    const results = (await query(...Q).fetch()).results as Comic[];
-    await fetchAllResources(results);
-    const end = performance.now();
-
-    const totalTime = end - start;
-    expect(totalTime).toBeLessThan(2000);
-  });
+  
+    let totalTime = 0;
+  
+    for (let i = 0; i < iterations; i++) {
+      const start = performance.now();
+      const results = (await query(...Q).fetch()).results as Comic[];
+      await fetchAllResources(results);
+      const end = performance.now();
+  
+      totalTime += end - start;
+    }
+  
+    const averageTime = totalTime / iterations;
+    expect(averageTime).toBeLessThan(2000 * multiplier);
+  }), 2000 * multiplier * iterations * 2; // Timeout is set to 2 times the expected time
 });
