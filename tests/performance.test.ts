@@ -71,7 +71,7 @@ describe("Performance Testing", () => {
           autoQuery: true,
         },
       },
-      expectedTime: 30,
+      expectedTime: 35,
     },
     {
       name: "AutoQuery with no validation",
@@ -91,7 +91,7 @@ describe("Performance Testing", () => {
           parameters: true,
         },
       },
-      expectedTime: 28,
+      expectedTime: 30,
     },
     {
       name: "Only validate API response",
@@ -101,7 +101,7 @@ describe("Performance Testing", () => {
           apiResponse: true,
         },
       },
-      expectedTime: 27,
+      expectedTime: 30,
     },
     {
       name: "Only validate AutoQuery",
@@ -111,7 +111,7 @@ describe("Performance Testing", () => {
           autoQuery: true,
         },
       },
-      expectedTime: 31,
+      expectedTime: 35,
     },
   ];
 

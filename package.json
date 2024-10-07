@@ -10,6 +10,7 @@
     "build": "tsup && node scripts/inject-links.js",
     "build:watch": "tsup --watch",
     "lint": "tsc",
+    "test": "npx jest",
     "release": "changeset publish",
     "tsdoc": "typescript-documentation"
   },
