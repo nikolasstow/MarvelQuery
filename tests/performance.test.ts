@@ -147,7 +147,7 @@ describe("Performance Testing", () => {
   
     let totalTime = 0;
   
-    for (let i = 0; i < iterations; i++) {
+    for (let i = 0; i < 5; i++) { // Only 5 iterations because fetching all resources is time-consuming
       const start = performance.now();
       const results = (await query(...Q).fetch()).results as Comic[];
       await fetchAllResources(results);
@@ -156,7 +156,7 @@ describe("Performance Testing", () => {
       totalTime += end - start;
     }
   
-    const averageTime = totalTime / iterations;
+    const averageTime = totalTime / 5;
     expect(averageTime).toBeLessThan(2000 * multiplier);
-  }, 2000 * multiplier * iterations * 2); // Timeout is set to 2 times the expected time
+  }, 2000 * multiplier * 5 * 2); // Timeout is set to 2 times the expected time
 });
