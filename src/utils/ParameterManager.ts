@@ -1,4 +1,4 @@
-import { Params } from "../models/types/param-types";
+import { Params, AnyParams } from "../models/types/param-types";
 import { ValidateParams } from "../models/schemas/param-schemas";
 import logger, { CustomLogger } from "./Logger";
 import { EndpointBuilder } from "./EndpointBuilder";
@@ -8,7 +8,6 @@ import {
   EndpointDescriptor,
   EndpointType,
 } from "../models/types/endpoint-types";
-import { AnyParams } from "../models/types/param-types";
 
 /**
  * Class responsible for managing and validating query parameters, including global
@@ -24,7 +23,9 @@ export class ParameterManager {
    * Validates global parameters if provided.
    * @param config - A partial configuration object.
    */
-  static setConfig<AQ extends boolean, HP extends boolean>(config: Partial<ConfigOptions<AQ, HP>>) {
+  static setConfig<AQ extends boolean, HP extends boolean>(
+    config: Partial<ConfigOptions<AQ, HP>>
+  ) {
     ParameterManager.config = config;
 
     if (config.globalParams) {
@@ -71,7 +72,7 @@ export class ParameterManager {
     customLogger = logger
   ) {
     if (
-      ParameterManager.config?.validation?.disableAll === true || 
+      ParameterManager.config?.validation?.disableAll === true ||
       ParameterManager.config?.validation?.parameters === false
     ) {
       return undefined;
@@ -118,7 +119,11 @@ export class ParameterManager {
     }
 
     // Validate the cleaned parameters
-    this.isValid = ParameterManager.validate(endpoint.type, cleanParams, this.logger);
+    this.isValid = ParameterManager.validate(
+      endpoint.type,
+      cleanParams,
+      this.logger
+    );
 
     // Construct the final parameters object by merging global, default, and specific parameters
     const finalParams = {
@@ -140,9 +145,7 @@ export class ParameterManager {
    * @param params - The parameters to be cleaned.
    * @returns A new object with undefined values removed.
    */
-  private omitUndefined<E extends Endpoint>(
-    params: Params<E>
-  ): Params<E> {
+  private omitUndefined<E extends Endpoint>(params: Params<E>): Params<E> {
     // Create a new object by filtering out undefined values
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined)

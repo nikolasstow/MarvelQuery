@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { EndpointMap } from "../types/endpoint-types";
-import { FormatSchema, YearSchema } from "./schema-utilities";
-import { EndpointType } from "lib";
+import { YearSchema } from "./schema-utilities";
 
 // API Wrapper Schema
 export const APIWrapperSchema = z.object({

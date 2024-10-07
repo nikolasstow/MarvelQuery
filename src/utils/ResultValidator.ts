@@ -1,9 +1,15 @@
-import { Endpoint, EndpointDescriptor } from "../models/types/endpoint-types";
-import { APIResult, APIWrapper } from "../models/types/data-types";
-import { CustomLogger } from "./Logger";
-import { APIWrapperSchema, ResultSchemaMap } from "../models/schemas/data-schemas";
 import { ZodError } from "zod";
-import { MarvelResult } from "lib";
+import { Endpoint, EndpointDescriptor } from "../models/types/endpoint-types";
+import {
+  APIResult,
+  APIWrapper,
+  MarvelResult,
+} from "../models/types/data-types";
+import { CustomLogger } from "./Logger";
+import {
+  APIWrapperSchema,
+  ResultSchemaMap,
+} from "../models/schemas/data-schemas";
 
 /**
  * Class responsible for validating the query results against predefined schemas.
@@ -15,7 +21,9 @@ export class ResultValidator<E extends Endpoint> {
   logger: CustomLogger;
   allValid: boolean = true;
 
-  static assertAPIResponse<T extends MarvelResult>(response: unknown): asserts response is APIWrapper<T> {
+  static assertAPIResponse<T extends MarvelResult>(
+    response: unknown
+  ): asserts response is APIWrapper<T> {
     if (!APIWrapperSchema.safeParse(response).success) {
       throw new Error("Invalid API response");
     }
@@ -47,7 +55,6 @@ export class ResultValidator<E extends Endpoint> {
       }
 
       const errorMap = new Map<string, number[]>();
-
 
       // Array to collect log messages for failed result items
       const failedItemsLogs: string[] = [];
@@ -97,7 +104,10 @@ export class ResultValidator<E extends Endpoint> {
    * @param errorMap - A map of errors and the indices where they occurred.
    * @param totalResults - The total number of results processed.
    */
-  private logValidationErrors(errorMap: Map<string, number[]>, totalResults: number) {
+  private logValidationErrors(
+    errorMap: Map<string, number[]>,
+    totalResults: number
+  ) {
     if (errorMap.size === 0) {
       this.logger.verbose("All results validated successfully");
       return;
@@ -118,7 +128,9 @@ export class ResultValidator<E extends Endpoint> {
       // Log the grouped indices and error message
       if (groupedIndices.length > 1) {
         this.logger.verbose(
-          `Validation failed for results at indices ${groupedIndices.join(', ')}:`,
+          `Validation failed for results at indices ${groupedIndices.join(
+            ", "
+          )}:`,
           JSON.parse(error)
         );
       } else {

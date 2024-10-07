@@ -17,11 +17,11 @@ import {
   ExtendResult,
   ExtendType,
   ResourceEndpointFromKey,
+  InitQuery,
 } from "../models/types/autoquery-types";
 import { Collection, Resource, APIResult } from "../models/types/data-types";
 import { Params } from "../models/types/param-types";
 import { EndpointBuilder } from "./EndpointBuilder";
-import { InitQuery } from "../models/types/autoquery-types";
 import { MarvelQueryInit } from "../models/types/interface";
 import { AutoQuerySchemaMap } from "../models/schemas/autoquery-schemas";
 import { Config } from "../models/types/config-types";

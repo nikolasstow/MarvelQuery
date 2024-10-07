@@ -1,9 +1,7 @@
-import { Metadata, APIWrapper } from "./data-types";
-import { ExtendResult, Result } from "./autoquery-types";
-import { APIResult } from "./data-types";
+import { Metadata, APIWrapper, APIResult} from "./data-types";
+import { Result } from "./autoquery-types";
 import { Params } from "./param-types";
-import { Endpoint } from "./endpoint-types";
-import { EndpointDescriptor } from "./endpoint-types";
+import { Endpoint, EndpointDescriptor } from "./endpoint-types";
 
 export interface MarvelQueryInit<E extends Endpoint, AQ extends boolean> {
   autoQuery: boolean;

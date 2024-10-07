@@ -1,5 +1,4 @@
 import {
-  APIWrapper,
   MarvelCharacter,
   MarvelComic,
   MarvelCreator,
@@ -7,11 +6,9 @@ import {
   MarvelResult,
   MarvelSeries,
   MarvelStory,
+  ResultMap,
 } from "./data-types";
-import { APIBaseParams, Params } from "./param-types";
-import { ResultMap } from "./data-types";
-import { ParameterMap } from "./param-types";
-import { APIResult } from "./data-types";
+import { APIBaseParams, Params, ParameterMap } from "./param-types";
 import { AsEndpoint, Endpoint, EndpointType } from "./endpoint-types";
 import { MarvelQueryInstance } from "./interface";
 

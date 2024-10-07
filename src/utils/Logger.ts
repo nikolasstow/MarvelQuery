@@ -1,9 +1,9 @@
+import * as winston from "winston";
+import "winston-daily-rotate-file";
+import { stringify as flattedStringify } from "flatted";
 import { format } from "date-fns";
 import { performance } from "perf_hooks";
 import { ConfigOptions } from "../models/types/config-types";
-import * as winston from "winston";
-import "winston-daily-rotate-file";
-import { stringify as flattedStringify } from 'flatted';
 
 /**
  * Interface for the custom logger that extends Winston's Logger.
@@ -56,7 +56,6 @@ export interface CustomLogger extends winston.Logger {
    */
   identify: (id: string) => CustomLogger;
 }
-
 
 /**
  * Interface for the performance timer object.
@@ -119,46 +118,52 @@ export class Logger {
       format: winston.format.combine(
         winston.format.colorize(), // Colorize the log output
         winston.format.timestamp(), // Add timestamp to the log
-        winston.format.printf(({ timestamp, level, message, queryId, ...meta }) => {
-          const time = new Date().toLocaleTimeString();
-          const metaString = Object.keys(meta).length
-            ? flattedStringify(meta, undefined, 2)
-            : "";
+        winston.format.printf(
+          ({ timestamp, level, message, queryId, ...meta }) => {
+            const time = new Date().toLocaleTimeString();
+            const metaString = Object.keys(meta).length
+              ? flattedStringify(meta, undefined, 2)
+              : "";
 
-          // Create identifier string with a unique background color based on query ID
-          const identifier = queryId ? this.getColorFromId(queryId) : "-";
+            // Create identifier string with a unique background color based on query ID
+            const identifier = queryId ? this.getColorFromId(queryId) : "-";
 
-          // Remove ANSI escape codes from the level (for cleaner output)
-          const levelString = level.replace(/\x1B\[([0-9;]*[A-Za-z])/g, "");
-          // Show level in logs unless it's verbose
-          const levelId = levelString === "verbose" ? "" : `[${level}]`;
+            // Remove ANSI escape codes from the level (for cleaner output)
+            const levelString = level.replace(/\x1B\[([0-9;]*[A-Za-z])/g, "");
+            // Show level in logs unless it's verbose
+            const levelId = levelString === "verbose" ? "" : `[${level}]`;
 
-          // Format log message and truncate if it exceeds the line/length limits
-          let logMessage = `${time} ${levelId}${identifier} ${message} ${metaString}`;
-          const lines = logMessage.split("\n");
-          const truncatedLines: string[] = [];
+            // Format log message and truncate if it exceeds the line/length limits
+            let logMessage = `${time} ${levelId}${identifier} ${message} ${metaString}`;
+            const lines = logMessage.split("\n");
+            const truncatedLines: string[] = [];
 
-          let currentLineCount = 0;
-          for (const line of lines) {
-            const wrappedLineCount = Math.ceil(line.length / Logger.maxLineLength);
-            if (currentLineCount + wrappedLineCount > Logger.maxLines) {
-              truncatedLines.push(line.slice(0, Logger.maxLineLength) + "...");
-              truncatedLines.push(
-                `\n──────────────────────────────────────────────────────────────────────────\n`
+            let currentLineCount = 0;
+            for (const line of lines) {
+              const wrappedLineCount = Math.ceil(
+                line.length / Logger.maxLineLength
               );
-              truncatedLines.push(
-                `Message truncated. Please see the full log in: ${logFilePath}`
-              );
-              break;
-            } else {
-              truncatedLines.push(line);
-              currentLineCount += wrappedLineCount;
+              if (currentLineCount + wrappedLineCount > Logger.maxLines) {
+                truncatedLines.push(
+                  line.slice(0, Logger.maxLineLength) + "..."
+                );
+                truncatedLines.push(
+                  `\n──────────────────────────────────────────────────────────────────────────\n`
+                );
+                truncatedLines.push(
+                  `Message truncated. Please see the full log in: ${logFilePath}`
+                );
+                break;
+              } else {
+                truncatedLines.push(line);
+                currentLineCount += wrappedLineCount;
+              }
             }
-          }
 
-          logMessage = truncatedLines.join("\n") + "\n";
-          return logMessage;
-        })
+            logMessage = truncatedLines.join("\n") + "\n";
+            return logMessage;
+          }
+        )
       ),
     });
 
@@ -167,29 +172,37 @@ export class Logger {
       level: "info",
       format: winston.format.combine(
         winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-        winston.format.printf(({ timestamp, level, message, queryId, ...meta }) => {
-          const { timestamp: _, level: __, message: ___, ...cleanMeta } = meta;
+        winston.format.printf(
+          ({ timestamp, level, message, queryId, ...meta }) => {
+            const {
+              timestamp: _,
+              level: __,
+              message: ___,
+              ...cleanMeta
+            } = meta;
 
-          const metaString = Object.keys(cleanMeta).length
-            ? flattedStringify(cleanMeta, undefined, 2)
-            : "";
+            const metaString = Object.keys(cleanMeta).length
+              ? flattedStringify(cleanMeta, undefined, 2)
+              : "";
 
-          const identifier = queryId ? ` (Q${queryId})` : "";
+            const identifier = queryId ? ` (Q${queryId})` : "";
 
-          // Format log message with timestamp, level, message, and metadata
-          let logMessage = `${timestamp} [${level.toUpperCase()}]${identifier} - ${message}\n${metaString}`;
+            // Format log message with timestamp, level, message, and metadata
+            let logMessage = `${timestamp} [${level.toUpperCase()}]${identifier} - ${message}\n${metaString}`;
 
-          // Deduplicate logs by storing the unique key in recentLogs set
-          const deduplicationKey = `${level}:${message}:${metaString}`;
-          if (this.recentLogs.has(deduplicationKey)) {
-            return ""; // Return empty if the message is a duplicate
+            // Deduplicate logs by storing the unique key in recentLogs set
+            const deduplicationKey = `${level}:${message}:${metaString}`;
+            if (this.recentLogs.has(deduplicationKey)) {
+              return ""; // Return empty if the message is a duplicate
+            }
+
+            this.recentLogs.add(deduplicationKey);
+            if (!Logger.isTestEnv)
+              setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000); // Remove after 1 minute
+
+            return logMessage;
           }
-
-          this.recentLogs.add(deduplicationKey);
-          if (!Logger.isTestEnv) setTimeout(() => this.recentLogs.delete(deduplicationKey), 60000); // Remove after 1 minute
-
-          return logMessage;
-        })
+        )
       ),
       transports: [consoleTransport, dailyRotateFileTransport],
     }) as CustomLogger;
@@ -219,13 +232,28 @@ export class Logger {
    */
   private getColorFromId(id: string): string {
     const standardBackgroundColors = [
-      40, 41, 42, 43, 44, 45, 46, 47, // Standard colors
-      100, 101, 102, 103, 104, 105, 106, 107, // Bright colors
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47, // Standard colors
+      100,
+      101,
+      102,
+      103,
+      104,
+      105,
+      106,
+      107, // Bright colors
     ];
 
     // Convert ID to an integer and map it to one of the colors
     const numericId = parseInt(id, 10);
-    const colorCode = standardBackgroundColors[numericId % standardBackgroundColors.length];
+    const colorCode =
+      standardBackgroundColors[numericId % standardBackgroundColors.length];
 
     // Return the ID string with the background color applied
     return `\x1b[${colorCode}m Q${id} \x1b[0m`;
@@ -260,7 +288,9 @@ export class Logger {
     Logger.instance.logger.level = verbose ? "verbose" : "info";
   }
 
-  static setConfig<AQ extends boolean, HP extends boolean>(config: ConfigOptions<AQ, HP>) {
+  static setConfig<AQ extends boolean, HP extends boolean>(
+    config: ConfigOptions<AQ, HP>
+  ) {
     Logger.maxLines = config.logOptions?.maxLines ?? 23;
     Logger.maxLineLength = config.logOptions?.maxLineLength ?? 500;
     Logger.setVerbose(config.logOptions?.verbose ?? false);
@@ -276,7 +306,10 @@ export class Logger {
    * @param customLogger - Optional custom logger to use for logging.
    * @returns An object with `startTime` and a `stop` method.
    */
-  private performance(message?: string, customLogger?: CustomLogger): PerformanceTimer {
+  private performance(
+    message?: string,
+    customLogger?: CustomLogger
+  ): PerformanceTimer {
     const logger = customLogger ?? this.logger;
     const startTime = performance.now();
     if (message) {
@@ -289,7 +322,9 @@ export class Logger {
         const formattedMessage = stopMessage ? `${stopMessage}. ` : "";
 
         // Log the duration of the task
-        logger.verbose(`${formattedMessage}Duration: ${this.formatDuration(duration)}`);
+        logger.verbose(
+          `${formattedMessage}Duration: ${this.formatDuration(duration)}`
+        );
 
         return duration;
       },
@@ -308,7 +343,9 @@ export class Logger {
     descriptor: TypedPropertyDescriptor<any>
   ): void {
     if (descriptor === undefined || typeof descriptor.value !== "function") {
-      throw new Error(`measurePerformance can only be used on methods, not on: ${key}`);
+      throw new Error(
+        `measurePerformance can only be used on methods, not on: ${key}`
+      );
     }
 
     const originalMethod = descriptor.value;
