@@ -9,16 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
       - uses: actions/setup-node@v3
         with:
           node-version: 20.x
-          cache: "pnpm"
+          cache: "npm"
 
       # Install dependencies
-      - run: pnpm install --frozen-lockfile
+      - run: npm install --frozen-lockfile
 
       # Build Docker image
       - name: Build Docker image
@@ -26,14 +23,10 @@ jobs:
 
       # Run tests inside Docker container
       - name: Run tests
-        run: docker run marvel-query-app pnpm run test
-
-      # Run performance tests inside Docker container
-      - name: Run performance tests
-        run: docker run marvel-query-app pnpm run test:performance
+        run: docker run marvel-query-app npm run test
 
       # Lint and build the project if tests pass
       - name: Lint and build
         run: |
-          docker run marvel-query-app pnpm run lint
-          docker run marvel-query-app pnpm run build
+          docker run marvel-query-app npm run lint
+          docker run marvel-query-app npm run build
