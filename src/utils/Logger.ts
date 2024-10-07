@@ -85,6 +85,8 @@ export class Logger {
   private static maxLines: number = 23;
   private static maxLineLength: number = 500;
   private static isTestEnv: boolean = false;
+  private static maxSize: string = "20m";
+  private static maxFiles: string = "14d";
   /** Set to store recent logs to prevent duplicate messages */
   recentLogs: Set<string> = new Set<string>();
   /** The custom Winston logger instance */
@@ -107,8 +109,8 @@ export class Logger {
     const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
       filename: "logs/marvelquery-%DATE%.log",
       datePattern: "YYYY-MM-DD",
-      maxSize: "20m",
-      maxFiles: "14d", // Keep logs for the last 14 days
+      maxSize: Logger.maxSize,
+      maxFiles: Logger.maxFiles,
       level: "verbose", // Log level for file output
     });
 
@@ -263,6 +265,8 @@ export class Logger {
     Logger.maxLineLength = config.logOptions?.maxLineLength ?? 500;
     Logger.setVerbose(config.logOptions?.verbose ?? false);
     Logger.isTestEnv = config.isTestEnv ?? false;
+    Logger.maxSize = config.logOptions?.maxFileSize ?? "20m";
+    Logger.maxFiles = config.logOptions?.maxFiles ?? "14d";
   }
 
   /**

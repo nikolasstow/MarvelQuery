@@ -15,7 +15,7 @@ import { APIResult } from "./data-types";
 import { AsEndpoint, Endpoint, EndpointType } from "./endpoint-types";
 import { MarvelQueryInstance } from "./interface";
 
-/** The public and private keys for the API. */
+/** The public and private keys for the API. Don't have one? Get one at https://developer.marvel.com/ */
 export interface APIKeys {
   /** Marvel API public key. Don't have one? Get one at https://developer.marvel.com/ */
   publicKey: string;
@@ -29,12 +29,19 @@ export type ShowHiddenProperties = true;
 
 export type Config = ConfigOptions<boolean, boolean>;
 
-/** Arguments for initialization of the API */
+export interface ValidationOptions {
+  /** Enable/Disable all validators */
+  disableAll?: boolean;
+  /** Enable/Disable parameter validation */
+  parameters?: boolean;
+  /** Enable/Disable response validation (returned data) */
+  apiResponse?: boolean;
+  /** Enable/Disable AutoQuery validation (if AutoQuery injection is turned on) */
+  autoQuery?: boolean;
+}
+
+/** Arguments for initialization of the API. [Learn More...](configuration.md) */
 export interface ConfigOptions<A extends boolean, H extends boolean> {
-  /** By default properties that relate to results of a query are hidden, 
-   * and the fetch() method returns the instance with those properties now visible.
-   * Enable this option to always show these properties. */
-  showHiddenProperties: H;
   /** Is AutoQuery Enabled? */
   autoQuery: A;
   /** Global parameters to be applied to all queries, or all queries of a specific type.
@@ -65,16 +72,11 @@ export interface ConfigOptions<A extends boolean, H extends boolean> {
   /** Flag for test enviroment */
   isTestEnv?: boolean;
   /** Enable/Disable all or some validators (all enabled by default) */
-  validation?: {
-    /** Enable/Disable all validators */
-    disableAll?: boolean;
-    /** Enable/Disable parameter validation */
-    parameters?: boolean;
-    /** Enable/Disable response validation (returned data) */
-    apiResponse?: boolean;
-    /** Enable/Disable AutoQuery validation (if AutoQuery injection is turned on) */
-    autoQuery?: boolean;
-  };
+  validation?: ValidationOptions;
+  /** By default properties that relate to results of a query are hidden,
+   * and the fetch() method returns the instance with those properties now visible.
+   * Enable this option to always show these properties. */
+  showHiddenProperties: H;
 }
 
 /** Global parameters, 'all' parameters are applied to all queries of any type unless overridden.
@@ -114,6 +116,12 @@ export interface LogOptions {
   maxLines?: number;
   /** Maximum length of a line in a log message. */
   maxLineLength?: number;
+  /** Save logs to files. */
+  saveToFile?: boolean;
+  /** Maximum size of a log file in bytes. */
+  maxFileSize?: string;
+  /** Maximum number of log files, or number of days with suffx 'd' (ex. "14d" is 14 days) */
+  maxFiles?: string;
 }
 
 /**
@@ -131,9 +139,7 @@ export type AnyResultFunction = OnResultFunction<
 >;
 
 /** Replace the default HTTP client with one of your choosing. */
-export type HTTPClient = (
-  url: string
-) => Promise<unknown>;
+export type HTTPClient = (url: string) => Promise<unknown>;
 
 /**
  * Creates a new instance of the MarvelQuery class.
@@ -143,7 +149,9 @@ export type HTTPClient = (
  * @param params Optional parameters for the query.
  * @returns A new instance of MarvelQueryInterface for the specified endpoint.
  */
-export type CreateQueryFunction<AQ extends boolean, HP extends boolean> = <T extends Endpoint | EndpointType>(
+export type CreateQueryFunction<AQ extends boolean, HP extends boolean> = <
+  T extends Endpoint | EndpointType
+>(
   endpoint: T,
   params?: Params<AsEndpoint<T>>
-) => MarvelQueryInstance<AsEndpoint<T>, AQ, HP>
+) => MarvelQueryInstance<AsEndpoint<T>, AQ, HP>;

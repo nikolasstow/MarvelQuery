@@ -61,6 +61,42 @@ type ReturnType<T extends EndpointType> =
   | ExtendResult<EndpointFromType<T>> // [T]
   | ExtendResult<NewEndpoint<EndpointFromType<ExcludeEndpointType<T>>, T>>;
 
+/**| Property             | Type                                              | Description                                                  |
+ * | -------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+ * | `endpoint`           | `Endpoint`                                        | The endpoint path as a tuple.                                |
+ * | `query()`            |                                                   |                                                              |
+ * | `fetch()`            |                                                   |                                                              |
+ * | `fetchSingle()`      |                                                   |                                                              |
+ * | `id`                 | `number`                                          | The unique ID of the comic resource.                         |
+ * | `resourceURI`        | `string`                                          | The canonical URL identifier for this resource.              |
+ * | `modified`           | `string`                                          | The date the resource was most recently modified.            |
+ * | `urls`               | [`URL[]`](data-types.md/#url)                     | A set of public web site URLs for the resource.              |
+ * | `thumbnail`          | [`Image`](data-types.md/#image)                   | The representative image for this comic.                     |
+ * | `digitalId`          | `number`                                          | The ID of the digital comic representation of this comic. Will be 0 if the comic is not available digitally. |
+ * | `title`              | `string`                                          | The canonical title of the comic.                            |
+ * | `issueNumber`        | `number`                                          | The number of the issue in the series (will generally be 0 for collection formats). |
+ * | `variantDescription` | `string`                                          | If the issue is a variant (e.g. an alternate cover, second printing, or director’s cut), a text description of the variant. |
+ * | `description`        | `string`                                          | The preferred description of the comic.                      |
+ * | `isbn`               | `string`                                          | The ISBN for the comic (generally only populated for collection formats). |
+ * | `upc`                | `string`                                          | The UPC barcode number for the comic (generally only populated for periodical formats). |
+ * | `diamondCode`        | `string`                                          | The Diamond code for the comic.                              |
+ * | `ean`                | `string`                                          | The EAN barcode for the comic.                               |
+ * | `issn`               | `string`                                          | The ISSN barcode for the comic.                              |
+ * | `format`             | [`Format`](api-parameters.md/#format)             | The format of the comic e.g. comic, digital comic, hardcover, trade paperback. |
+ * | `pageCount`          | `number`                                          | The number of pages in the comic.                            |
+ * | `textObjects`        | [`TextObject[]`](data-types.md/#textobject)       | A set of descriptive text blurbs for the comic.              |
+ * | `series`             | [`SeriesSummary[]`](data-types.md/#seriessummary) | A summary representation of the series to which this comic belongs. |
+ * | `variants`           | [`ComicSummary[]`](data-types.md#comicsummary)    | A list of variant issues for this comic (includes the "original" issue if the current issue is a variant). |
+ * | `collections`        | [`ComicSummary[]`](data-types.md#comicsummary)    | A list of collections which include this comic (will generally be empty if the comic's format is a collection). |
+ * | `collectedIssues`    | [`ComicSummary[]`](data-types.md#comicsummary)    | A list of issues collected in this comic (will generally be empty for periodical formats such as "comic" or "magazine" |
+ * | `dates`              | [`ComicDate[]`](data-types.md#comicdate)          | A list of key dates for this comic.                          |
+ * | `prices`             | [`ComicPrice[]`](data-types.md#comicprice)        | A list of prices for this comic.                             |
+ * | `images`             | [`Image[]`](data-types.md#image`)                 | A list of promotional images associated with this comic.     |
+ * | `creators`           | [`CreatorList[]`](data-types.md#creatorlist)      | A resource list containing the creators associated with this comic. |
+ * | `characters`         | [`CharacterList[]`](data-types.md#characterlist)  | A resource list containing the characters in this comic.     |
+ * | `stories`            | [`StoryList[]`](data-types.md#storylist)          | A resource list containing the stories which appear in this comic. |
+ * | `events`             | [`EventList[]`](data-types.md#eventlist)          | A resource list containing the events in which this comic appears. |
+ */
 export type Comic = ReturnType<"comics">;
 export type Character = ReturnType<"characters">;
 export type Creator = ReturnType<"creators">;
@@ -158,102 +194,102 @@ export type CharacterSummary = z.infer<typeof RoleSummarySchema>;
  * | `name`        | `string` | The name of the event.                     |
  */
 export type EventSummary = z.infer<typeof SummarySchema>;
-/**| Property        | Type                  | Description
- * | --------------- | --------------------- | ------------------------------------------------------------
- * | `available`     | `number`              | The number of total available resources in this list. Will always be greater than or equal to the "returned" value.
- * | `returned`      | `number`              | The number of resources returned in this collection (up to 20).
- * | `collectionURI` | `string`              | The path to the full list of items in this collection.
- * | `items`         | `Summary`             | The list of returned issues in this collection.
+/**| Property        | Type       -------------           | Description
+ * | --------------- | ---------------------------------- | ------------------------------------------------------------
+ * | `available`     | `number`                           | The number of total available resources in this list. Will always be greater than or equal to the "returned" value.
+ * | `returned`      | `number`                           | The number of resources returned in this collection (up to 20).
+ * | `collectionURI` | `string`                           | The path to the full list of items in this collection.
+ * | `items`         | [`Summary`](data-types.md#summary) | The list of returned issues in this collection.
  */
 export type Collection = z.infer<typeof ListSchema>;
-/**| Property        | Type                            | Description                                                  |
- * | --------------- | ------------------------------- | ------------------------------------------------------------ |
- * | `available`     | `number`                        | The number of total available issues in this list. Will always be greater than or equal to the "returned" value. |
- * | `returned`      | `number`                        | The number of issues returned in this collection (up to 20). |
- * | `collectionURI` | `string`                        | The path to the full list of issues in this collection.      |
- * | `items`         | `ComicSummary`                  | The list of returned issues in this collection.              |
+/**| Property        | Type                                         | Description                                                  |
+ * | --------------- | -------------------------------------------- | ------------------------------------------------------------ |
+ * | `available`     | `number`                                     | The number of total available issues in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                                     | The number of issues returned in this collection (up to 20). |
+ * | `collectionURI` | `string`                                     | The path to the full list of issues in this collection.      |
+ * | `items`         | [`ComicSummary`](data-types.md#comicsummary) | The list of returned issues in this collection.              |
  */
 export type ComicList = z.infer<typeof ComicListSchema>;
-/**| Property        | Type                            | Description
- * | --------------- | ------------------------------- | ------------------------------------------------------------
- * | `available`     | `number`                        | The number of total available stories in this list. Will always be greater than or equal to the "returned" value. |
- * | `returned`      | `number`                        | The number of stories returned in this collection (up to 20).
- * | `collectionURI` | `string`                        | The path to the full list of stories in this collection.
- * | `items`         | `StorySummary`                  | The list of returned stories in this collection.
+/**| Property        | Type                                         | Description
+ * | --------------- | -------------------------------------------- | ------------------------------------------------------------
+ * | `available`     | `number`                                     | The number of total available stories in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                                     | The number of stories returned in this collection (up to 20).
+ * | `collectionURI` | `string`                                     | The path to the full list of stories in this collection.
+ * | `items`         | [`StorySummary`](data-types.md#storysummary) | The list of returned stories in this collection.
  */
 export type StoryList = z.infer<typeof StoryListSchema>;
-/**| Property        | Type                              | Description                                                  |
- * | --------------- | --------------------------------- | ------------------------------------------------------------ |
- * | `available`     | `number`                          | The number of total available series in this list. Will always be greater than or equal to the "returned" value. |
- * | `returned`      | `number`                          | The number of series returned in this collection (up to 20). |
- * | `collectionURI` | `string`                          | The path to the full list of series in this collection.      |
- * | `items`         | `SeriesSummary`                   | The list of returned series in this collection.              |
+/**| Property        | Type                                           | Description                                                  |
+ * | --------------- | ---------------------------------------------- | ------------------------------------------------------------ |
+ * | `available`     | `number`                                       | The number of total available series in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                                       | The number of series returned in this collection (up to 20). |
+ * | `collectionURI` | `string`                                       | The path to the full list of series in this collection.      |
+ * | `items`         | [`SeriesSummary`](data-types.md#seriessummary) | The list of returned series in this collection.              |
  */
 export type SeriesList = z.infer<typeof SeriesListSchema>;
-/**| Property        | Type                            | Description                                                  |
- * | --------------- | ------------------------------- | ------------------------------------------------------------ |
- * | `available`     | `number`                        | The number of total available events in this list. Will always be greater than or equal to the "returned" value. |
- * | `returned`      | `number`                        | The number of events returned in this collection (up to 20). |
- * | `collectionURI` | `string`                        | The path to the full list of events in this collection.      |
- * | `items`         | `EventSummary`                  | The list of returned events in this collection.              |
+/**| Property        | Type                                         | Description                                                  |
+ * | --------------- | -------------------------------------------- | ------------------------------------------------------------ |
+ * | `available`     | `number`                                     | The number of total available events in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                                     | The number of events returned in this collection (up to 20). |
+ * | `collectionURI` | `string`                                     | The path to the full list of events in this collection.      |
+ * | `items`         | [`EventSummary`](data-types.md#eventsummary) | The list of returned events in this collection.              |
  */
 export type EventList = z.infer<typeof EventListSchema>;
-/**| Property        | Type                                | Description                                                  |
- * | --------------- | ----------------------------------- | ------------------------------------------------------------ |
- * | `available`     | `number`                            | The number of total available creators in this list. Will always be greater than or equal to the "returned" value. |
- * | `returned`      | `number`                            | The number of creators returned in this collection (up to 20). |
- * | `collectionURI` | `string`                            | The path to the full list of creators in this collection.    |
- * | `items`         | `CreatorSummary`                    | The list of returned creators in this collection.            |
+/**| Property        | Type                                             | Description                                                  |
+ * | --------------- | ------------------------------------------------ | ------------------------------------------------------------ |
+ * | `available`     | `number`                                         | The number of total available creators in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                                         | The number of creators returned in this collection (up to 20). |
+ * | `collectionURI` | `string`                                         | The path to the full list of creators in this collection.    |
+ * | `items`         | [`CreatorSummary`](data-types.md#creatorsummary) | The list of returned creators in this collection.            |
  */
 export type CreatorList = z.infer<typeof CreatorListSchema>;
-/**| Property        | Type                                    | Description                                                  |
- * | --------------- | --------------------------------------- | ------------------------------------------------------------ |
- * | `available`     | `number`                                | The number of total available characters in this list. Will always be greater than or equal to the "returned" value. |
- * | `returned`      | `number`                                | The number of characters returned in this collection (up to 20). |
- * | `collectionURI` | `string`                                | The path to the full list of characters in this collection.  |
+/**| Property        | Type                                                 | Description                                                  |
+ * | --------------- | ---------------------------------------------------- | ------------------------------------------------------------ |
+ * | `available`     | `number`                                             | The number of total available characters in this list. Will always be greater than or equal to the "returned" value. |
+ * | `returned`      | `number`                                             | The number of characters returned in this collection (up to 20). |
+ * | `collectionURI` | `string`                                             | The path to the full list of characters in this collection.  |
  * | `items`         | [`CharacterSummary`](data-types.md#charactersummary) | The list of returned characters in this collection.          |
  */
 export type CharacterList = z.infer<typeof CharacterListSchema>;
-/**| Property      | Type              | Description                                       |
- * | ------------- | ----------------- | ------------------------------------------------- |
- * | `id`          | `number`          | The unique ID of the resource.                    |
- * | `resourceURI` | `string`          | The canonical URL identifier for this resource.   |
- * | `modified`    | `string`          | The date the resource was most recently modified. |
- * | `urls`        | `URL[]`           | A set of public web site URLs for the resource.   |
- * | `thumbnail`   | `Image`           | The representative image for this item. 
+/**| Property      | Type                          | Description                                       |
+ * | ------------- | ----------------------------- | ------------------------------------------------- |
+ * | `id`          | `number`                      | The unique ID of the resource.                    |
+ * | `resourceURI` | `string`                      | The canonical URL identifier for this resource.   |
+ * | `modified`    | `string`                      | The date the resource was most recently modified. |
+ * | `urls`        | [`URL[]`](data-types.md/#url) | A set of public web site URLs for the resource.   |
+ * | `thumbnail`   | [`Image`](data-types.md/#image) | The representative image for this item. 
  */
 export type MarvelResult = z.infer<typeof MarvelResultSchema>;
-/**| Property             | Type                                | Description                                                  |
- * | -------------------- | ----------------------------------- | ------------------------------------------------------------ |
- * | `id`                 | `number`                            | The unique ID of the comic resource.                         |
- * | `resourceURI`        | `string`                            | The canonical URL identifier for this resource.              |
- * | `modified`           | `string`                            | The date the resource was most recently modified.            |
- * | `urls`               | `URL[]`                    | A set of public web site URLs for the resource.              |
- * | `thumbnail`          | `Image`                 | The representative image for this comic.                     |
- * | `digitalId`          | `number`                            | The ID of the digital comic representation of this comic. Will be 0 if the comic is not available digitally. |
- * | `title`              | `string`                            | The canonical title of the comic.                            |
- * | `issueNumber`        | `number`                            | The number of the issue in the series (will generally be 0 for collection formats). |
- * | `variantDescription` | `string`                            | If the issue is a variant (e.g. an alternate cover, second printing, or director’s cut), a text description of the variant. |
- * | `description`        | `string`                            | The preferred description of the comic.                      |
- * | `isbn`               | `string`                            | The ISBN for the comic (generally only populated for collection formats). |
- * | `upc`                | `string`                            | The UPC barcode number for the comic (generally only populated for periodical formats). |
- * | `diamondCode`        | `string`                            | The Diamond code for the comic.                              |
- * | `ean`                | `string`                            | The EAN barcode for the comic.                               |
- * | `issn`               | `string`                            | The ISSN barcode for the comic.                              |
- * | `format`             | `Format`               | The format of the comic e.g. comic, digital comic, hardcover, trade paperback. |
- * | `pageCount`          | `number`                            | The number of pages in the comic.                            |
- * | `textObjects`        | `TextObject[]`       | A set of descriptive text blurbs for the comic.              |
- * | `series`             | `SeriesSummary`   | A summary representation of the series to which this comic belongs. |
- * | `variants`           | [`ComicSummary[]`](data-types.md#comicsummary)   | A list of variant issues for this comic (includes the "original" issue if the current issue is a variant). |
- * | `collections`        | [`ComicSummary[]`](data-types.md#comicsummary)   | A list of collections which include this comic (will generally be empty if the comic's format is a collection). |
- * | `collectedIssues`    | [`ComicSummary[]`](data-types.md#comicsummary)   | A list of issues collected in this comic (will generally be empty for periodical formats such as "comic" or "magazine" |
- * | `dates`              | [`ComicDate[]`](data-types.md#comicdate)         | A list of key dates for this comic.                          |
- * | `prices`             | [`ComicPrice[]`](data-types.md#comicprice)       | A list of prices for this comic.                             |
- * | `images`             | [`Image[]`](data-types.md#image`)                | A list of promotional images associated with this comic.     |
- * | `creators`           | [`CreatorList[]`](data-types.md#creatorlist)     | A resource list containing the creators associated with this comic. |
- * | `characters`         | [`CharacterList[]`](data-types.md#characterlist) | A resource list containing the characters in this comic.     |
- * | `stories`            | [`StoryList[]`](data-types.md#storylist)         | A resource list containing the stories which appear in this comic. |
- * | `events`             | [`EventList[]`](data-types.md#eventlist)         | A resource list containing the events in which this comic appears. |
+/**| Property             | Type                                              | Description                                                  |
+ * | -------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
+ * | `id`                 | `number`                                          | The unique ID of the comic resource.                         |
+ * | `resourceURI`        | `string`                                          | The canonical URL identifier for this resource.              |
+ * | `modified`           | `string`                                          | The date the resource was most recently modified.            |
+ * | `urls`               | [`URL[]`](data-types.md/#url)                     | A set of public web site URLs for the resource.              |
+ * | `thumbnail`          | [`Image`](data-types.md/#image)                   | The representative image for this comic.                     |
+ * | `digitalId`          | `number`                                          | The ID of the digital comic representation of this comic. Will be 0 if the comic is not available digitally. |
+ * | `title`              | `string`                                          | The canonical title of the comic.                            |
+ * | `issueNumber`        | `number`                                          | The number of the issue in the series (will generally be 0 for collection formats). |
+ * | `variantDescription` | `string`                                          | If the issue is a variant (e.g. an alternate cover, second printing, or director’s cut), a text description of the variant. |
+ * | `description`        | `string`                                          | The preferred description of the comic.                      |
+ * | `isbn`               | `string`                                          | The ISBN for the comic (generally only populated for collection formats). |
+ * | `upc`                | `string`                                          | The UPC barcode number for the comic (generally only populated for periodical formats). |
+ * | `diamondCode`        | `string`                                          | The Diamond code for the comic.                              |
+ * | `ean`                | `string`                                          | The EAN barcode for the comic.                               |
+ * | `issn`               | `string`                                          | The ISSN barcode for the comic.                              |
+ * | `format`             | [`Format`](api-parameters.md/#format)             | The format of the comic e.g. comic, digital comic, hardcover, trade paperback. |
+ * | `pageCount`          | `number`                                          | The number of pages in the comic.                            |
+ * | `textObjects`        | [`TextObject[]`](data-types.md/#textobject)       | A set of descriptive text blurbs for the comic.              |
+ * | `series`             | [`SeriesSummary[]`](data-types.md/#seriessummary) | A summary representation of the series to which this comic belongs. |
+ * | `variants`           | [`ComicSummary[]`](data-types.md#comicsummary)    | A list of variant issues for this comic (includes the "original" issue if the current issue is a variant). |
+ * | `collections`        | [`ComicSummary[]`](data-types.md#comicsummary)    | A list of collections which include this comic (will generally be empty if the comic's format is a collection). |
+ * | `collectedIssues`    | [`ComicSummary[]`](data-types.md#comicsummary)    | A list of issues collected in this comic (will generally be empty for periodical formats such as "comic" or "magazine" |
+ * | `dates`              | [`ComicDate[]`](data-types.md#comicdate)          | A list of key dates for this comic.                          |
+ * | `prices`             | [`ComicPrice[]`](data-types.md#comicprice)        | A list of prices for this comic.                             |
+ * | `images`             | [`Image[]`](data-types.md#image`)                 | A list of promotional images associated with this comic.     |
+ * | `creators`           | [`CreatorList[]`](data-types.md#creatorlist)      | A resource list containing the creators associated with this comic. |
+ * | `characters`         | [`CharacterList[]`](data-types.md#characterlist)  | A resource list containing the characters in this comic.     |
+ * | `stories`            | [`StoryList[]`](data-types.md#storylist)          | A resource list containing the stories which appear in this comic. |
+ * | `events`             | [`EventList[]`](data-types.md#eventlist)          | A resource list containing the events in which this comic appears. |
  */
 export type MarvelComic = z.infer<typeof MarvelComicSchema>;
 /**| Property      | Type                                | Description                                                  |

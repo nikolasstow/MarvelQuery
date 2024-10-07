@@ -29,3 +29,8 @@
 | `fetchSingle` | `void`                                                       | [`Promise<ExtendResult<E>>`](#marvelquery)      | Sets offset to 0 and limit to 1 to fetch a single result.    |
 | `buildURL`    | `apiKeys: APIKeys, endpoint: Endpoint, params: Record<string, unknown>` | `string`                                        | Builds the URL of the query with the parameters, timestamp and hash. |
 | `request`     | `url: string`                                                | [`Promise<APIWrapper<Result<E>>>`](#apiwrapper) | Sends the request to the API, and validate the response.     |
+
+# AutoQuery Injection
+
+## ResourceQuery {#queryresource}
+

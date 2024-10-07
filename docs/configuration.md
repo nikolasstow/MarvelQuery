@@ -1,6 +1,8 @@
+# Configuration
+
 ## Initialization: `MarvelQuery.init()`
 
-The `init` function initializes the MarvelQuery library with your API keys and configuration settings. It returns the `query` function, ensuring that no queries can be created without proper initialization.
+The `init` function initializes the MarvelQuery library with your API keys and configuration settings. It returns the `query` function, ensuring that no queries can be created without proper initialization. The function has two arguments, the public and private keys for the Marvel API, and configuration options detailed below.
 
 ```ts
 const query = MarvelQuery.init({
@@ -18,17 +20,24 @@ const query = MarvelQuery.init({
 | `publicKey`  | `string` | Marvel API public key  |
 | `privateKey` | `string` | Marvel API private key |
 
-## `Config`
+## `Config`: Configuration Options
 
-| Property        | Type                           | Description                                                  |
-| --------------- | ------------------------------ | ------------------------------------------------------------ |
-| `globalParams`  | `GlobalParams`                 | Global parameters to be applied to all queries, or all queries of a specific type. |
-| `onResult`      | `OnResultMap`                  | A map of functions to be called when all results, or results of a specific type, are returned. |
-| `onRequest`     | ` (url: string) => void`       | A function that is called for each request. Useful for monitoring your API usage. |
-| `logOptions`    | `LogOptions`                   | Options for logging: verbose, maxLines, maxLineLength        |
-| `httpClient`    | [`HTTPClient`](#fetchfunction) | Replace the default fetch function (axios) with your own HTTP client. |
+| Property               | Type                                      | Description                                                  |
+| ---------------------- | ----------------------------------------- | ------------------------------------------------------------ |
+| `autoQuery`            | `boolean`                                 | Enables/disables [AutoQuery Injection](marvel-query.md).     |
+| `globalParams`         | [`GlobalParams`](#globalparams)           | Global parameters to be applied to all queries, or all queries of a specific type. |
+| `onResult`             | [`OnResultMap`](#onresultmap)             | A map of functions to be called when all results, or results of a specific type, are returned. |
+| `onRequest`            | ` (url: string) => void`                  | A function that is called for each request. Useful for monitoring your API usage. |
+| `logOptions`           | [`LogOptions`](#logoptions)               | Options for logging, including verbosity, max length in console, and options for saving to file. |
+| `httpClient`           | [`HTTPClient`](#fetchfunction)            | Replace the default fetch function (axios) with your own HTTP client. |
+| `validation`           | [`ValidationOptions`](#validationoptions) |                                                              |
+| `showHiddenProperties` | `boolean`                                 | Properties that pertain to the response of the API are hidden by default until a response is received. In some situations you may want to disable this feature. [Learn more here.]("showhiddenproperties") |
 
 ## Configuration Options and Examples
+
+### `autoQuerty`
+
+
 
 ### `globalParams`
 
@@ -125,14 +134,19 @@ const query = MarvelQuery.init({ ... }, {
 });
 ```
 
-## Creating a Query: `query()`
+## Types
 
-The query function, returned by init, creates a new instance of MarvelQuery for executing API queries. It validates the endpoint and parameters, leveraging the initialization settings to ensure valid requests.
+### GlobalParams
 
-```ts
-const character = await query(["characters"], {
-  nameStartsWith: "Stilt-Man",
-}).fetch();
-```
+### OnResultMap
 
-To learn more about the creating a query I recommend referencing the [Creating a Query](#creatingaquery) section in the [Getting Started](#gettingstarted) guide.
+### LogOptions
+
+### HTTPClient
+
+### ValidationOptions
+
+### `showHiddenProperties`
+
+
+

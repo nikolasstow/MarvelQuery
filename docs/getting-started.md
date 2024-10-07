@@ -31,6 +31,12 @@ A query is made up of two parts, the endpoint and the query parameters: `query(e
 const spiders = await query(["characters"], {
   nameStartsWith: "Spider",
 });
+
+// Endpoints that are only a single element (when querying an entire category/data-type) you can remove the brackets
+
+const spiders = await query("characters", {
+  nameStartsWith: "Spider",
+});
 ```
 
 ### Defining your Endpoint

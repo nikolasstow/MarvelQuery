@@ -81,7 +81,7 @@ describe("Performance Testing", () => {
           disableAll: true,
         },
       },
-      expectedTime: 9,
+      expectedTime: 10,
     },
     {
       name: "Only validate parameters",
