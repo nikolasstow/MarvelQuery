@@ -20,9 +20,20 @@ jobs:
       # Install dependencies
       - run: pnpm install --frozen-lockfile
 
-      # Run tests
+      # Build Docker image
+      - name: Build Docker image
+        run: docker build -t marvel-query-app .
+
+      # Run tests inside Docker container
       - name: Run tests
-        run: pnpm run test
+        run: docker run marvel-query-app pnpm run test
+
+      # Run performance tests inside Docker container
+      - name: Run performance tests
+        run: docker run marvel-query-app pnpm run test:performance
 
       # Lint and build the project if tests pass
-      - run: pnpm run lint && pnpm run build
+      - name: Lint and build
+        run: |
+          docker run marvel-query-app pnpm run lint
+          docker run marvel-query-app pnpm run build

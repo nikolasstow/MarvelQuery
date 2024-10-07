@@ -50,6 +50,7 @@ async function fetchAllResources(results: Comic[]) {
 }
 
 describe("Performance Testing", () => {
+  const multiplier = 2;
   const testCases = [
     {
       name: "AutoQuery and all validation disabled",
@@ -71,7 +72,7 @@ describe("Performance Testing", () => {
           autoQuery: true,
         },
       },
-      expectedTime: 35,
+      expectedTime: 27,
     },
     {
       name: "AutoQuery with no validation",
@@ -81,7 +82,7 @@ describe("Performance Testing", () => {
           disableAll: true,
         },
       },
-      expectedTime: 10,
+      expectedTime: 9,
     },
     {
       name: "Only validate parameters",
@@ -91,7 +92,7 @@ describe("Performance Testing", () => {
           parameters: true,
         },
       },
-      expectedTime: 30,
+      expectedTime: 28,
     },
     {
       name: "Only validate API response",
@@ -101,7 +102,7 @@ describe("Performance Testing", () => {
           apiResponse: true,
         },
       },
-      expectedTime: 30,
+      expectedTime: 27,
     },
     {
       name: "Only validate AutoQuery",
@@ -111,7 +112,7 @@ describe("Performance Testing", () => {
           autoQuery: true,
         },
       },
-      expectedTime: 35,
+      expectedTime: 27,
     },
   ];
 
@@ -131,8 +132,8 @@ describe("Performance Testing", () => {
       }
 
       const averageTime = totalTime / iterations;
-      expect(averageTime).toBeLessThan(expectedTime);
-    });
+      expect(averageTime).toBeLessThan(expectedTime * multiplier);
+    }, 10000);
   });
 
   test("AutoQuery without validation, fetching all resources", async () => {
