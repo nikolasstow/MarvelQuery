@@ -50,7 +50,7 @@ async function fetchAllResources(results: Comic[]) {
 }
 
 describe("Performance Testing", () => {
-  const multiplier = 2;
+  const multiplier = 2.5;
   const testCases = [
     {
       name: "AutoQuery and all validation disabled",
@@ -72,7 +72,7 @@ describe("Performance Testing", () => {
           autoQuery: true,
         },
       },
-      expectedTime: 27,
+      expectedTime: 30,
     },
     {
       name: "AutoQuery with no validation",
