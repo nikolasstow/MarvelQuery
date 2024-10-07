@@ -158,5 +158,5 @@ describe("Performance Testing", () => {
   
     const averageTime = totalTime / iterations;
     expect(averageTime).toBeLessThan(2000 * multiplier);
-  }), 2000 * multiplier * iterations * 2; // Timeout is set to 2 times the expected time
+  }, 2000 * multiplier * iterations * 2); // Timeout is set to 2 times the expected time
 });
