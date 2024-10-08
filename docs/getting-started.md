@@ -2,15 +2,21 @@
 
 ## Installation
 
+This package is currently in **release candidate** phase (version 1.0.0-rc.1). All core features are complete, with only documentation finalization remaining before the stable release. To install this release candidate, use the @next tag.
+
 ```bash npm2yarn
-npm i marvelquery axios
+npm install marvelquery@next
 ```
 
-*Note: You can exclude axios if it's already in your project or if you plan to substitute your own http client.*
+This library is designed to be flexible with your choice of HTTP client. By default, it uses axios for making requests, but you are free to use any client that fits your needs. If you prefer to use the default setup with axios, you will need to install it as a **peerDependency**:
+
+```shell
+npm install axios
+```
 
 ## Setup
 
-First, initialize the library with your API keys and pass in your [configuration options](#config) using the static function `MarvelQuery.init()`.
+To get started, initialize the library with your API keys and any desired [configuration options](#config) by calling `MarvelQuery.init()`.
 
 ```ts
 const query = MarvelQuery.init({
@@ -21,7 +27,7 @@ const query = MarvelQuery.init({
   });
 ```
 
-This will return a function referred to in this documentation as `query`, though you can name it anything you like. This function takes two arguments: the [endpoint](#endpoint) and the [parameters](#parameters). As its name suggests, it creates an instance of [MarvelQuery](#marvelquery).
+This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments: the [endpoint](#endpoint) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](#marvelquery).
 
 ## Creating a Query
 

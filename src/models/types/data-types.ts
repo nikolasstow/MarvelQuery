@@ -32,8 +32,6 @@ import {
 } from "./endpoint-types";
 import { ExtendResult } from "./autoquery-types";
 
-// const URL = 'https://github.com/nikolasstow/MarvelQuery/blob/rewrite/docs/';
-
 /** Result data type as an EndpointType, determined by the endpoint <E> */
 export type DataType<E> = E extends Endpoint
   ? E[2] extends EndpointType // If there is a 3rd element (and is an EndpointType) use it

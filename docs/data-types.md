@@ -448,3 +448,48 @@ The core properties found in all data-types returned by the Marvel API
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the result.                   |
 | **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`MarvelStory`](#marvelstory)                     | Fetches and returns the resource.                            |
+
+## Utility Types
+
+### `ResultMap`
+
+```ts
+/**
+ * A map of result types by endpoint.
+ */
+type ResultMap = {
+  comics: MarvelComic;
+  characters: MarvelCharacter;
+  creators: MarvelCreator;
+  events: MarvelEvent;
+  stories: MarvelStory;
+  series: MarvelSeries;
+};
+```
+
+### `ResultType`
+
+```ts
+/**
+ * ResultType is a utility type designed to determine the expected data type returned 
+ * from a given API endpoint.
+ */
+type APIResult<E extends Endpoint> = ResultMap[DataType<E>];
+```
+
+### `DataType`
+
+```ts
+/**
+ * Utility type that determines the type of data being queried.
+ * It works by checking the endpoint and looking for the last data type in the endpoint.
+ * If the last element is a type, use it. If it's a number, use the type in the first element.
+ */
+type DataType<E> = E extends Endpoint
+  ? E[2] extends EndpointType // If there is a 3rd element (and is an EndpointType) use it
+    ? E[2]
+    : E[0] extends EndpointType // Otherwise use the first element (if it is an EndpointType)
+    ? E[0]
+    : ["Error, could not determine data type", E]
+  : ["Error, not a valid endpoint", E];
+```
