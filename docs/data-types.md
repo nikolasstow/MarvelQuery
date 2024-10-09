@@ -1,4 +1,4 @@
-# Data Types
+# API Response
 
 ## `Metadata`
 
@@ -37,16 +37,16 @@ These codes indicate the success or failure of the request and provide insights 
 
 The API returns structured data in an array, where each element corresponds to a specific type, such as characters, comics, creators, series, stories, and events. These data types provide detailed information about the returned resources, including metadata like IDs, names, descriptions, and related resources. Each result follows a consistent format, allowing for easy access and manipulation of the data within your application.
 
-Properties and methods in **bold** are available only if [AutoQuery Injection is enabled in the configuration](configuration.md).
+Properties and methods in **bold** are available only if [AutoQuery Injection is enabled in the configuration](configuration.md). If AutoQuery is disabled, the type name is prepended by '**Marvel**' (ex: MarvelComic, MarvelCreator, as compared to Comic, Creator).
 
-## `MarvelComic`
+## `Comic`{#MarvelComic}
 
 | Property             | Type                                              | Description                                                  |
 | -------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
 | **`endpoint`**       | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["comics", 123]`). |
 | **`query()`**        | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the comic.                    |
-| **`fetch()`**        | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`**  | [`MarvelComic`](#marvelcomic)                     | Fetches and returns the resource.                            |
+| **`fetch()`**        | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`**  | [`Promise<Comic>`](#marvelcomic)                  | Fetches and returns the resource.                            |
 | `id`                 | `number`                                          | The unique ID of the comic resource.                         |
 | `resourceURI`        | `string`                                          | The canonical URL identifier for this resource.              |
 | `modified`           | `string`                                          | The date the resource was most recently modified.            |
@@ -77,14 +77,14 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `stories`            | [`StoryList[]`](#storylist)                       | A resource list containing the stories which appear in this comic. |
 | `events`             | [`EventList[]`](#eventlist)                       | A resource list containing the events in which this comic appears. |
 
-## `MarvelEvent`
+## `Event`{#MarvelEvent}
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["events", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the event.                    |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelEvent`](#marvelevent)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Promise<Event>`](#marvelevent)                  | Fetches and returns the resource.                            |
 | `id`                | `number`                                          | The unique ID of the event resource.                         |
 | `resourceURI`       | `string`                                          | The canonical URL identifier for this resource.              |
 | `modified`          | `string`                                          | The date the resource was most recently modified.            |
@@ -102,14 +102,14 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `next`              | [`EventSummary[]`](#eventsummary)                 | A summary representation of the event which follows this event in the timeline. |
 | `previous`          | [`EventSummary[]`](#eventsummary)                 | A summary representation of the event which preceded this event in the timeline. |
 
-## `MarvelSeries`
+## `Series`{#MarvelSeries}
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["series", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the series.                   |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelEvent`](#marvelevent)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Promise<MarvelEvent>`](#marvelevent)            | Fetches and returns the resource.                            |
 | `id`                | `number`                                          | The unique ID of the series resource.                        |
 | `resourceURI`       | `string`                                          | The canonical URL identifier for this resource.              |
 | `modified`          | `string`                                          | The date the resource was most recently modified.            |
@@ -128,14 +128,14 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `next`              | [`SeriesSummary[]`](#seriessummary)               | A summary representation of the series which follows this series in the timeline. |
 | `previous`          | [`SeriesSummary[]`](#seriessummary)               | A summary representation of the series which preceded this series in the timeline. |
 
-## `MarvelCreator`
+## `Creator`{#MarvelCreator}
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["creators", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the creator.                  |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelCreator`](#marvelcreator)                 | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Promise<Creator>`](#marvelcreator)              | Fetches and returns the resource.                            |
 | `id`                | `number`                                          | The unique ID of the creator resource.                       |
 | `resourceURI`       | `string`                                          | The canonical URL identifier for this resource.              |
 | `modified`          | `string`                                          | The date the resource was most recently modified.            |
@@ -151,14 +151,14 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `comics`            | [`ComicList[]`](#comiclist)                       | A resource list containing the comics which feature work by this creator. |
 | `events`            | [`EventList[]`](#eventlist)                       | A resource list containing the events which feature work by this creator. |
 
-## `MarvelCharacter`
+## `Character`{#MarvelCharacter}
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["characters", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the character.                |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelCharacter`](#marvelcharacter)             | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Promise<Character>`](#marvelcharacter)          | Fetches and returns the resource.                            |
 | `id`                | `number`                                          | The unique ID of the character resource.                     |
 | `resourceURI`       | `string`                                          | The canonical URL identifier for this resource.              |
 | `modified`          | `string`                                          | The date the resource was most recently modified.            |
@@ -171,14 +171,14 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `events`            | [`EventList[]`](#eventlist)                       | A resource list containing the events in which this character appears. |
 | `series`            | [`SeriesList[]`](#serieslist)                     | A resource list containing the series in which this character appears. |
 
-## `MarvelStory`
+## `Story`{#MarvelStory}
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["stories", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the story.                    |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelStory`](#marvelstory)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Promise<Story>`](#marvelstory)                  | Fetches and returns the resource.                            |
 | `id`                | `number`                                          | The unique ID of the story resource.                         |
 | `resourceURI`       | `string`                                          | The canonical URL identifier for this resource.              |
 | `modified`          | `string`                                          | The date the resource was most recently modified.            |
@@ -252,7 +252,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the resource.                               |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["comics", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the item.                     |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`MarvelResult`](#marvelresult)                   | Fetches and returns the resource.                            |
 
 ### `RoleSummary`
@@ -265,7 +265,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the resource.                               |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["characters", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the item.                     |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`MarvelResult`](#marvelresult)                   | Fetches and returns the resource.                            |
 
 ### `TypeSummary`
@@ -278,7 +278,7 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the resource.                               |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["stories", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the item.                     |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`MarvelResult`](#marvelresult)                   | Fetches and returns the resource.                            |
 
 ### `ComicSummary`
@@ -290,8 +290,8 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the comic resource.                         |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["comics", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the comic.                    |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the comic resource in the results array. |
-| **`fetchSingle()`** | [`MarvelComic`](#marvelcomic)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the comic resource in the results array. |
+| **`fetchSingle()`** | [`Comic`](#marvelcomic)                           | Fetches and returns the resource.                            |
 
 ### `StorySummary`
 
@@ -303,8 +303,8 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the story resource.                         |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["stories", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the story.                    |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelComic`](#marvelcomic)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Comic`](#marvelcomic)                           | Fetches and returns the resource.                            |
 
 ### `SeriesSummary`
 
@@ -315,8 +315,8 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the series resource.                        |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["series", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the series.                   |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelComic`](#marvelcomic)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Comic`](#marvelcomic)                           | Fetches and returns the resource.                            |
 
 ### `CreatorSummary`
 
@@ -328,8 +328,8 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the creator resource.                       |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["creator", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the creator.                  |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelComic`](#marvelcomic)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Comic`](#marvelcomic)                           | Fetches and returns the resource.                            |
 
 ### `CharacterSummary`
 
@@ -341,8 +341,8 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the character resource.                     |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["characters", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the character.                |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelComic`](#marvelcomic)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Comic`](#marvelcomic)                           | Fetches and returns the resource.                            |
 
 ### `EventSummary`
 
@@ -353,8 +353,8 @@ The `Format` type categorizes different forms of comic publications, ranging fro
 | **`id`**            | `number`                                          | The unique ID of the event resource.                         |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["events", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the event.                    |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
-| **`fetchSingle()`** | [`MarvelComic`](#marvelcomic)                     | Fetches and returns the resource.                            |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetchSingle()`** | [`Comic`](#marvelcomic)                           | Fetches and returns the resource.                            |
 
 ### `List`
 
@@ -446,7 +446,7 @@ The core properties found in all data-types returned by the Marvel API
 | `thumbnail`         | [`Image`](#image)                                 | The representative image for this item.                      |
 | **`endpoint`**      | [`Endpoint`](utility-types.md#endpoints)          | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["stories", 123]`). |
 | **`query()`**       | [`QueryResource`](marvel-query.md#query-resource) | Query a collection relating to the result.                   |
-| **`fetch()`**       | [`MarvelQuery`](marvel-query.md)                  | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
+| **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)         | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`MarvelStory`](#marvelstory)                     | Fetches and returns the resource.                            |
 
 ## Utility Types

@@ -29,130 +29,114 @@ const query = MarvelQuery.init({
 
 This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments: the [endpoint](#endpoint) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](#marvelquery).
 
-## Creating a Query
+## Creating a Query{#query}
 
-A query is made up of two parts, the endpoint and the query parameters: `query(endpoint, parameters )`.
+A query consists of two main components: the endpoint and its associated parameters, structured as `query(endpoint, parameters).`
 
 ```ts
 const spiders = await query(["characters"], {
   nameStartsWith: "Spider",
 });
 
-// Endpoints that are only a single element (when querying an entire category/data-type) you can remove the brackets
+// For endpoints representing a single category or data type, the brackets can be omitted:
 
 const spiders = await query("characters", {
   nameStartsWith: "Spider",
 });
 ```
 
-### Defining your Endpoint
+### Defining Your Endpoint{#endpoint}
 
-The endpoint is an tuple containing 1 to 3 elements that specify the target locations for data retrieval and determine the data type of the results.
+The endpoint is a tuple containing 1 to 3 elements that specify the target location for data retrieval and determine the type of results returned.
 
 ```ts
-["comics"] // Search for comics
-["comics", 98310] // Search for a comic with it's ID
-["comics", 98310, "characters"] // Search for characters in a specific comic
+["comics"] // Search for all comics
+["comics", 98310] // Search for a specific comic by its ID
+["comics", 98310, "characters"] // Search for characters within a specific comic
 //  ^                     ^
-// These are data types and they determine the type of data the API will return.
-
-["comics"] // returns MarvelComic[]
-["comics", 98310] // returns MarvelComic[] (length = 1)
-["comics", 98310, "characters"] // returns MarvelCharacter[]
+// These elements represent data types and determine the type of data returned by the API.
 ```
 
-### Adding Parameters
+*Note: The type of data returned (e.g., Comic or MarvelComic) depends on your configuration and the fetch method used.*
+*See the [full explanation](#fetch-methods) for details on return types and chaining options.*
 
-The data type returned by an endpoint determines the available parameters for the query. As a general rule, the last data type specified in the endpoint indicates the type of data the query will return.
+### Adding Parameters{#parameters}
+
+The data type returned by an endpoint determines the available parameters for the query. Typically, the final data type specified in the endpoint indicates the type of data the query will return.
 
 ```ts
-// With a single element in the endpoint, that will be the data type.
-const thisWeek = query(["comics"], {
+// For a single-element endpoint, the data type is implied.
+const thisWeek = query("comics", {
   dateDescriptor: "thisWeek", // Parameters for "comics" (ComicParams)
 });
 
-// The second element is always an id. Without a third element, your endpoint represents a single item and therefore has no available parameters.
+// When the second element is an ID, and there's no third element, the endpoint refers to a single item and does not require additional parameters.
 const sheHulk = query(["comics", 409]);
 
-// When you add a third element, another data type, you are searching for items of that type that are linked to the id in the endpoint.
-// For that reason, the data type of the third element dictates the parameters available for that endpoint.
-const sheHulk = query(["comics", 409, "creators"], {
+// Adding a third element creates a query for related items within the resource specified by the first two elements.
+// The third element defines the type of related items, often referred to as a collection.
+const sheHulkCreators = query(["comics", 409, "creators"], {
   firstName: "Dan", // Parameters for "creators" (CreatorParams)
   lastName: "Slott",
 });
 ```
 
-## Retrieving Results
+## Retrieving Results{#results}
 
-To fetch data with your query, call `.fetch()` on your MarvelQuery object. This is an asynchronous method, so be sure to include `await`. The `fetchSingle()` method also exists, limiting your query to a single result, which is useful when querying a character or creator, or any time one result is all that's expected.
+To fetch data from your query, use the .fetch() method on the MarvelQuery object. This is asynchronous, so ensure you use await. Alternatively, use the .fetchSingle() method when you expect a single result, such as when querying a specific character or creator.
 
-### `.fetch()`
+Note: The type of data returned depends on your configuration and the fetch method:
+
+- With AutoQuery turned on, the data types are the same as the endpoint type only singular with the first letter capitalized (ex: "comics" becomes Comic).
+- With AutoQuery turned off, the data types are prepended with '**Marvel**' (ex: MarvelComic, MarvelEvent, MarvelCharacter, etc.)
+
+### `.fetch()`{#fetch}
+
+The .fetch() method returns the MarvelQuery instance itself, with the results populating the .results property. Since it returns the instance, methods can be chained for further querying.
 
 ```ts
-// To fetch data with your query, call .fetch() and don't forget to add "await".
+// Fetch data using .fetch() and ensure you include "await".
 
 const slottsSheHulk = await query(["creators", 12983, "comics"], {
   format: "comic",
   characters: 1009583 // She-Hulk
-}).fetch(); // Fetches comics by Dan Slott and featuring She-Hulk
+}).fetch(); // Fetches comics by Dan Slott featuring She-Hulk
 
-// OR
+// The results are now in the .results property of the query instance:
+console.log(slottsSheHulk.results); // e.g., MarvelComic[] or Comic[]
 
-const sheHulkQuery = query(["creators", 12983, "comics"], {
-  format: "comic",
-  characters: 1009583
-});
+// Calling .fetch() again on the instance retrieves the next page of results:
+await slottsSheHulk.fetch(); // Fetches the next page
+await slottsSheHulk.fetch(); // Fetches the following page
 
-const slottsSheHulk = await sheHulkQuery.fetch()
-
-// If you call fetch again, you'll get the next page of results.
-await slottsSheHulk.fetch();
-// And then the next...
-await slottsSheHulk.fetch();
-
-// If you want every result available, you can accomplish this with a while loop and the .isComplete property.
-while(!latest.isComplete) {
-  await latest.fetch(); // This will continue until all results have been received
+// To retrieve all available results, use a while loop with the .isComplete property:
+while (!slottsSheHulk.isComplete) {
+  await slottsSheHulk.fetch(); // Continues until all results are fetched
 }
 ```
 
-### `.fetchSingle()`
+### `.fetchSingle()`{#fetchsingle}
 
-When searching for a single item, use fetchSingle() to request only one result.
+The .fetchSingle() method returns a single result item, and you cannot call .fetch() again on it. However, with AutoQuery enabled, you can use methods injected into the result to perform further queries, such as searching for related items.
 
 ```ts
 const spiderMan = await query(["characters"], {
-    name: "Peter Parker",
-  }).fetchSingle();
+  name: "Peter Parker",
+}).fetchSingle(); // Retrieves a single character (MarvelCharacter or Character)
+
+// If AutoQuery is enabled, you can chain methods directly on the result:
+const amazingSpiderMan = await spiderMan.comics.query({
+  titleStartsWith: "Amazing"
+}).fetch(); // Fetches all Amazing Spider-Man comics
+
+// OR use promises:
+query(["characters"], {
+  name: "Peter Parker",
+}).fetchSingle()
+  .then(peter => peter.comics.query({
+    titleStartsWith: "Amazing"
+  }).fetch());
 ```
 
+[Next: **Explore MarvelQuery Properties and Methods →**](autoquery.md)
 
-
-The [`fetch()`](#marvelquery) and `fetchSingle()` functions return `this`, the MarvelQuery instance now containing the data returned by the request and helper functions. This includes:
-
-- `url`: The query URL.
-- `metadata`: Information such as code, status, and copyright.
-- `responseData`: Details like offset, limit, total, and count.
-- `result`: A single result item.
-- `results`: An array of results.
-- `resultHistory`: The combined results of all requests with this query.
-
-```ts
-// Using the properties of MarvelQueryResult
-
-const slottsSheHulk = await query(["creators", 12983, "comics"], {
-  format: "comic",
-  characters: 1009583
-})
-	.fetch() // Fetches comics by Dan Slott and featuring She-Hulk
-  .then((query) => query.results); // Return just the results
-
-
-const characters = await query(["comics", 98310, "characters"])
-  .fetch() // Fetch characters in this comic (id # 98310)
-  .then((query) => query.results.map((character) => character.name)); // Return an array of character names.
-
-
-```
-
-I recommend referencing the [`MarvelQuery`](#marvelquery) documentation for more information about its properties.

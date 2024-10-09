@@ -121,7 +121,7 @@
 | `limit`         | `number`            | Limit the result set to the specified number of resources.
 | `offset`        | `number`            | Skip the specified number of resources in the result set.
 
-## Types
+## Common Types
 
 ### Formats
 
