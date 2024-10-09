@@ -11,12 +11,15 @@ import MarvelQuery, {
  * Initialize the Marvel API with your public and private keys.
  * Optionally, you can add functions for logging requests and saving results.
  */
-const query = MarvelQuery.init({
-  publicKey: "your-public-key",
-  privateKey: "your-private-key",
-}, {
-  autoQuery: true,
-});
+const query = MarvelQuery.init(
+  {
+    publicKey: "your-public-key",
+    privateKey: "your-private-key",
+  },
+  {
+    autoQuery: true,
+  }
+);
 
 /**
  * Fetches series information based on the title and start year.
