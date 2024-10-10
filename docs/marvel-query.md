@@ -1,10 +1,8 @@
-
-
-## MarvelQuery: Properties and Methods
+# MarvelQuery: Properties and Methods
 
 The `MarvelQuery` class is the backbone of this library, designed to interact with the Marvel API. If you’re unfamiliar with the basics of initializing the library or creating your first query, please refer to the [Getting Started](getting-started.md) guide. Below, you’ll find more in-depth information about the properties and methods available for customizing queries and handling the data returned by the API.
 
-### Initialization and Query Creation{#staticmethods}
+## Initialization and Query Creation{#init}
 
 The init() function is responsible for setting up the library with your API keys and any custom configurations you need for handling requests. Once initialized, it returns a query() function, which you’ll use to create queries for different Marvel API endpoints.
 
@@ -17,11 +15,11 @@ For a detailed explanation of available configuration options, such as global pa
 
 † *The query function, which can be named anything, is returned by init(). It accepts two arguments: an API endpoint and the query parameters. For more information, see [Creating a Query](getting-started.md#query).*
 
-### Instance Properties and Methods{#properties}
+## Instance Properties and Methods{#properties}
 
 The MarvelQuery instance has different sets of properties depending on whether it has been fetched or not. Before making a request, it follows the structure of MarvelQueryInit, which contains information about the query setup. Once the query has been fetched, the instance becomes MarvelQueryFetched, extending the initial properties with additional data from the API response. If showHiddenProperties is enabled in the configuration, all properties will be visible from the beginning, even before a fetch occurs.
 
-### `MarvelQueryInit` (Pre-fetch)
+### `MarvelQueryInit` (Pre-fetch){#marvelqueryinit}
 
 | Name            | Type                                           | Description                                                  |
 | --------------- | ---------------------------------------------- | ------------------------------------------------------------ |
@@ -35,7 +33,7 @@ The MarvelQuery instance has different sets of properties depending on whether i
 | `queryId`       | `string`                                       | A unique identifier for the query, used for logging and tracking. |
 | `validated`     | `{ parameters: boolean | undefined }`          | Indicates whether the query parameters have been validated. Contains only the parameters key. Values can be undefined, true (valid), or false (invalid). |
 
-### `MarvelQueryFetched` (Post-fetch)
+### `MarvelQueryFetched` (Post-fetch){#marvelqueryfetched}
 
 After the query is executed and results are fetched, the instance contains additional properties as defined in MarvelQueryFetched, which extends the MarvelQueryInit properties.
 
@@ -52,7 +50,7 @@ After the query is executed and results are fetched, the instance contains addit
 | `isComplete`    | `boolean`                                                 | Indicates whether all possible results have been fetched. If true, there are no more pages of data to retrieve. |
 | `validated`     | `{ parameters, results, autoQuery: boolean | undefined }` | Adds results and autoQuery keys, along with parameters, to track validation. Values can be undefined, true (valid), or false (invalid). |
 
-### Configuration for Hidden Properties
+### Configuration for Hidden Properties{#hidden}
 
 If showHiddenProperties is enabled in the configuration, the properties that are typically available only post-fetch (MarvelQueryFetched) will be visible prior to fetching, giving you full visibility into all aspects of the query.
 
