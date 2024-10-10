@@ -29,23 +29,11 @@ const query = MarvelQuery.init({
 
 This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments: the [endpoint](#endpoint) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](#marvelquery).
 
-## Creating a Query{#query}
+# Creating a Query{#query}
 
-A query consists of two main components: the endpoint and its associated parameters, structured as `query(endpoint, parameters).`
+A query consists of two components: the endpoint and its associated parameters, structured as `query(endpoint, parameters).`
 
-```ts
-const spiders = await query(["characters"], {
-  nameStartsWith: "Spider",
-});
-
-// For endpoints representing a single category or data type, the brackets can be omitted:
-
-const spiders = await query("characters", {
-  nameStartsWith: "Spider",
-});
-```
-
-### Defining Your Endpoint{#endpoint}
+## Defining Your Endpoint {#endpoint}
 
 The endpoint is a tuple containing 1 to 3 elements that specify the target location for data retrieval and determine the type of results returned.
 
@@ -57,24 +45,35 @@ The endpoint is a tuple containing 1 to 3 elements that specify the target locat
 // These elements represent data types and determine the type of data returned by the API.
 ```
 
-*Note: The type of data returned (e.g., Comic or MarvelComic) depends on your configuration and the fetch method used.*
-*See the [full explanation](#fetch-methods) for details on return types and chaining options.*
+*Read more about [Endpoints](endpoints.md)*
 
-### Adding Parameters{#parameters}
+## Querying by Data Type {#category}
 
-The data type returned by an endpoint determines the available parameters for the query. Typically, the final data type specified in the endpoint indicates the type of data the query will return.
+One of the most common queries involves targeting an entire data type while using parameters to filter the results. When you don’t have an ID for a specific resource or collection, your endpoint will simply be the data type (e.g., “comics” or “characters”). In cases where the endpoint is a single data type, you can omit the tuple brackets for simplicity:
 
 ```ts
-// For a single-element endpoint, the data type is implied.
+const spiders = await query("characters"); // "characters" instead of ["characters"]
+```
+
+## Adding Parameters{#parameters}
+
+The data type returned by an endpoint determines the available parameters for the query. For instance, when querying a single data type without an ID, parameters related to that data type can be included to filter the results:
+
+```ts
 const thisWeek = query("comics", {
   dateDescriptor: "thisWeek", // Parameters for "comics" (ComicParams)
 });
+```
 
-// When the second element is an ID, and there's no third element, the endpoint refers to a single item and does not require additional parameters.
+When the endpoint includes a second element that’s an ID, and no third element is specified, you’re referring to a specific item. In this case, additional parameters are not needed:
+
+```ts
 const sheHulk = query(["comics", 409]);
+```
 
-// Adding a third element creates a query for related items within the resource specified by the first two elements.
-// The third element defines the type of related items, often referred to as a collection.
+When you introduce a third element, you’re requesting related items within the specified resource. The third element indicates the type of related data, and determines the available parameters:
+
+```ts
 const sheHulkCreators = query(["comics", 409, "creators"], {
   firstName: "Dan", // Parameters for "creators" (CreatorParams)
   lastName: "Slott",
