@@ -119,7 +119,7 @@ while (!slottsSheHulk.isComplete) {
 The .fetchSingle() method returns a single result item, and you cannot call .fetch() again on it. However, with AutoQuery enabled, you can use methods injected into the result to perform further queries, such as searching for related items.
 
 ```ts
-const spiderMan = await query(["characters"], {
+const spiderMan = await query("characters", {
   name: "Peter Parker",
 }).fetchSingle(); // Retrieves a single character (MarvelCharacter or Character)
 
@@ -129,7 +129,7 @@ const amazingSpiderMan = await spiderMan.comics.query({
 }).fetch(); // Fetches all Amazing Spider-Man comics
 
 // OR use promises:
-query(["characters"], {
+query("characters", {
   name: "Peter Parker",
 }).fetchSingle()
   .then(peter => peter.comics.query({
@@ -137,5 +137,5 @@ query(["characters"], {
   }).fetch());
 ```
 
-[Next: **Explore MarvelQuery Properties and Methods →**](autoquery.md)
+[Next: **Explore MarvelQuery Properties and Methods →**](docs/autoquery.md)
 
