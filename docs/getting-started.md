@@ -29,11 +29,11 @@ const query = MarvelQuery.init({
 
 This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments: the [endpoint](#endpoint) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](#marvelquery).
 
-# Creating a Query{#query}
+# Creating a Query
 
 A query consists of two components: the endpoint and its associated parameters, structured as `query(endpoint, parameters).`
 
-## Defining Your Endpoint {#endpoint}
+## Defining Your Endpoint
 
 The endpoint is a tuple containing 1 to 3 elements that specify the target location for data retrieval and determine the type of results returned.
 
@@ -47,7 +47,7 @@ The endpoint is a tuple containing 1 to 3 elements that specify the target locat
 
 *Read more about [Endpoints](endpoints.md)*
 
-## Querying by Data Type {#category}
+## Querying by Data Type
 
 One of the most common queries involves targeting an entire data type while using parameters to filter the results. When you don’t have an ID for a specific resource or collection, your endpoint will simply be the data type (e.g., “comics” or “characters”). In cases where the endpoint is a single data type, you can omit the tuple brackets for simplicity:
 
@@ -55,7 +55,7 @@ One of the most common queries involves targeting an entire data type while usin
 const spiders = await query("characters"); // "characters" instead of ["characters"]
 ```
 
-## Adding Parameters{#parameters}
+## Adding Parameters
 
 The data type returned by an endpoint determines the available parameters for the query. For instance, when querying a single data type without an ID, parameters related to that data type can be included to filter the results:
 
@@ -80,7 +80,7 @@ const sheHulkCreators = query(["comics", 409, "creators"], {
 });
 ```
 
-## Retrieving Results{#results}
+## Retrieving Results
 
 To fetch data from your query, use the .fetch() method on the MarvelQuery object. This is asynchronous, so ensure you use await. Alternatively, use the .fetchSingle() method when you expect a single result, such as when querying a specific character or creator.
 
@@ -89,7 +89,7 @@ Note: The type of data returned depends on your configuration and the fetch meth
 - With AutoQuery turned on, the data types are the same as the endpoint type only singular with the first letter capitalized (ex: "comics" becomes Comic).
 - With AutoQuery turned off, the data types are prepended with '**Marvel**' (ex: MarvelComic, MarvelEvent, MarvelCharacter, etc.)
 
-### `.fetch()`{#fetch}
+### `.fetch()`
 
 The .fetch() method returns the MarvelQuery instance itself, with the results populating the .results property. Since it returns the instance, methods can be chained for further querying.
 
@@ -114,7 +114,7 @@ while (!slottsSheHulk.isComplete) {
 }
 ```
 
-### `.fetchSingle()`{#fetchsingle}
+### `.fetchSingle()`
 
 The .fetchSingle() method returns a single result item, and you cannot call .fetch() again on it. However, with AutoQuery enabled, you can use methods injected into the result to perform further queries, such as searching for related items.
 
@@ -137,5 +137,5 @@ query("characters", {
   }).fetch());
 ```
 
-[Next: **Explore MarvelQuery Properties and Methods →**](docs/autoquery.md)
+[Next: **Explore MarvelQuery Properties and Methods →**](autoquery.md)
 

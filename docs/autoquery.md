@@ -3,7 +3,7 @@
 AutoQuery is a powerful feature that automatically injects methods and properties into API responses wherever a URI is found. These additions allow you to seamlessly create follow-up queries directly from the result data, without manually constructing new queries. By detecting URIs associated with related resources or collections (such as comics, characters, or creators), AutoQuery makes it easy to navigate through connected data. For example, once you retrieve a character, you can use the injected query methods to fetch related comics or other associated resources with minimal effort.
 
 First lets take a look an Event result type and take note of the URI's found within it:
-```ts
+```javascript
 interface Event {
   id: number;
   resourceURI: string; // <-- Resource URI

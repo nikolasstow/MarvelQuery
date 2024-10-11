@@ -1,6 +1,6 @@
 # API Parameters
 
-## Base Parameters {#apibaseparams}
+## Base Parameters
 | Property         | Type                  | Description                                                                                         
 |------------------|-----------------------|-------------------------------------------------------------------------------------
 | `modifiedSince`  | [`Date`](#dates)      | Only return resources created or changed since the specified date.

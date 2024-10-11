@@ -1,6 +1,6 @@
 # Endpoints
 
-### Endpoint Tuples{#tuples}
+### Endpoint Tuples
 
 The Marvel API represents an endpoint as a string (e.g., `"comics/1323/characters"`), where each part separated by a slash (`/`) defines the type, ID, and collection type. In the MarvelQuery library, for practical reasons, this string format is converted into a **tuple** (e.g., `["comics", 1323, "characters"]`).
 
@@ -20,7 +20,7 @@ When querying an entire category (e.g., all comics), you can omit the brackets f
 query("comics", { titleStartsWith: "Spider" });
 ```
 
-### Let's look at a few examples: {#examples}
+### Let's look at a few examples: 
 
 > **Note**: I am aware that TypeScript supports template literals in types now, but I've been unable to get it working with the same level of type safety and user experience. However, I am open to suggestions.
 
@@ -61,7 +61,7 @@ const eventsWithStilts = await query(["characters", 1009627, "events"])
 
 
 
-### Types: `EndpointType`, `EndpointDescriptor`, `EndpointResultType`, `DistinctEndpointType`, and `Endpoint` {#types}
+### Types: `EndpointType`, `EndpointDescriptor`, `EndpointResultType`, `DistinctEndpointType`, and `Endpoint` 
 
 ```ts
 /**

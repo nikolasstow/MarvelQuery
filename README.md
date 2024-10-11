@@ -71,4 +71,4 @@ const blackCatComics = await query(["characters", 1009335, "comics"])
 
 ```
 
-For more information and to get started, please visit the [Getting Started](./getting-started.md) guide.
+For more information and to get started, please visit the [Getting Started](docs/getting-started.md) guide.

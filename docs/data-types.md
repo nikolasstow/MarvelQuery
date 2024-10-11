@@ -39,7 +39,7 @@ The API returns structured data in an array, where each element corresponds to a
 
 Properties and methods in **bold** are available only if [AutoQuery Injection is enabled in the configuration](configuration.md). If AutoQuery is disabled, the type name is prepended by '**Marvel**' (ex: MarvelComic, MarvelCreator, as compared to Comic, Creator).
 
-## `Comic`{#MarvelComic}
+## `Comic`
 
 | Property             | Type                                              | Description                                                  |
 | -------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
@@ -77,7 +77,7 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `stories`            | [`StoryList`](#storylist)                       | A resource list containing the stories which appear in this comic. |
 | `events`             | [`EventList`](#eventlist)                       | A resource list containing the events in which this comic appears. |
 
-## `Event`{#MarvelEvent}
+## `Event`
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
@@ -102,7 +102,7 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `next`              | [`EventSummary`](#eventsummary)                   | A summary representation of the event which follows this event in the timeline. |
 | `previous`          | [`EventSummary`](#eventsummary)                   | A summary representation of the event which preceded this event in the timeline. |
 
-## `Series`{#MarvelSeries}
+## `Series`
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
@@ -128,7 +128,7 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `next`              | [`SeriesSummary`](#seriessummary)                 | A summary representation of the series which follows this series in the timeline. |
 | `previous`          | [`SeriesSummary`](#seriessummary)                 | A summary representation of the series which preceded this series in the timeline. |
 
-## `Creator`{#MarvelCreator}
+## `Creator`
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
@@ -151,7 +151,7 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `comics`            | [`ComicList`](#comiclist)                       | A resource list containing the comics which feature work by this creator. |
 | `events`            | [`EventList`](#eventlist)                       | A resource list containing the events which feature work by this creator. |
 
-## `Character`{#MarvelCharacter}
+## `Character`
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
@@ -171,7 +171,7 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `events`            | [`EventList`](#eventlist)                       | A resource list containing the events in which this character appears. |
 | `series`            | [`SeriesList`](#serieslist)                     | A resource list containing the series in which this character appears. |
 
-## `Story`{#MarvelStory}
+## `Story`
 
 | Property            | Type                                              | Description                                                  |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------------------ |
