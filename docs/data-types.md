@@ -72,10 +72,10 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `dates`              | [`ComicDate[]`](#comicdate)                       | A list of key dates for this comic.                          |
 | `prices`             | [`ComicPrice[]`](#comicprice)                     | A list of prices for this comic.                             |
 | `images`             | [`Image[]`](#image`)                              | A list of promotional images associated with this comic.     |
-| `creators`           | [`CreatorList[]`](#creatorlist)                   | A resource list containing the creators associated with this comic. |
-| `characters`         | [`CharacterList[]`](#characterlist)               | A resource list containing the characters in this comic.     |
-| `stories`            | [`StoryList[]`](#storylist)                       | A resource list containing the stories which appear in this comic. |
-| `events`             | [`EventList[]`](#eventlist)                       | A resource list containing the events in which this comic appears. |
+| `creators`           | [`CreatorList`](#creatorlist)                   | A resource list containing the creators associated with this comic. |
+| `characters`         | [`CharacterList`](#characterlist)               | A resource list containing the characters in this comic.     |
+| `stories`            | [`StoryList`](#storylist)                       | A resource list containing the stories which appear in this comic. |
+| `events`             | [`EventList`](#eventlist)                       | A resource list containing the events in which this comic appears. |
 
 ## `Event`{#MarvelEvent}
 
@@ -94,13 +94,13 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `description`       | `string`                                          | A description of the event.                                  |
 | `start`             | `YYYY-MM-DD HH:MM:SS`                             | The date of publication of the first issue in this event     |
 | `end`               | `YYYY-MM-DD HH:MM:SS`                             | The date of publication of the last issue in this event      |
-| `comics`            | [`ComicList[]`](#comiclist)                       | A resource list containing the comics in this event.         |
-| `stories`           | [`StoryList[]`](#storylist)                       | A resource list containing the stories in this event.        |
-| `series`            | [`SeriesList[]`](#serieslist)                     | A resource list containing the series in this event.         |
-| `characters`        | [`CharacterList[]`](#characterlist)               | A resource list containing the characters which appear in this event. |
-| `creators`          | [`CreatorList[]`](#creatorlist)                   | A resource list containing creators whose work appears in this event. |
-| `next`              | [`EventSummary[]`](#eventsummary)                 | A summary representation of the event which follows this event in the timeline. |
-| `previous`          | [`EventSummary[]`](#eventsummary)                 | A summary representation of the event which preceded this event in the timeline. |
+| `comics`            | [`ComicList`](#comiclist)                       | A resource list containing the comics in this event.         |
+| `stories`           | [`StoryList`](#storylist)                       | A resource list containing the stories in this event.        |
+| `series`            | [`SeriesList`](#serieslist)                     | A resource list containing the series in this event.         |
+| `characters`        | [`CharacterList`](#characterlist)               | A resource list containing the characters which appear in this event. |
+| `creators`          | [`CreatorList`](#creatorlist)                   | A resource list containing creators whose work appears in this event. |
+| `next`              | [`EventSummary`](#eventsummary)                   | A summary representation of the event which follows this event in the timeline. |
+| `previous`          | [`EventSummary`](#eventsummary)                   | A summary representation of the event which preceded this event in the timeline. |
 
 ## `Series`{#MarvelSeries}
 
@@ -120,13 +120,13 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `startYear`         | `number`                                          | The first year in which the series has been published.       |
 | `endYear`           | `number`                                          | The last year of publication for the series (conventionally, 2099 for ongoing series). |
 | `rating`            | `string`                                          | The age-appropriateness rating for the series.               |
-| `comics`            | [`ComicList[]`](#comiclist)                       | A resource list containing comics in this series.            |
-| `stories`           | [`StoryList[]`](#storylist)                       | A resource list containing stories which occur in comics in this series. |
-| `events`            | [`EventList[]`](#eventlist)                       | A resource list containing events which take place in comics in this series. |
-| `characters`        | [`CharacterList[]`](#characterlist)               | A resource list containing the characters which appear in this series. |
-| `creators`          | [`CreatorList[]`](#creatorlist)                   | A resource list containing creators whose work appears in this series. |
-| `next`              | [`SeriesSummary[]`](#seriessummary)               | A summary representation of the series which follows this series in the timeline. |
-| `previous`          | [`SeriesSummary[]`](#seriessummary)               | A summary representation of the series which preceded this series in the timeline. |
+| `comics`            | [`ComicList`](#comiclist)                       | A resource list containing comics in this series.            |
+| `stories`           | [`StoryList`](#storylist)                       | A resource list containing stories which occur in comics in this series. |
+| `events`            | [`EventList`](#eventlist)                       | A resource list containing events which take place in comics in this series. |
+| `characters`        | [`CharacterList`](#characterlist)               | A resource list containing the characters which appear in this series. |
+| `creators`          | [`CreatorList`](#creatorlist)                   | A resource list containing creators whose work appears in this series. |
+| `next`              | [`SeriesSummary`](#seriessummary)                 | A summary representation of the series which follows this series in the timeline. |
+| `previous`          | [`SeriesSummary`](#seriessummary)                 | A summary representation of the series which preceded this series in the timeline. |
 
 ## `Creator`{#MarvelCreator}
 
@@ -146,10 +146,10 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `lastName`          | `string`                                          | The last name of the creator.                                |
 | `suffix`            | `string`                                          | The suffix or honorific for the creator.                     |
 | `fullName`          | `string`                                          | The full name of the creator (a space-separated concatenation of the above four fields). |
-| `series`            | [`SeriesList[]`](#serieslist)                     | A resource list containing the series which feature work by this creator. |
-| `stories`           | [`StoryList[]`](#storylist)                       | A resource list containing the stories which feature work by this creator. |
-| `comics`            | [`ComicList[]`](#comiclist)                       | A resource list containing the comics which feature work by this creator. |
-| `events`            | [`EventList[]`](#eventlist)                       | A resource list containing the events which feature work by this creator. |
+| `series`            | [`SeriesList`](#serieslist)                     | A resource list containing the series which feature work by this creator. |
+| `stories`           | [`StoryList`](#storylist)                       | A resource list containing the stories which feature work by this creator. |
+| `comics`            | [`ComicList`](#comiclist)                       | A resource list containing the comics which feature work by this creator. |
+| `events`            | [`EventList`](#eventlist)                       | A resource list containing the events which feature work by this creator. |
 
 ## `Character`{#MarvelCharacter}
 
@@ -166,10 +166,10 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `thumbnail`         | [`Image`](#image)                                 | The representative image for this character.                 |
 | `name`              | `string`                                          | The name of the character.                                   |
 | `description`       | `string`                                          | A short bio or description of the character.                 |
-| `comics`            | [`ComicList[]`](#comiclist)                       | A resource list containing comics which feature this character. |
-| `stories`           | [`StoryList[]`](#storylist)                       | A resource list containing the stories in which this character appears. |
-| `events`            | [`EventList[]`](#eventlist)                       | A resource list containing the events in which this character appears. |
-| `series`            | [`SeriesList[]`](#serieslist)                     | A resource list containing the series in which this character appears. |
+| `comics`            | [`ComicList`](#comiclist)                       | A resource list containing comics which feature this character. |
+| `stories`           | [`StoryList`](#storylist)                       | A resource list containing the stories in which this character appears. |
+| `events`            | [`EventList`](#eventlist)                       | A resource list containing the events in which this character appears. |
+| `series`            | [`SeriesList`](#serieslist)                     | A resource list containing the series in which this character appears. |
 
 ## `Story`{#MarvelStory}
 
@@ -187,12 +187,12 @@ Properties and methods in **bold** are available only if [AutoQuery Injection is
 | `title`             | `string`                                          | The story title.                                             |
 | `description`       | `string`                                          | A description of the story.                                  |
 | `type`              | `string`                                          | The story type e.g. interior story, cover, text story.       |
-| `comics`            | [`ComicList[]`](#comiclist)                       | A resource list containing comics in which this story takes place. |
-| `series`            | [`SeriesList[]`](#serieslist)                     | A resource list containing series in which this story appears. |
-| `events`            | [`EventList[]`](#eventlist)                       | A resource list containing events in which this story appears. |
-| `characters`        | [`CharacterList[]`](#characterlist)               | A resource list containing the characters which appear in this story. |
-| `creators`          | [`CreatorList[]`](#creatorlist)                   | A resource list of creators who worked on this story.        |
-| `originalIssue`     | [`ComicSummary[]`](#comicsummary)                 | A summary representation of the issue in which this story was originally published. |
+| `comics`            | [`ComicList`](#comiclist)                       | A resource list containing comics in which this story takes place. |
+| `series`            | [`SeriesList`](#serieslist)                     | A resource list containing series in which this story appears. |
+| `events`            | [`EventList`](#eventlist)                       | A resource list containing events in which this story appears. |
+| `characters`        | [`CharacterList`](#characterlist)               | A resource list containing the characters which appear in this story. |
+| `creators`          | [`CreatorList`](#creatorlist)                   | A resource list of creators who worked on this story.        |
+| `originalIssue`     | [`ComicSummary`](#comicsummary)                   | A summary representation of the issue in which this story was originally published. |
 
 ### `TextObject`
 

@@ -26,11 +26,13 @@ export interface MarvelQueryInit<E extends Endpoint, AQ extends boolean> {
   fetchSingle(): Promise<Result<E, AQ>>;
   /** Sends the API request to the Marvel API and validates the response data. */
   request(url: string): Promise<APIWrapper<APIResult<E>>>;
-  /** Indicates whether the query parameters have been validated. 
+  /** Indicates whether the query parameters have been validated.
    * Contains only the parameters key. Values can be undefined, true (valid), or false (invalid). */
   validated: {
     parameters: boolean | undefined;
   };
+  /** Indicates whether all possible results have been fetched. If true, there are no more pages of data to retrieve. */
+  isComplete: boolean;
 }
 
 export interface MarvelQueryFetched<E extends Endpoint, AQ extends boolean>
@@ -64,8 +66,6 @@ export interface MarvelQueryFetched<E extends Endpoint, AQ extends boolean>
     results: boolean | undefined;
     autoQuery: boolean | undefined;
   };
-  /** Indicates whether all possible results have been fetched. If true, there are no more pages of data to retrieve. */
-  isComplete: boolean;
 }
 
 export type MarvelQueryInstance<

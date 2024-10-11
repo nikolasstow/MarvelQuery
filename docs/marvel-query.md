@@ -32,6 +32,7 @@ The MarvelQuery instance has different sets of properties depending on whether i
 | `autoQuery`     | `boolean`                                      | Specifies whether AutoQuery is enabled, allowing additional queries to be made on the result items. |
 | `queryId`       | `string`                                       | A unique identifier for the query, used for logging and tracking. |
 | `validated`     | `{ parameters: boolean | undefined }`          | Indicates whether the query parameters have been validated. Contains only the parameters key. Values can be undefined, true (valid), or false (invalid). |
+| `isComplete`    | `boolean`                                      | Indicates whether all possible results have been fetched. If true, there are no more pages of data to retrieve. |
 
 ### `MarvelQueryFetched` (Post-fetch){#marvelqueryfetched}
 
@@ -47,7 +48,6 @@ After the query is executed and results are fetched, the instance contains addit
 | `metadata`      | [`Metadata`](#metadata)                                   | Information about the API response, including status codes, attribution requirements, and other details. |
 | `results`       | [`Result[]`](data-types.md#resulttypes)                   | The list of results returned for the current query request.  |
 | `resultHistory` | [`Result[]`](data-types.md#resulttypes)                   | The cumulative list of results from all previous requests made for this query. |
-| `isComplete`    | `boolean`                                                 | Indicates whether all possible results have been fetched. If true, there are no more pages of data to retrieve. |
 | `validated`     | `{ parameters, results, autoQuery: boolean | undefined }` | Adds results and autoQuery keys, along with parameters, to track validation. Values can be undefined, true (valid), or false (invalid). |
 
 ### Configuration for Hidden Properties{#hidden}
