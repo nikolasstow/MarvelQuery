@@ -12,6 +12,8 @@ The tuple contains up to three elements:
 
 By using this tuple structure, the library provides a more organized way to define the endpoint, while internally converting it back into the string format required by the Marvel API.
 
+### `EndpointDescriptor`
+
 ### Single Element Queries
 
 When querying an entire category (e.g., all comics), you can omit the brackets for convenience. Instead of writing ["comics"], you can simply use "comics" directly. This format is functionally equivalent and can be used like this:

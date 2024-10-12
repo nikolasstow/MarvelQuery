@@ -24,14 +24,14 @@ const query = MarvelQuery.init({
 
 | Property               | Type                                      | Description                                                  |
 | ---------------------- | ----------------------------------------- | ------------------------------------------------------------ |
-| `autoQuery`            | `boolean`                                 | Enables/disables [AutoQuery Injection](marvel-query.md).     |
-| `globalParams`         | [`GlobalParams`](#globalparams)           | Global parameters to be applied to all queries, or all queries of a specific type. |
+| `autoQuery`            | `boolean`                                 | Enables/disables [AutoQuery Injection](autoquery.md).     |
+| `globalParams`         | [`GlobalParams`](#globalparams-1)           | Global parameters to be applied to all queries, or all queries of a specific type. |
 | `onResult`             | [`OnResultMap`](#onresultmap)             | A map of functions to be called when all results, or results of a specific type, are returned. |
 | `onRequest`            | ` (url: string) => void`                  | A function that is called for each request. Useful for monitoring your API usage. |
-| `logOptions`           | [`LogOptions`](#logoptions)               | Options for logging, including verbosity, max length in console, and options for saving to file. |
-| `httpClient`           | [`HTTPClient`](#fetchfunction)            | Replace the default fetch function (axios) with your own HTTP client. |
+| `logOptions`           | [`LogOptions`](#logoptions-1)               | Options for logging, including verbosity, max length in console, and options for saving to file. |
+| `httpClient`           | [`HTTPClient`](#httpclient-1)            | Replace the default fetch function (axios) with your own HTTP client. |
 | `validation`           | [`ValidationOptions`](#validationoptions) | Enables or disables validation at various stages of the query process, including parameter validation, API response validation, and AutoQuery injections. |
-| `showHiddenProperties` | `boolean`                                 | Properties that pertain to the response of the API are hidden by default until a response is received. In some situations you may want to disable this feature. [Learn more here.]("showhiddenproperties") |
+| `showHiddenProperties` | `boolean`                                 | Properties that pertain to the response of the API are hidden by default until a response is received. In some situations you may want to disable this feature. [Learn more here.](#showhiddenproperties-boolean) |
 
 ## Configuration Options and Examples
 
@@ -170,7 +170,7 @@ The globalParams feature in your library enables you to set default parameters f
 
 | Property     | Type                                                   | Description                                                  |
 | ------------ | ------------------------------------------------------ | ------------------------------------------------------------ |
-| `all`        | [`APIBaseParams`](api-parameters.md#apibaseparams)     | Parameters which apply to all requests, and as such are limited to parameters found on all endpoints (`modifiedSince`, `limit`, and `offset`). |
+| `all`        | [`APIBaseParams`](api-parameters.md#base-parameters)     | Parameters which apply to all requests, and as such are limited to parameters found on all endpoints (`modifiedSince`, `limit`, and `offset`). |
 | `comics`     | [`ComicParams`](api-parameters.md#comicparams)         | Set default parameters for all api requests for comics.      |
 | `characters` | [`CharacterParams`](api-parameters.md#characterparams) | Set default parameters for all api requests for characters . |
 | `creators`   | [`CreatorParams`](api-parameters.md#creatorparams)     | Set default parameters for all api requests for creators.    |
