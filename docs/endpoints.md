@@ -1,5 +1,9 @@
 # Endpoints
 
+An endpoint in the Marvel API is represented as a string (e.g., "comics/1323/characters"), where each part separated by a forward slash (/) defines the type, ID, and collection type. In the MarvelQuery library, this string format is converted into a **tuple** (e.g., ["comics", 1323, "characters"]) for consistency and easier manipulation.
+
+Each endpoint corresponds to a specific type of resource—such as comics, characters, or events—and is essential for directing queries to the right data. In the MarvelQuery library, endpoints are represented as tuples, offering a structured and type-safe way to build queries programmatically. This approach allows you to navigate between different resources efficiently by embedding related resource paths directly into the API response.
+
 ## `EndpointType`
 
 The EndpointType union defines the six primary data types in the Marvel API. These types correspond to the root-level endpoints for various Marvel resources: comics, characters, creators, events, series, and stories.
@@ -12,11 +16,9 @@ The EndpointType union defines the six primary data types in the Marvel API. The
 type EndpointType = "comics" | "characters" | "creators" | "events" | "series" | "stories";
 ```
 
-## `Endpoint` *(path as tuple)*
+## `Endpoint`
 
-An endpoint in the Marvel API is represented as a string (e.g., `"comics/1323/characters"`), where each part separated by a forward slash ( `/` ) defines the type, ID, and collection type. In the MarvelQuery library, this string format is converted into a **tuple** (e.g., `["comics", 1323, "characters"]`).
-
-The tuple is defined by the Endpoint type, which can contain up to three elements:
+The endpoint tuple is defined by the Endpoint type, which can contain up to three elements:
 
 ```ts
 type Endpoint = [EndpointType, number?, EndpointType?];
@@ -71,4 +73,4 @@ await query(["characters", 1009627, "comics"])
   .then(api => api.results); // returns Event[]
 ```
 
-[**Next: Parameters to Refine Your Query** →](api-parameters.md)
+[Next: **Building Blocks & AutoQuery →**](autoquery.md)

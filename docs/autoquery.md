@@ -37,7 +37,7 @@ Each **List** represents a collection of related resources. It includes properti
 | `returned`      | `number`                                                 | The number of resources returned in this collection (up to 20). |
 | `collectionURI` | `string`                                                 | The path to the full list of items in this collection.       |
 | `items`         | [`Summary`](#summary)                                    | The list of returned items in this collection.               |
-| **`endpoint`**  | [`Endpoint`](endpoints.md#endpoint-path-as-tuple)        | A collection endpoint contains three elements: `[${resourceType}, ${id}, ${collectionType}']` (example: `["events", 123, "comics"]`). |
+| **`endpoint`**  | [`Endpoint`](endpoints.md#endpoint)        | A collection endpoint contains three elements: `[${resourceType}, ${id}, ${collectionType}']` (example: `["events", 123, "comics"]`). |
 | **`query()`**   | [`QueryResource`](autoquery.md#resources-with-autoquery) | Query the collection, filtering the resources by the parameters. |
 
 **Injected Properties and Methods**
@@ -56,7 +56,7 @@ A **Summary** represents a single resource and provides key information about th
 | `resourceURI`       | `string`                                                 | The path to the individual resource.                         |
 | `name`              | `string`                                                 | The canonical name of the resource.                          |
 | **`id`**            | `number`                                                 | The unique ID of the resource.                               |
-| **`endpoint`**      | [`Endpoint`](endpoints.md#endpoint-path-as-tuple)        | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["comics", 123]`). |
+| **`endpoint`**      | [`Endpoint`](endpoints.md#endpoint)        | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["comics", 123]`). |
 | **`query()`**       | [`QueryResource`](autoquery.md#resources-with-autoquery) | Query a collection relating to the item.                     |
 | **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)                | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`MarvelResult`](#marvelresult)                          | Fetches and returns the resource.                            |
@@ -77,7 +77,7 @@ At the root level, the result represents a resource, meaning we can treat it jus
 
 | Property            | Type                                                     | Description                                                  |
 | ------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
-| **`endpoint`**      | [`Endpoint`](endpoints.md#endpoint-path-as-tuple)        | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["events", 123]`). |
+| **`endpoint`**      | [`Endpoint`](endpoints.md#endpoint)        | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["events", 123]`). |
 | **`query()`**       | [`QueryResource`](autoquery.md#resources-with-autoquery) | Query a collection relating to the event.                    |
 | **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)                | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`Promise<Event>`](#marvelevent)                         | Fetches and returns the resource.                            |
@@ -100,222 +100,4 @@ At the root level, the result represents a resource, meaning we can treat it jus
 
 For a detailed breakdown of all the data-types returned by the Marvel API, please reference [API Response](data-types.md)
 
-[**Next: Understanding AutoQuery** →](api-parameters.md)
-
-### Resources with AutoQuery
-
-The resourceURI is used to generate an Endpoint type, tuple, and id. Using these, three methods are injected into the resource: `query()`, `fetch()`, and `fetchSingle()`. The `query()` method works no different than the inital query function; it accepts a type (so long as it's not the same as the resource), and the parameters to filter the query. This query method searches only for related items to the resource, if you want to fetch the resource itself there are two methods available. `fetch()` and `fetchSingle` work in the same way they would when used following any query method, `fetch()` returns a MarvelQuery instance populated with the results, and `fetchSingle()` returns only the result item.
-
-```ts
-interface Resource {
-	resourceURI: string;
-  id: number; // <-- Generated from the resourceURI
-  endpoint: { // <-- Generated from the resourceURI
-  	path: Endpoint; // ["comics", 90210] (tuple)
-    type: EndpointType // "comics"
-  }
-	name: string;
-  fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the resource
-  fetchSingle: () => Result; // Returns a single result (Series, Character, Event, etc...)
-  query(): (type, params) => MarvelQuery; // Query related resources (collection)
-	role?: string;
-	type?: string; 
-}
-```
-
-### Collections with AutoQuery
-
-Collections are a little simpler. Like a resource, they gain the `endpoint` property, and a query method but with only a single argument: paramters to filter the contents of the collection
-
-```ts
-interface Collection {
-	available: number;
-	returned: number;
-	collectionURI: string;
-  endpoint: { // <-- Generated from the collectionURI
-  	path: Endpoint; // ["comics", 90210, "events"] (tuple)
-    type: EndpointType // "events"
-  }
-  query(): (params) => MarvelQuery;
-	items: Array<Resource>
-}
-```
-
-## Results with AutoQuery
-
-All result types contain a resourceURI, so the properties and methods found in resources with AutoQuery will also be added to each result item. Let's take a look at the same Event result from before, now with AutoQuery Injection:
-
-```ts
-interface Event {
-  id: number;
-  resourceURI: string; // <-- Resource URI
-  
-  endpoint: { // <-- Generated from the resourceURI
-  	path: Endpoint; // ["event", 911] (tuple)
-    type: EndpointType // "event"
-  }
-  fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the Event in results
-  fetchSingle: () => Result; // Returns this Event
-  query(): (type, params) => MarvelQuery; // Query related resources (comics, creators, characters)
-  
-  modified: string;
-  urls: URL[];
-  thumbnail: Image;
-  title: string;
-  description: string;
-  start: string;
-  end: string;
-  comics: {
-    available: number;
-    returned: number;
-    collectionURI: string; // <-- Collection URI
-    
-    endpoint: { // <-- Generated from the collectionURI
-  		path: Endpoint; // ["events", 90210, "comics"] (tuple)
-  	  type: EndpointType // "comics"
- 		}
-  	query(): (params) => MarvelQuery; // Query comics featured in the Event
-    
-    items: Array<{
-      resourceURI: string; // <-- Resource URI
-      name: string;
-      
-      id: number; // <-- Generated from the resourceURI
-      endpoint: { // <-- Generated from the resourceURI
-        path: Endpoint; // ["comics", 90210] (tuple)
-        type: EndpointType // "comics"
-      }
-      name: string;
-      fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the Comic
-      fetchSingle: () => Result; // Returns a single Comic
-      query(): (type, params) => MarvelQuery; // Query related resources (collection)
-    }>;
-  };
-  stories: {
-    available: number;
-    returned: number;
-    collectionURI: string; // <-- Collection URI
-    
-    endpoint: { // <-- Generated from the collectionURI
-  		path: Endpoint; // ["events", 90210, "stories"] (tuple)
-  	  type: EndpointType // "stories"
- 		}
-  	query(): (params) => MarvelQuery; // Query stories featured in the Event
-    
-    items: Array<{
-      resourceURI: string; // <-- Resource URI
-      name: string;
-      type: string;
-      
-      id: number; // <-- Generated from the resourceURI
-      endpoint: { // <-- Generated from the resourceURI
-        path: Endpoint; // ["stories", 90210] (tuple)
-        type: EndpointType // "stories"
-      }
-      name: string;
-      fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the Story
-      fetchSingle: () => Result; // Returns a single Story
-      query(): (type, params) => MarvelQuery; // Query related resources (collection)
-    }>;
-  };
-  series: {
-    available: number;
-    returned: number;
-    collectionURI: string; // <-- Collection URI
-    
-    endpoint: { // <-- Generated from the collectionURI
-  		path: Endpoint; // ["events", 90210, "series"] (tuple)
-  	  type: EndpointType // "series"
- 		}
-  	query(): (params) => MarvelQuery; // Query series featured in the Event
-    
-    items: Array<{
-      resourceURI: string; // <-- Resource URI
-      name: string;
-      
-      id: number; // <-- Generated from the resourceURI
-      endpoint: { // <-- Generated from the resourceURI
-        path: Endpoint; // ["series", 90210] (tuple)
-        type: EndpointType // "series"
-      }
-      name: string;
-      fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the Series
-      fetchSingle: () => Result; // Returns a single Series
-      query(): (type, params) => MarvelQuery; // Query related resources (collection)
-    }>;
-  };
-  characters: {
-    available: number;
-    returned: number;
-    collectionURI: string; // <-- Collection URI
-    
-    endpoint: { // <-- Generated from the collectionURI
-  		path: Endpoint; // ["events", 90210, "characters"] (tuple)
-  	  type: EndpointType // "characters"
- 		}
-  	query(): (params) => MarvelQuery; // Query characters featured in the Event
-    
-    items: Array<{
-      resourceURI: string; // <-- Resource URI
-      name: string;
-      role: string;
-      
-      id: number; // <-- Generated from the resourceURI
-      endpoint: { // <-- Generated from the resourceURI
-        path: Endpoint; // ["characters", 90210] (tuple)
-        type: EndpointType // "characters"
-      }
-      name: string;
-      fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the Character
-      fetchSingle: () => Result; // Returns a single Character
-      query(): (type, params) => MarvelQuery; // Query related resources (collection)
-    }>;
-  };
-  creators: {
-    available: number;
-    returned: number;
-    collectionURI: string; // <-- Collection URI
-    
-    endpoint: { // <-- Generated from the collectionURI
-  		path: Endpoint; // ["events", 90210, "creators"] (tuple)
-  	  type: EndpointType // "creators"
- 		}
-  	query(): (params) => MarvelQuery; // Query creators featured in the Event
-    
-    items: Array<{
-      resourceURI: string; // <-- Resource URI
-      name: string;
-      role: string;
-      
-      id: number; // <-- Generated from the resourceURI
-      endpoint: { // <-- Generated from the resourceURI
-        path: Endpoint; // ["creators", 90210] (tuple)
-        type: EndpointType // "creators"
-      }
-      name: string;
-      fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the Creator
-      fetchSingle: () => Result; // Returns a single Creator
-      query(): (type, params) => MarvelQuery; // Query related resources (collection)
-    }>;
-  };
-  next: {
-    resourceURI: string; // <-- Resource URI
-    name: string;
-    
-    id: number; // <-- Generated from the resourceURI
-      endpoint: { // <-- Generated from the resourceURI
-        path: Endpoint; // ["events", 90210] (tuple)
-        type: EndpointType // "events"
-      }
-      name: string;
-      fetch(): () => MarvelQuery; // Returns a MarvelQuery instance with the Event
-      fetchSingle: () => Result; // Returns a single Event
-      query(): (type, params) => MarvelQuery; // Query related resources (collection)
-  };
-  previous: {
-    resourceURI: string; // <-- Resource URI
-    name: string;
-  };
-}
-```
-
+[Next: **Take Your Queries Further with AutoQuerying** →](api-parameters.md)
