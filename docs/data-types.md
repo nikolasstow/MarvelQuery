@@ -37,7 +37,7 @@ These codes indicate the success or failure of the request and provide insights 
 
 The API returns structured data in an array, where each element corresponds to a specific type, such as characters, comics, creators, series, stories, and events. These data types provide detailed information about the returned resources, including metadata like IDs, names, descriptions, and related resources. Each result follows a consistent format, allowing for easy access and manipulation of the data within your application.
 
-Properties and methods in **bold** are available only if [AutoQuery Injection is enabled in the configuration](configuration.md). If AutoQuery is disabled, the type name is prepended by '**Marvel**' (ex: MarvelComic, MarvelCreator, as compared to Comic, Creator).
+Properties and methods in **bold** are available only if [AutoQuery Injection is enabled in the configuration](configuration.md#autoquerty-boolean). If AutoQuery is disabled, the type name is prepended by '**Marvel**' (e.g., MarvelComic, MarvelCreator, as compared to Comic, Creator).
 
 ## `Comic`
 

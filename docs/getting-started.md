@@ -16,7 +16,7 @@ npm install axios
 
 ## Setup
 
-To get started, initialize the library with your API keys and any desired [configuration options](#config) by calling `MarvelQuery.init()`.
+To get started, initialize the library with your API keys and any desired [configuration options](configuration.md) by calling `MarvelQuery.init()`.
 
 ```ts
 const query = MarvelQuery.init({
@@ -27,7 +27,7 @@ const query = MarvelQuery.init({
   });
 ```
 
-This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments: the [endpoint](#endpoint) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](#marvelquery).
+This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments: the [endpoint](endpoints.md) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](marvelquery.md).
 
 # Creating a Query
 
@@ -86,8 +86,8 @@ To fetch data from your query, use the .fetch() method on the MarvelQuery object
 
 Note: The type of data returned depends on your configuration and the fetch method:
 
-- With AutoQuery turned on, the data types are the same as the endpoint type only singular with the first letter capitalized (ex: "comics" becomes Comic).
-- With AutoQuery turned off, the data types are prepended with '**Marvel**' (ex: MarvelComic, MarvelEvent, MarvelCharacter, etc.)
+- With AutoQuery turned on, the data types are the same as the endpoint type only singular with the first letter capitalized (e.g., "comics" becomes Comic).
+- With AutoQuery turned off, the data types are prepended with '**Marvel**' (e.g., MarvelComic, MarvelEvent, MarvelCharacter, etc.)
 
 ### `.fetch()`
 

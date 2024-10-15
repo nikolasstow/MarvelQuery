@@ -18,7 +18,6 @@ import { DataType } from "./data-types";
  * your query endpoint would be ['characters', '1009491', events']
  */
 export type Endpoint = [EndpointType, number?, EndpointType?] extends [
-  // Shape of the endpoint
   infer First,
   number?,
   EndpointType?
@@ -28,7 +27,10 @@ export type Endpoint = [EndpointType, number?, EndpointType?] extends [
     : ["Error: Invalid endpoint type", First] // If the first element is not an EndpointType, return an error
   : ["Error: Invalid endpoint"];
 
-/** The data types of the endpoints: 'comics', 'characters', 'creators', 'events', 'series', 'stories' */
+/**
+ * Represents the core data types in the Marvel API.
+ * These are the root-level endpoints for various Marvel resources.
+ */
 export type EndpointType =
   | "comics"
   | "characters"
