@@ -1,7 +1,8 @@
 import { Metadata, APIWrapper, APIResult } from "./data-types";
 import { Result } from "./autoquery-types";
 import { Params } from "./param-types";
-import { Endpoint, EndpointDescriptor } from "./endpoint-types";
+import { Endpoint } from "./endpoint-types";
+import { DataType } from "lib";
 
 export interface MarvelQueryInit<E extends Endpoint, AQ extends boolean> {
   /** Specifies whether AutoQuery is enabled, allowing additional queries to be made on the result items. */
@@ -13,7 +14,7 @@ export interface MarvelQueryInit<E extends Endpoint, AQ extends boolean> {
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes ["characters", 1009491, "comics"]
    */
-  endpoint: EndpointDescriptor<E>;
+  endpoint: E;
   /** The query parameters used to refine the API request. */
   params: Params<E>;
   /** Constructs the full URL for the API request using keys, the endpoint, and query parameters. */
