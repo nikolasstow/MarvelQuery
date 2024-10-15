@@ -28,17 +28,6 @@ type Endpoint = [EndpointType, number?, EndpointType?];
 
 By using this tuple structure, the library provides a more organized way to define the endpoint, while internally converting it back into the string format required by the Marvel API.
 
-## `EndpointDescriptor`
-
-In addition to the Endpoint tuple, the library defines the EndpointDescriptor interface. This interface helps describe the endpoint more precisely by including both the tuple path and the specific data type of the endpoint.
-
-```ts
-interface EndpointDescriptor<E extends Endpoint> {
-  path: E; // The Endpoint tuple
-  type: DataType<E>; // The core data type from EndpointType
-}
-```
-
 ## Querying
 
 ### Single Element Queries

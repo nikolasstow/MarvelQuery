@@ -46,12 +46,23 @@ After the query is executed and results are fetched, the instance contains addit
 | `total`         | `number`                                                  | The total number of results available for the entire query across all pages. |
 | `count`         | `number`                                                  | The number of results returned in the current request.       |
 | `metadata`      | [`Metadata`](#metadata)                                   | Information about the API response, including status codes, attribution requirements, and other details. |
-| `results`       | [`Result[]`](data-types.md#resulttypes)                   | The list of results returned for the current query request.  |
-| `resultHistory` | [`Result[]`](data-types.md#resulttypes)                   | The cumulative list of results from all previous requests made for this query. |
+| `results`       | [`Result[]`](data-types.md#result-types)                  | The list of results returned for the current query request.  |
+| `resultHistory` | [`Result[]`](data-types.md#result-types)                  | The cumulative list of results from all previous requests made for this query. |
 | `validated`     | `{ parameters, results, autoQuery: boolean | undefined }` | Adds results and autoQuery keys, along with parameters, to track validation. Values can be undefined, true (valid), or false (invalid). |
+
+### `EndpointDescriptor`
+
+In addition to the Endpoint tuple, the library defines the EndpointDescriptor interface. This interface helps describe the endpoint more precisely by including both the tuple path and the specific data type of the endpoint.
+
+```ts
+interface EndpointDescriptor<E extends Endpoint> {
+  path: E; // The Endpoint tuple
+  type: DataType<E>; // The core data type from EndpointType
+}
+```
 
 ### Configuration for Hidden Properties
 
 If showHiddenProperties is enabled in the configuration, the properties that are typically available only post-fetch (MarvelQueryFetched) will be visible prior to fetching, giving you full visibility into all aspects of the query.
 
-[Next: **Understanding AutoQuery →**](autoquery.md)
+[Next: **Building Blocks & AutoQuery →**](autoquery.md)
