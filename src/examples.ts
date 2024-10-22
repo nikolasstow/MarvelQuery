@@ -21,6 +21,70 @@ const query = MarvelQuery.init(
   }
 );
 
+async function regularExamples() {
+  // Find comics that feature Spider-Man and Dock Ock
+  const spidey = await query("characters", {
+    name: "Peter Parker",
+  })
+    .fetchSingle()
+    .then((character) => character.id);
+
+  const ock = await query("characters", {
+    name: "Doctor Octopus",
+  })
+    .fetchSingle()
+    .then((character) => character.id);
+
+  const comics = await query("comics", {
+    characters: [spidey, ock],
+  }).fetch();
+}
+
+async function autoQueryExamples() {
+  // Let's find the most recent comics that feature Sorceror Supreme Doctor Doom.
+  const doom = await query("characters", {
+    name: "Victor Von Doom",
+  }).fetchSingle();
+  // Once retrieved, we can create a new query from the collection in the 'comics' property.
+  const doomComics = await doom.comics
+    .query({
+      orderBy: "focDate",
+    })
+    .fetch();
+
+  // We can streamline this process by chaining queries together using .then()
+  // In this example we can fetch the most recent comic featuring Morlun
+  query("characters", {
+    name: "Morlun",
+  })
+    .fetchSingle()
+    .then(({ comics }) => comics.query({ orderBy: "onsaleDate" }).fetchSingle())
+    .then((mostRecentComic) => {
+      // Do something with the most recent comic
+      console.log(mostRecentComic);
+    });
+
+  // Let's find new series being released this month
+
+  // First, we query the comics released this month.
+  // Step 1: Query all comics with issue number 1 released this month.
+  const comics = await query("comics", {
+    dateDescriptor: "thisMonth",
+    issueNumber: 1,
+  }).fetch();
+
+  // Step 2: Fetch series details for each comic, one at a time to avoid API rate limiting.
+  const seriesDetails: Series[] = [];
+  for (const comic of comics.results) {
+    const seriesDetail = await comic.series.fetchSingle(); // Sequentially fetch each series
+    seriesDetails.push(seriesDetail);
+  }
+
+  // find similar comics
+  // find
+  // step 1: find comic (stan #30, jrs #13272)
+}
+
 /**
  * Fetches series information based on the title and start year.
  *

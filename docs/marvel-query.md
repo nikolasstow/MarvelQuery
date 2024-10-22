@@ -13,7 +13,7 @@ For a detailed explanation of available configuration options, such as global pa
 | `init`                                           | [`keys: APIKeys`](#apikeys), [`config: Config`](#config) | [`query()`](#createquery)† | Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. |
 | `query<T extends Endpoint | EndpointType>`† | `endpoint: T, params: Params<AsEndpoint<T>>`             | `MarvelQuery<T>`                | Private function to create a new query instance. Must be accessed via init() initialization. |
 
-† *The query function, which can be named anything, is returned by init(). It accepts two arguments: an API endpoint and the query parameters. For more information, see [Creating a Query](getting-started.md#query).*
+† *The query function, which can be named anything, is returned by init(). It accepts two arguments: an API endpoint and the query parameters. For more information, see [Creating a Query](getting-started.md#creating-a-query).*
 
 ## Instance Properties and Methods
 
@@ -54,4 +54,4 @@ After the query is executed and results are fetched, the instance contains addit
 
 If showHiddenProperties is enabled in the configuration, the properties that are typically available only post-fetch (MarvelQueryFetched) will be visible prior to fetching, giving you full visibility into all aspects of the query.
 
-[Next: **Structuring Queries with Endpoints →**](endpoints,md)
+[Next: **Structuring Queries with Endpoints →**](endpoints.md)

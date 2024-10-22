@@ -24,7 +24,7 @@ const query = MarvelQuery.init({
 
 | Property               | Type                                      | Description                                                  |
 | ---------------------- | ----------------------------------------- | ------------------------------------------------------------ |
-| `autoQuery`            | `boolean`                                 | Enables/disables [AutoQuery Injection](autoquery.md).     |
+| `autoQuery`            | `boolean`                                 | Enables/disables [AutoQuery Injection](autoquery-blocks.md).     |
 | `globalParams`         | [`GlobalParams`](#globalparams-1)           | Global parameters to be applied to all queries, or all queries of a specific type. |
 | `onResult`             | [`OnResultMap`](#onresultmap)             | A map of functions to be called when all results, or results of a specific type, are returned. |
 | `onRequest`            | ` (url: string) => void`                  | A function that is called for each request. Useful for monitoring your API usage. |

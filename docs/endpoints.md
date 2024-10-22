@@ -73,4 +73,4 @@ await query(["characters", 1009627, "comics"])
   .then(api => api.results); // returns Event[]
 ```
 
-[Next: **Building Blocks & AutoQuery →**](autoquery.md)
+[Next: **Building Blocks & AutoQuery →**](autoquery-blocks.md)

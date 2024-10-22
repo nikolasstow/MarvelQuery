@@ -45,15 +45,13 @@ The endpoint is a tuple containing 1 to 3 elements that specify the target locat
 // These elements represent data types and determine the type of data returned by the API.
 ```
 
-*Read more about [Endpoints](endpoints.md)*
-
-## Querying by Data Type
-
 One of the most common queries involves targeting an entire data type while using parameters to filter the results. When you don’t have an ID for a specific resource or collection, your endpoint will simply be the data type (e.g., “comics” or “characters”). In cases where the endpoint is a single data type, you can omit the tuple brackets for simplicity:
 
 ```ts
 const spiders = await query("characters"); // "characters" instead of ["characters"]
 ```
+
+*Learn more about [Endpoints](endpoints.md)*.
 
 ## Adding Parameters
 
@@ -137,5 +135,5 @@ query("characters", {
   }).fetch());
 ```
 
-[Next: **Explore MarvelQuery Properties and Methods →**](autoquery.md)
+[Next: **Explore MarvelQuery Properties and Methods →**](marvel-query.md)
 

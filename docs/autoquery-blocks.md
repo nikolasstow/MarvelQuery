@@ -27,7 +27,7 @@ Looking at the structure of the **Event** item, you’ll notice patterns that he
 
 There are a few notable exceptions: a **Creator** result does not have a characters property, and while a **Comic** result contains a series property, it is a **Summary** rather than a **List** because a comic belongs to only one series. 
 
-## Collections (`List`)x
+## `List` Properties
 
 Each **List** represents a collection of related resources. It includes properties such as available and returned to track the total and currently returned items, a collectionURI pointing to the full collection, and an items array containing **Summaries** of the returned resources.
 
@@ -38,7 +38,7 @@ Each **List** represents a collection of related resources. It includes properti
 | `collectionURI` | `string`                                                 | The path to the full list of items in this collection.       |
 | `items`         | [`Summary`](#summary)                                    | The list of returned items in this collection.               |
 | **`endpoint`**  | [`Endpoint`](endpoints.md#endpoint)        | A collection endpoint contains three elements: `[${resourceType}, ${id}, ${collectionType}']` (example: `["events", 123, "comics"]`). |
-| **`query()`**   | [`QueryResource`](autoquery.md#resources-with-autoquery) | Query the collection, filtering the resources by the parameters. |
+| **`query()`**   | [`QueryResource`](autoquery-blocks.md#resources-with-autoquery) | Query the collection, filtering the resources by the parameters. |
 
 **Injected Properties and Methods**
 
@@ -47,7 +47,7 @@ Using the `collectionURI`, the AutoQuery feature injects two key additions into 
 - `endpoint`: Provides the endpoint path as a tuple, as well as the data type it returns.
 - `query()`: A method that allows you to query the collection directly, using parameters to refine the search.
 
-## Resources (`Summary`)
+## `Summary` Properties
 
 A **Summary** represents a single resource and provides key information about that resource in a compact form. Summaries are typically found as an array within the items property of a **List**, but they can also appear in other places throughout the API. For example, in a **Comic**, Summary arrays are used in properties like `variants`, `collections`, and `collectedIssues`. Additionally, summaries are used as the type for properties such as `next` and` previous` in an **Event** or **Series**, as well as `originalIssue` in a **Story**. Some summaries, like those for **Characters** and **Creators**, include additional properties such as `role`, while **Story** summaries include a `type` property to specify the type of story.
 
@@ -57,7 +57,7 @@ A **Summary** represents a single resource and provides key information about th
 | `name`              | `string`                                                 | The canonical name of the resource.                          |
 | **`id`**            | `number`                                                 | The unique ID of the resource.                               |
 | **`endpoint`**      | [`Endpoint`](endpoints.md#endpoint)        | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["comics", 123]`). |
-| **`query()`**       | [`QueryResource`](autoquery.md#resources-with-autoquery) | Query a collection relating to the item.                     |
+| **`query()`**       | [`QueryResource`](autoquery-blocks.md#resources-with-autoquery) | Query a collection relating to the item.                     |
 | **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)                | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`MarvelResult`](#marvelresult)                          | Fetches and returns the resource.                            |
 
@@ -65,11 +65,11 @@ A **Summary** represents a single resource and provides key information about th
 
 Using the resourceURI, the AutoQuery feature injects several key additions into Summaries:
 
-	- `id`: Extracts the unique ID from the resource’s URI for easy reference.
-	- `endpoint`: Provides the endpoint path as a tuple, as well as the data type it returns.
-	- `query()`: A method that allows you to query a collection related to the resource directly from the summary.
-	- `fetch()`: Fetches the resource and returns a MarvelQuery instance, placing the result inside the results array.
-	- `fetchSingle()`:  Fetches and returns the resource as a single item.
+- `id`: Extracts the unique ID from the resource’s URI for easy reference.
+- `endpoint`: Provides the endpoint path as a tuple, as well as the data type it returns.
+- `query()`: A method that allows you to query a collection related to the resource directly from the summary.
+- `fetch()`: Fetches the resource and returns a MarvelQuery instance, placing the result inside the results array.
+- `fetchSingle()`:  Fetches and returns the resource as a single item.
 
 ## Result Properties
 
@@ -78,7 +78,7 @@ At the root level, the result represents a resource, meaning we can treat it jus
 | Property            | Type                                                     | Description                                                  |
 | ------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
 | **`endpoint`**      | [`Endpoint`](endpoints.md#endpoint)        | A resource endpoint contains two elements: `[${type}, ${id}']` (example: `["events", 123]`). |
-| **`query()`**       | [`QueryResource`](autoquery.md#resources-with-autoquery) | Query a collection relating to the event.                    |
+| **`query()`**       | [`QueryResource`](autoquery-blocks.md#resources-with-autoquery) | Query a collection relating to the event.                    |
 | **`fetch()`**       | [`Promise<MarvelQuery>`](marvel-query.md)                | Fetches the resource and returns a MarvelQuery instance with the resource in the results array. |
 | **`fetchSingle()`** | [`Promise<Event>`](#marvelevent)                         | Fetches and returns the resource.                            |
 | `id`                | `number`                                                 | The unique ID of the event resource.                         |
@@ -100,4 +100,16 @@ At the root level, the result represents a resource, meaning we can treat it jus
 
 For a detailed breakdown of all the data-types returned by the Marvel API, please reference [API Response](data-types.md)
 
-[Next: **Take Your Queries Further with AutoQuerying** →](api-parameters.md)
+## A Note on Lists, Collections, Summaries, and Resources:
+
+It’s important to distinguish between Lists, Collections, Summaries, and Resources, as these terms represent different levels of data abstraction.
+
+- **Resources** are individual items within the Marvel API (e.g., a single comic or character).
+- **Summaries** are a compact representation of a Resource, providing key properties such as name and resourceURI. Summaries are often found inside Lists, but they can also appear in other properties that represent individual resources (e.g., the next or previous properties of an Event).
+- **Collections** represent groups of related resources of a single type (e.g., a collection of comics or stories), and they all share a relation to a specific Resource of a different type (e.g., comics related to a particular character). For more details on how collection endpoints work, see [Endpoints](endpoints.md#collection-endpoints).
+- **Lists** are a representation of a Collection. While the Collection itself refers to a full set of Resources, a List summarizes the Collection and includes information such as the total number of available items and an array of Summaries representing the first 20 Resources in the Collection.
+
+When it comes to the methods added to result data, it’s helpful to think in terms of what the data represents. Both a result item and a Summary represent individual **Resources**, and for that reason, they share the same injected methods for fetching and querying resources.
+
+[Next: **The Magical Methods of AutoQuery** →](autoquery-methods.md)
+

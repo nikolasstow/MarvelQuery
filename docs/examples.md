@@ -1,5 +1,7 @@
 # Code Examples
 
+Referance api-parameters.md and data-types.md
+
 ```ts
 // Do's and Don'ts
 
@@ -7,7 +9,9 @@ const comics = await query("comics", {
   dateDescriptor: "thisWeek"
 }).fetch();
 
-for (comic)
+// Show common queries, like finding comics that feature both Spider-Man and Doc Ock
+
+
 ```
 
 ## Why no fetchAll() feature?
@@ -20,6 +24,4 @@ while(!query.isComplete) {
 }
 ```
 
-## AutoQuery Injection
-
-## Chained Resource Querying
+[Next: **The Art of AutoQuery →**](autoquery-blocks.md)
