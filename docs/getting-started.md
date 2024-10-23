@@ -135,5 +135,4 @@ query("characters", {
   }).fetch());
 ```
 
-[Next: **Explore MarvelQuery Properties and Methods →**](marvel-query.md)
-
+[← Back](../README.md) | [Table of Contents](table-of-contents.md) | [Next: **Explore MarvelQuery Properties and Methods →**](marvel-query.md)

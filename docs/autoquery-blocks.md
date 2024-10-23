@@ -111,5 +111,4 @@ It’s important to distinguish between Lists, Collections, Summaries, and Resou
 
 When it comes to the methods added to result data, it’s helpful to think in terms of what the data represents. Both a result item and a Summary represent individual **Resources**, and for that reason, they share the same injected methods for fetching and querying resources.
 
-[Next: **The Magical Methods of AutoQuery** →](autoquery-methods.md)
-
+[← Back](examples.md) | [Table of Contents](table-of-contents.md) | [Next: **The Magical Methods of AutoQuery** →](autoquery-methods.md)

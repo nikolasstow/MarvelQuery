@@ -1,5 +1,7 @@
 # API Parameters
 
+[← Back](autoquery-examples.md) | [Table of Contents](table-of-contents.md) | [Next: **Explore the Core Data Types of Every Marvel API Response →**](data-types.md)
+
 ## Base Parameters
 | Property         | Type                  | Description                                                                                         
 |------------------|-----------------------|-------------------------------------------------------------------------------------
@@ -187,3 +189,5 @@ type ParameterMap = {
   series: SeriesParams;
 };
 ```
+
+[← Back](autoquery-examples.md) | [Table of Contents](table-of-contents.md) | [Next: **Explore the Core Data Types of Every Marvel API Response →**](data-types.md)

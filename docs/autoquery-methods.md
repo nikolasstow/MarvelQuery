@@ -52,4 +52,4 @@ type QueryCollection<E extends Endpoint> = (
 
 These query methods provide flexibility and consistency across the library, whether you’re querying entire categories, individual resources, or filtering collections. With AutoQuery, you gain powerful tools for multi-step queries that keep your code readable and concise.
 
-[Next: **Take Your Queries Further with AutoQuerying** →](autoquery-examples.md)
+[← Back](autoquery-blocks.md) | [Table of Contents](table-of-contents.md) | [Next: **Take Your Queries Further with AutoQuerying** →](autoquery-examples.md)

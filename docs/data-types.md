@@ -1,5 +1,7 @@
 # API Response Types
 
+[← Back](api-parameters.md) | [Table of Contents](table-of-contents.md)
+
 ## `Metadata`
 
 The Metadata interface represents key information included in the API response from the Marvel API. It includes the HTTP status code, a textual status description, copyright notices, attribution information that must be displayed when using the API data, and a unique etag for caching purposes.
@@ -483,3 +485,5 @@ type DataType<E> = E extends Endpoint
     : ["Error, could not determine data type", E]
   : ["Error, not a valid endpoint", E];
 ```
+
+[← Back](api-parameters.md) | [Table of Contents](table-of-contents.md)

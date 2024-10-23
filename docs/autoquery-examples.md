@@ -24,8 +24,6 @@ const doomComics = await doom.comics
   .fetch();
 ```
 
-
-
 ## Example 2: Chaining with `.then()`
 
 In scenarios where you need to handle multiple asynchronous operations in sequence, .then() can provide a clean way to chain them together.
@@ -48,7 +46,7 @@ In this example, we start by querying for the character Morlun, a Spider-Man vil
 
 **Step 1: Query for Comics**
 
-In this example, we want to find new comic series that are launching this month. While the API doesn’t allow sorting **series** by start date (since series results only include start and end **years**), we can filter **comics** by more precise time periods. The `dateDescriptor` parameter works with relative time periods, meaning values like `thisMonth` are always relative to the current month, and next month the results will change accordingly. Additionally, we can use the `issueNumber` parameter to limit the results to first issues, helping us focus on new series.
+In this example, we want to find new comic series that are launching this month. While the API doesn’t allow sorting **series** by start date (since series results only include start and end **years**), we can filter comics by more precise time periods. The `dateDescriptor` parameter works with relative time periods, meaning values like `thisMonth` are always relative to the current month, and next month the results will change accordingly. Additionally, we can use the `issueNumber` parameter to limit the results to first issues, which is usually the first issue of a series.
 
 ```ts
 const comics = await query("comics", {
@@ -71,4 +69,4 @@ for (const comic of comics.results) {
 
 For a comprehensive breakdown of how to fine-tune your queries, check out [**API Parameters**](api-parameters.md), where you’ll find detailed explanations of every available option. To better understand the structure of the data returned by the API, visit [**Data Types Explained**](data-types.md) for an in-depth guide to the formats and properties you’ll be working with.
 
-[Next: **Parameters to Refine Your Query** →](api-parameters.md)
+[← Back](autoquery-methods.md) | [Table of Contents](table-of-contents.md) | [Next: **Parameters to Refine Your Query** →](api-parameters.md)

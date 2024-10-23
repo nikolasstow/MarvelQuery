@@ -73,4 +73,4 @@ await query(["characters", 1009627, "comics"])
   .then(api => api.results); // returns Event[]
 ```
 
-[Next: **Building Blocks & AutoQuery →**](autoquery-blocks.md)
+[← Back](marvel-query.md) | [Table of Contents](table-of-contents.md) | [Next: **MarvelQuerying (Examples) →**](examples.md)

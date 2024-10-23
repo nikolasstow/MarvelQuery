@@ -54,4 +54,4 @@ After the query is executed and results are fetched, the instance contains addit
 
 If showHiddenProperties is enabled in the configuration, the properties that are typically available only post-fetch (MarvelQueryFetched) will be visible prior to fetching, giving you full visibility into all aspects of the query.
 
-[Next: **Structuring Queries with Endpoints →**](endpoints.md)
+[← Back](getting-started.md) | [Table of Contents](table-of-contents.md) | [Next: **Structuring Queries with Endpoints →**](endpoints.md)
