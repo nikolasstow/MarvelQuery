@@ -1,36 +1,87 @@
-## `MarvelQuery<E extends Endpoint>`
+# MarvelQuery: Properties and Methods
 
-### Static Functions
+The `MarvelQuery` class is the backbone of this library, designed to interact with the Marvel API. If you’re unfamiliar with the basics of initializing the library or creating your first query, please refer to the [Getting Started](getting-started.md) guide. Below, you’ll find more in-depth information about the properties and methods available for customizing queries and handling the data returned by the API.
+
+## Initialization and Query Creation
+
+The init() function is responsible for setting up the library with your API keys and any custom configurations you need for handling requests. Once initialized, it returns a query() function, which you’ll use to create queries for different Marvel API endpoints.
+
+For a detailed explanation of available configuration options, such as global parameters, custom fetch functions, and error handling, refer to the [Configuration Options](configuration.md) page.
 
 | Function                                         | Arguments                                                | Returns                         | Description                                                  |
 | ------------------------------------------------ | -------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
-| `init`                                           | [`keys: APIKeys`](#apikeys), [`config: Config`](#config) | [`query()`](#createquery) | Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. |
-| `query<T extends Endpoint | EndpointType>` | `endpoint: T, params: Params<AsEndpoint<T>>`             | `MarvelQuery<T>`                | Private function to create a new query instance. Must be accessed via init() initialization. |
+| `init`                                           | [`keys: APIKeys`](#apikeys), [`config: Config`](#config) | [`query()`](#createquery)† | Initialize the library with public and private keys, and options such as global parameters and custom functions for requests, results, and http client. |
+| `query<T extends Endpoint | EndpointType>`† | `endpoint: T, params: Params<AsEndpoint<T>>`             | `MarvelQuery<T>`                | Private function to create a new query instance. Must be accessed via init() initialization. |
 
-### Instance Properties
+† *The query function, which can be named anything, is returned by init(). It accepts two arguments: an API endpoint and the query parameters. For more information, see [Creating a Query](getting-started.md#creating-a-query).*
 
-| Property        | Type                                  | Description                                                |
-| --------------- | ------------------------------------- | ---------------------------------------------------------- |
-| `endpoint`      | [`Endpoint`](#endpoint)               | The endpoint as passed in query().                   |
-| `params`        | [`ParamsType<E>`]()                   | Parameters of the query, determined by the Endpoint (E)    |
-| `type`          | [`EndpointType`](#endpointtypes)      | The data type of the results returned by the query .       |
-| `url`           | `string`                              | The URL generated for the API request.                     |
-| `count`         | `number`                              | The number of results returned by the query.               |
-| `total`         | `total`                               | The total number of results available for the query.       |
-| `metadata`      | [`Metadata`](#metadata)               | Metadata included in the API response.                     |
-| `responseData`  | [`APIResponseData`](#apiresponsedata) | Data for the API response.                                 |
-| `results`       | [`ResultType<E>[]`](#resulttype)      | The results of the query.                                  |
-| `resultHistory` | [`ResultType<E>[]`](#resulttype)      | The conjunction of all results from this query instance.   |
-| `isComplete`    | `boolean`                             | All of the available results have been returned when true. |
+## Instance Properties and Methods
 
-| Function      | Arguments                                                    | Returns                                         | Description                                                  |
-| ------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------ |
-| `fetch`       | `void`                                                       | [`Promise<MarvelQuery<E>>`](#marvelquery)       | Validates parameters with zod, builds URL, makes the request, and returns a [`MarvelQuery`](#marvelquery) object with the results from the API. |
-| `fetchSingle` | `void`                                                       | [`Promise<ExtendResult<E>>`](#marvelquery)      | Sets offset to 0 and limit to 1 to fetch a single result.    |
-| `buildURL`    | `apiKeys: APIKeys, endpoint: Endpoint, params: Record<string, unknown>` | `string`                                        | Builds the URL of the query with the parameters, timestamp and hash. |
-| `request`     | `url: string`                                                | [`Promise<APIWrapper<Result<E>>>`](#apiwrapper) | Sends the request to the API, and validate the response.     |
+The MarvelQuery instance has different sets of properties depending on whether it has been fetched or not. Before making a request, it follows the structure of MarvelQueryInit, which contains information about the query setup. Once the query has been fetched, the instance becomes MarvelQueryFetched, extending the initial properties with additional data from the API response. If showHiddenProperties is enabled in the configuration, all properties will be visible from the beginning, even before a fetch occurs.
 
-# AutoQuery Injection
+### `MarvelQueryInit` (Pre-fetch)
 
-## ResourceQuery {#queryresource}
+| Name            | Type                                           | Description                                                  |
+| --------------- | ---------------------------------------------- | ------------------------------------------------------------ |
+| `fetch()`       | `() => Promise<MarvelQuery>`                   | Executes the query and returns a `MarvelQueryFetched` instance with the results and the offset adjusted to request the next page of results. |
+| `request()`     | `(url: string) => Promise<APIWrapper<Result>>` | Sends the API request to the Marvel API and validates the response data. |
+| `fetchSingle()` | `() => Promise<Result>`                        | Fetches a single result, overriding parameters to set the limit to 1 and offset to 0. |
+| `buildURL()`    | `() => string`                                 | Constructs the full URL for the API request using keys, the endpoint, and query parameters. |
+| `endpoint`      | [`EndpointDescriptor<E>`](endpoints.md#types)  | Contains the endpoint path (a tuple, e.g., ["comics", 1234]) and the data type (e.g., "comics"), defining the target location for the API request and the type of data being queried. |
+| `params`        | [`Params<E>`](#params)                         | The query parameters used to refine the API request.         |
+| `autoQuery`     | `boolean`                                      | Specifies whether AutoQuery is enabled, allowing additional queries to be made on the result items. |
+| `queryId`       | `string`                                       | A unique identifier for the query, used for logging and tracking. |
+| `validated`     | `{ parameters: boolean | undefined }`          | Indicates whether the query parameters have been validated. Contains only the parameters key. Values can be undefined, true (valid), or false (invalid). |
+| `isComplete`    | `boolean`                                      | Indicates whether all possible results have been fetched. If true, there are no more pages of data to retrieve. |
 
+### `MarvelQueryFetched` (Post-fetch)
+
+After the query is executed and results are fetched, the instance contains additional properties as defined in MarvelQueryFetched, which extends the MarvelQueryInit properties.
+
+| Name            | Type                                                      | Description                                                  |
+| --------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| `url`           | `string`                                                  | The complete URL used to make the API request, including all parameters and authentication. |
+| `offset`        | `number`                                                  | The starting position for the current set of results, used for paginating through larger datasets. |
+| `limit`         | `number`                                                  | The maximum number of results returned per request, as specified in the query parameters (max: 100). |
+| `total`         | `number`                                                  | The total number of results available for the entire query across all pages. |
+| `count`         | `number`                                                  | The number of results returned in the current request.       |
+| `metadata`      | [`Metadata`](#metadata)                                   | Information about the API response, including status codes, attribution requirements, and other details. |
+| `results`       | [`Result[]`](data-types.md#result-types)                  | The list of results returned for the current query request.  |
+| `resultHistory` | [`Result[]`](data-types.md#result-types)                  | The cumulative list of results from all previous requests made for this query. |
+| `validated`     | `{ parameters, results, autoQuery: boolean | undefined }` | Adds results and autoQuery keys, along with parameters, to track validation. Values can be undefined, true (valid), or false (invalid). |
+
+### Configuration for Hidden Properties
+
+If showHiddenProperties is enabled in the configuration, the properties that are typically available only post-fetch (MarvelQueryFetched) will be visible prior to fetching, giving you full visibility into all aspects of the query.
+
+## Why no fetchAll() feature?
+
+I decided not to include a fetchAll() function in this library due to the risks it could introduce. Automatically fetching all results at once could easily overwhelm the API, potentially leading to unintentional DDoS attacks, excessive rate-limiting, or overuse of resources.
+
+Instead, you can manually request all items from a query in a more controlled way. In the following example, instance refers to an instance of the MarvelQuery class, created using the query function:
+
+```ts
+const instance = query("comics", { 
+  dateDescriptor: "thisWeek" 
+});
+
+while (!instance.isComplete) {
+  await instance.fetch(); // Ensure each fetch is awaited.
+}
+```
+
+It is **highly recommended** to include a limit to the number of fetches to prevent overwhelming the API. Here’s an example with a limit:
+
+```ts
+let fetchCount = 0;
+const maxFetches = 10;
+
+while (!instance.isComplete && fetchCount < maxFetches) {
+  await instance.fetch(); // Ensure it's awaited to avoid simultaneous requests.
+  fetchCount++;
+}
+```
+
+By managing the process manually and setting limits, you can avoid potential issues while still retrieving all necessary data in a controlled manner.
+
+[← Back](getting-started.md) | [Table of Contents](table-of-contents.md) | [Next: **Structuring Queries with Endpoints →**](endpoints.md)

@@ -41,8 +41,6 @@ export type Params<E extends Endpoint> =
     ? never // Then it's a resource endpoint and has no parameters
     : E[0]]; // If neither of the above, the first element is the data type
 
-type daas = Params<IsEndpoint<["comics", 123]>>;
-
 /** Remove a property, and replace it with a stricter type. */
 type Restrict<Z, P extends keyof Z, StrictProperty> = Omit<Z, P> &
   StrictProperty;

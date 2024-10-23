@@ -23,11 +23,11 @@ import {
   Metadata,
   APIWrapper,
   APIResult,
+  DataType,
 } from "./models/types/data-types";
 import {
   Endpoint,
   EndpointType,
-  EndpointDescriptor,
   AsEndpoint,
 } from "./models/types/endpoint-types";
 import {
@@ -80,8 +80,8 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     }) as MarvelQueryInstance<AsEndpoint<T>, AQ, HP>;
 
   /**
-   * Initializes the MarvelQuery class with API keys and configuration settings. This method 
-   * should be called before creating any query instances. It sets up the global configuration 
+   * Initializes the MarvelQuery class with API keys and configuration settings. This method
+   * should be called before creating any query instances. It sets up the global configuration
    * for the class, and passes the configuration to the Logger and ParameterManager classes.
    *
    * @param apiKeys The API keys for authentication.
@@ -144,11 +144,13 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     autoQuery: undefined,
   };
   /**
-   * Endpoint path as a tuple, and the type of the endpoint
+   * The endpoint as a tuple
    * @example http://gateway.marvel.com/v1/public/characters/1009491/comics
    * becomes { path: ["characters", "1009491", "comics"], type: "comics" }
    *  */
-  endpoint: EndpointDescriptor<E>;
+  endpoint: E;
+  /** The type of the data being queried */
+  private type: DataType<E>;
   /** Parameters of the query */
   params: Params<E>;
   /** The URL of the query */
@@ -189,23 +191,23 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     );
 
     // Setup and Validate the endpoint and parameters
-    this.endpoint = new EndpointBuilder(endpoint, this.logger);
+    const endpointDescriptor = new EndpointBuilder(endpoint, this.logger);
+
+    this.endpoint = endpointDescriptor.path;
+    this.type = endpointDescriptor.type;
 
     this.autoQuery = MarvelQuery.config.autoQuery;
 
     const paramManager = new ParameterManager(this.logger);
 
-    this.params = paramManager.query(this.endpoint, params);
+    this.params = paramManager.query(endpointDescriptor, params);
 
     this.validated.parameters = paramManager.isValid;
 
     // Set the onResult function for the specific type, or the 'any' type if not provided.
     if (MarvelQuery.config.onResult) {
-      this.logger.verbose(
-        `Setting onResult function for ${this.endpoint.type}`
-      );
-      const typeSpecificOnResult =
-        MarvelQuery.config.onResult[this.endpoint.type];
+      this.logger.verbose(`Setting onResult function for ${this.type}`);
+      const typeSpecificOnResult = MarvelQuery.config.onResult[this.type];
       this.onResult = typeSpecificOnResult
         ? typeSpecificOnResult
         : MarvelQuery.config.onResult.any;
@@ -254,7 +256,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    * @returns The URL for the query.
    */
   public buildURL(): string {
-    const endpoint = this.endpoint.path;
+    const endpoint = this.endpoint;
     const params: Record<string, unknown> = this.params;
 
     this.logger.verbose(
@@ -300,12 +302,10 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    * @param response The API response containing the results to process.
    * @returns An array of extended results.
    */
-  private processResults(response: APIWrapper<APIResult<E>>): Result<E, AQ>[] {
-    // Destructure the response to extract data and metadata
-    const { data, ...metadata } = response;
-    const { results, ...responseData } = data;
-    const { total, count, offset, limit } = responseData;
-
+  private processResults({ // Destructure API Response
+    data: { results, total, count, offset, limit },
+    ...metadata
+  }: APIWrapper<APIResult<E>>): Result<E, AQ>[] {
     // Calculate the number of results fetched and the remaining results
     const fetched = offset + count;
     const remaining = total - fetched;
@@ -353,7 +353,10 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
        */
       const autoQuery = new AutoQuery<E>(
         MarvelQuery,
-        this.endpoint,
+        {
+          path: this.endpoint,
+          type: this.type,
+        },
         this.logger,
         MarvelQuery.config
       );
@@ -417,7 +420,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
   async request<T extends APIResult<E>>(url: string): Promise<APIWrapper<T>> {
     // Create a timer for the request to measure performance
     const timer = logger.performance(
-      `Sending request to endpoint: ${this.endpoint.path.join("/")}`,
+      `Sending request to endpoint: ${this.endpoint.join("/")}`,
       this.logger
     );
 
@@ -425,7 +428,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
       // Execute the onRequest function if it is defined in the config
       if (MarvelQuery.config.onRequest) {
         this.logger.verbose("Executing onRequest function...");
-        MarvelQuery.config.onRequest(url, this.endpoint.path, this.params);
+        MarvelQuery.config.onRequest(url, this.endpoint, this.params);
       }
 
       // Send the HTTP request using the configured HTTP client and await the response
@@ -448,7 +451,10 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
       this.validated.results = new ResultValidator(
         response.data.results,
-        this.endpoint,
+        {
+          path: this.endpoint,
+          type: this.type,
+        },
         this.logger
       ).allValid;
 
@@ -490,11 +496,7 @@ export default MarvelQuery;
 export * from "./models/types/data-types";
 export * from "./models/types/param-types";
 export * from "./models/types/config-types";
-export {
-  Endpoint,
-  EndpointType,
-  EndpointDescriptor,
-} from "./models/types/endpoint-types";
+export { Endpoint, EndpointType } from "./models/types/endpoint-types";
 
 export const TYPES: Array<EndpointType> = [
   "characters",

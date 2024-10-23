@@ -14,6 +14,13 @@
     "release": "changeset publish",
     "tsdoc": "typescript-documentation"
   },
+  "files": [
+    "lib",
+    "docs",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nikolasstow/MarvelQuery.git"

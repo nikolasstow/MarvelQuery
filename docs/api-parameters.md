@@ -1,6 +1,8 @@
 # API Parameters
 
-## Base Parameters {#apibaseparams}
+[← Back](autoquery-examples.md) | [Table of Contents](table-of-contents.md) | [Next: **Explore the Core Data Types of Every Marvel API Response →**](data-types.md)
+
+## Base Parameters
 | Property         | Type                  | Description                                                                                         
 |------------------|-----------------------|-------------------------------------------------------------------------------------
 | `modifiedSince`  | [`Date`](#dates)      | Only return resources created or changed since the specified date.
@@ -121,7 +123,7 @@
 | `limit`         | `number`            | Limit the result set to the specified number of resources.
 | `offset`        | `number`            | Skip the specified number of resources in the result set.
 
-## Types
+## Common Types
 
 ### Formats
 
@@ -155,3 +157,37 @@ The following date formats are accepted:
 - **YYYY-MM-DDTHH:MM:SS**: Includes date and time in hours, minutes, and seconds.
 - **YYYY-MM-DDTHH:MM:SS±HH:MM**: A complete date and time string including a timezone offset (e.g., `-05:00` for EST).
 
+
+### `Params`
+
+```ts
+/**
+ * ParamsType is a utility type designed to determine the expected parameters 
+ * for a given API endpoint. It uses conditional types to map an endpoint to its
+ * corresponding parameters, providing type safety and clarity when constructing 
+ * API requests.
+ */
+type Params<E extends Endpoint> = 
+  ParameterMap[E extends Required<Endpoint> // Does the Endpoint have a third element?
+    ? E[2] // If it does, the third element is the data type
+    : E extends [EndpointType, number] // Is there a second element and it's a number?
+    ? never // Then it's a resource endpoint and has no parameters
+    : E[0]]; // If neither of the above, the first element is the data type
+```
+### `ParameterMap`
+
+```ts
+/**
+ * A map of parameter types by endpoint.
+ */
+type ParameterMap = {
+  comics: ComicParams;
+  characters: CharacterParams;
+  creators: CreatorParams;
+  events: EventParams;
+  stories: StoryParams;
+  series: SeriesParams;
+};
+```
+
+[← Back](autoquery-examples.md) | [Table of Contents](table-of-contents.md) | [Next: **Explore the Core Data Types of Every Marvel API Response →**](data-types.md)
