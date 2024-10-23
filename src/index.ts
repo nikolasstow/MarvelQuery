@@ -80,8 +80,8 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
     }) as MarvelQueryInstance<AsEndpoint<T>, AQ, HP>;
 
   /**
-   * Initializes the MarvelQuery class with API keys and configuration settings. This method 
-   * should be called before creating any query instances. It sets up the global configuration 
+   * Initializes the MarvelQuery class with API keys and configuration settings. This method
+   * should be called before creating any query instances. It sets up the global configuration
    * for the class, and passes the configuration to the Logger and ParameterManager classes.
    *
    * @param apiKeys The API keys for authentication.
@@ -192,9 +192,9 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
     // Setup and Validate the endpoint and parameters
     const endpointDescriptor = new EndpointBuilder(endpoint, this.logger);
-    
+
     this.endpoint = endpointDescriptor.path;
-    this.type = endpointDescriptor.type
+    this.type = endpointDescriptor.type;
 
     this.autoQuery = MarvelQuery.config.autoQuery;
 
@@ -206,11 +206,8 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
     // Set the onResult function for the specific type, or the 'any' type if not provided.
     if (MarvelQuery.config.onResult) {
-      this.logger.verbose(
-        `Setting onResult function for ${this.type}`
-      );
-      const typeSpecificOnResult =
-        MarvelQuery.config.onResult[this.type];
+      this.logger.verbose(`Setting onResult function for ${this.type}`);
+      const typeSpecificOnResult = MarvelQuery.config.onResult[this.type];
       this.onResult = typeSpecificOnResult
         ? typeSpecificOnResult
         : MarvelQuery.config.onResult.any;
@@ -307,9 +304,10 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    */
   private processResults(response: APIWrapper<APIResult<E>>): Result<E, AQ>[] {
     // Destructure the response to extract data and metadata
-    const { data, ...metadata } = response;
-    const { results, ...responseData } = data;
-    const { total, count, offset, limit } = responseData;
+    const {
+      data: { results, total, count, offset, limit },
+      ...metadata
+    } = response;
 
     // Calculate the number of results fetched and the remaining results
     const fetched = offset + count;
@@ -501,10 +499,7 @@ export default MarvelQuery;
 export * from "./models/types/data-types";
 export * from "./models/types/param-types";
 export * from "./models/types/config-types";
-export {
-  Endpoint,
-  EndpointType,
-} from "./models/types/endpoint-types";
+export { Endpoint, EndpointType } from "./models/types/endpoint-types";
 
 export const TYPES: Array<EndpointType> = [
   "characters",

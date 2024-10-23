@@ -23,7 +23,29 @@ Designed for TypeScript, this library offers a seamless, developer-friendly way 
 npm i marvelquery axios
 ```
 
-## Example
+## Initialization
+
+```ts
+import MarvelQuery from "marvelquery";
+
+const query = MarvelQuery.init({
+  publicKey: "your-public-key",
+  privateKey: "your-private-key",
+})
+```
+
+## Example 1: Fetching This Week’s Comics
+
+```ts
+// Let's start with a simple task: fetching this week's comics.
+const comics = query("comics", {
+  dateDescriptor: "thisWeek",
+})
+  .fetch() // Calling .fetch() returns a promise that resolves to the MarvelQuery instance.
+  .then((instance) => instance.results); // Once resolved, the results property becomes populated.
+```
+
+
 
 ```ts
 import MarvelQuery from "marvelquery";
