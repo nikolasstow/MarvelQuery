@@ -2,7 +2,6 @@ import { Metadata, APIWrapper, APIResult } from "./data-types";
 import { Result } from "./autoquery-types";
 import { Params } from "./param-types";
 import { Endpoint } from "./endpoint-types";
-import { DataType } from "lib";
 
 export interface MarvelQueryInit<E extends Endpoint, AQ extends boolean> {
   /** Specifies whether AutoQuery is enabled, allowing additional queries to be made on the result items. */
