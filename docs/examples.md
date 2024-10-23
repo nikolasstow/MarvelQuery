@@ -1,27 +1,24 @@
-# Code Examples
+# More Code Examples
 
-Referance api-parameters.md and data-types.md
+## Example 1: Crossovers
 
 ```ts
-// Do's and Don'ts
+// Find comics that feature Spider-Man and Dock Ock
+const spidey = await query("characters", {
+  name: "Peter Parker",
+})
+  .fetchSingle()
+  .then((character) => character.id);
+
+const ock = await query("characters", {
+  name: "Doctor Octopus",
+})
+  .fetchSingle()
+  .then((character) => character.id);
 
 const comics = await query("comics", {
-  dateDescriptor: "thisWeek"
+  characters: [spidey, ock],
 }).fetch();
-
-// Show common queries, like finding comics that feature both Spider-Man and Doc Ock
-
-
 ```
 
-## Why no fetchAll() feature?
-
-I chose to exclude a fetchAll function from this library because using it on the wrong query can very quickly
-
-```ts
-while(!query.isComplete) {
-  query.fetch();
-}
-```
-
-[← Back](endpoints.md) | [Table of Contents](table-of-contents.md) | [Next: **Building Blocks & AutoQuery →**](autoquery-blocks.md)
+← Back](endpoints.md) | [Table of Contents](table-of-contents.md) | [Next: **Building Blocks & AutoQuery →**](autoquery-blocks.md)

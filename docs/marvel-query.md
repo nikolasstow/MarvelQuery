@@ -54,4 +54,34 @@ After the query is executed and results are fetched, the instance contains addit
 
 If showHiddenProperties is enabled in the configuration, the properties that are typically available only post-fetch (MarvelQueryFetched) will be visible prior to fetching, giving you full visibility into all aspects of the query.
 
+## Why no fetchAll() feature?
+
+I decided not to include a fetchAll() function in this library due to the risks it could introduce. Automatically fetching all results at once could easily overwhelm the API, potentially leading to unintentional DDoS attacks, excessive rate-limiting, or overuse of resources.
+
+Instead, you can manually request all items from a query in a more controlled way. In the following example, instance refers to an instance of the MarvelQuery class, created using the query function:
+
+```ts
+const instance = query("comics", { 
+  dateDescriptor: "thisWeek" 
+});
+
+while (!instance.isComplete) {
+  await instance.fetch(); // Ensure each fetch is awaited.
+}
+```
+
+It is **highly recommended** to include a limit to the number of fetches to prevent overwhelming the API. Here’s an example with a limit:
+
+```ts
+let fetchCount = 0;
+const maxFetches = 10;
+
+while (!instance.isComplete && fetchCount < maxFetches) {
+  await instance.fetch(); // Ensure it's awaited to avoid simultaneous requests.
+  fetchCount++;
+}
+```
+
+By managing the process manually and setting limits, you can avoid potential issues while still retrieving all necessary data in a controlled manner.
+
 [← Back](getting-started.md) | [Table of Contents](table-of-contents.md) | [Next: **Structuring Queries with Endpoints →**](endpoints.md)

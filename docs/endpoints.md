@@ -34,43 +34,61 @@ By using this tuple structure, the library provides a more organized way to defi
 
 ### Single Element Queries
 
-When querying an entire category (e.g., all comics), you can omit the brackets for convenience. Instead of writing `["comics"]`, you can simply use "comics" directly. This format is functionally equivalent and can be used like this:
+When querying an entire category (e.g., all comics), you can omit the brackets for convenience. Instead of writing ["comics"], you can simply use "comics" directly. This format is functionally equivalent and can be used like this:
 
 ```ts
 query("comics", { titleStartsWith: "Spider" });
 ```
 
-### Let's look at a few examples: 
+## Example 1: Query All Comics Released This Week
+
+This query targets all comics released this week. Since we are querying an entire category, we can omit the brackets and use "comics" directly.
 
 ```ts
-/** Query all comics released this week.
- * Since this query targets all comics, only one element is needed, 
- * so the brackets can be omitted.
- */
-await query("comics", {
+query("comics", {
   dateDescriptor: "thisWeek"
 }).fetch()
   .then(api => api.results); // returns Comic[]
+```
 
-// Now, let’s find a character by name:
-await query("characters", {
+## Example 2: Find a Character by Name
+
+In this example, we query for a character by name. Here, we use the nameStartsWith parameter to find any characters whose names begin with the specified string.
+
+```ts
+query("characters", {
   nameStartsWith: "Stilt-Man"
 }).fetchSingle()
   .then(api => api.result.id); // returns 1009627
+```
 
-// If you already know the character's ID, you can query them directly:
+## Example 3: Query a Character by ID
+
+If you already know the character’s ID, you can query them directly by specifying the ID in the second element of the endpoint.
+
+```ts
 await query(["characters", 1009627]).fetchSingle(); // returns Character;
+```
 
-// You can also use the character’s ID to fetch all the comics they appear in:
+## Example 4: Fetch All Comics a Character Appears In
+
+Using the character’s ID, we can fetch all the comics they appear in. In this case, we’re also filtering the results to exclude variant comics by using the noVariants parameter.
+
+```ts
 await query(["characters", 1009627, "comics"], {
   noVariants: true, // filters out variants
 }).fetch()
   .then(api => api.results); // returns Comic[]
+```
 
-// Or, retrieve all the events the character is part of:
-await query(["characters", 1009627, "comics"])
+## Example 5: Fetch All Events a Character is Part Of
+
+Here, we’re querying for all the events a character is part of by using the third element in the endpoint to specify "events". This will return a list of events related to the character.
+
+```ts
+await query(["characters", 1009627, "events"])
   .fetch()
   .then(api => api.results); // returns Event[]
 ```
 
-[← Back](marvel-query.md) | [Table of Contents](table-of-contents.md) | [Next: **MarvelQuerying (Examples) →**](examples.md)
+[← Back](marvel-query.md) | [Table of Contents](table-of-contents.md) | [Next: **MarvelQuerying Advanced Examples →**](examples.md)

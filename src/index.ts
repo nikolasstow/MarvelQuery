@@ -302,13 +302,10 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
    * @param response The API response containing the results to process.
    * @returns An array of extended results.
    */
-  private processResults(response: APIWrapper<APIResult<E>>): Result<E, AQ>[] {
-    // Destructure the response to extract data and metadata
-    const {
-      data: { results, total, count, offset, limit },
-      ...metadata
-    } = response;
-
+  private processResults({ // Destructure API Response
+    data: { results, total, count, offset, limit },
+    ...metadata
+  }: APIWrapper<APIResult<E>>): Result<E, AQ>[] {
     // Calculate the number of results fetched and the remaining results
     const fetched = offset + count;
     const remaining = total - fetched;

@@ -25,6 +25,8 @@ npm i marvelquery axios
 
 ## Initialization
 
+Before diving into the examples, you need to initialize the library with your API keys. If you do not have API keys, visit the [Marvel Developer Portal](https://developer.marvel.com) to get started.
+
 ```ts
 import MarvelQuery from "marvelquery";
 
@@ -33,6 +35,8 @@ const query = MarvelQuery.init({
   privateKey: "your-private-key",
 })
 ```
+
+Now that you’ve set up the library, let’s look at a few quick examples. For a more in-depth explanation of how the library works and what options are available, visit the [Getting Started](docs/getting-started.md) page.
 
 ## Example 1: Fetching This Week’s Comics
 
@@ -45,52 +49,40 @@ const comics = query("comics", {
   .then((instance) => instance.results); // Once resolved, the results property becomes populated.
 ```
 
-
+## Example 2: Fetching Comics Featuring a Specific Character
 
 ```ts
-import MarvelQuery from "marvelquery";
-
-const query = MarvelQuery.init({
-  publicKey: "your-public-key",
-  privateKey: "your-private-key",
-});
-
-// Let's start with a simple task: fetching this week's comics.
-const comics = query("comics", {
-  dateDescriptor: "thisWeek",
-})
-  .fetch() // Calling .fetch() returns a promise that resolves to the MarvelQuery instance.
-  .then((instance) => instance.results); // Once resolved, the results property becomes populated.
-
-// Now, let's take it a step further and fetch comics featuring a specific character.
 // First, we need to find the character named "Peter Parker."
 const peter = await query("characters", {
   name: "Peter Parker",
 }).fetchSingle();
-/** Unlike the .fetch() method, which returns an instance, .fetchSingle() gives us
- * a single result—here, a 'Character' type.
- * 
- * When accessing the 'comics' property, we find a collection of comics featuring Peter,
- * where a 'query' method has been injected to allow further API queries.
+
+/** fetchSingle() gives us a single result—here, a 'Character' type.
+ * The 'comics' property contains a collection of comics featuring Peter,
+ * with a 'query' method for further API queries.
  */
 const spiderComics = await peter.comics.query({
-  /** The endpoint is handled internally, and you can optionally pass parameters to 
-   * filter the results.
-  */
     format: "comic",
     noVariants: true,
     dateDescriptor: "nextWeek",
   })
-  .fetch(); // Resolves to an instance populated with Spider-Man comics
+  .fetch(); // Resolves to an instance populated with Spider-Man comics.
+```
 
-// Now let's move away from simple endpoints, adding an id will query a resource
+## Example 3: Fetching a Specific Resource
+
+```ts
+// Adding an ID to the endpoint will query a specific resource.
 const blackCat = await query(["characters", 1009335])
-	.fetchSingle(); // Resolves to an expert thief ('Character' object)
+	.fetchSingle(); // Resolves to a 'Character' object (Felicia Hardy)
+```
 
-// And when you add a third element, you query related resources.
+## Example 4: Fetching Related Resources
+
+```ts
+ // Adding a third element queries a related collection of items.
 const blackCatComics = await query(["characters", 1009335, "comics"])
 	.fetch(); // Resolves to an instance populated with comics featuring Felicia Hardy.
-
 ```
 
 For more information and to get started, please visit the [Getting Started](docs/getting-started.md) guide, or explore the [Table of Contents](table-of-contents.md).
