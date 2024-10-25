@@ -10,7 +10,7 @@ Let’s start with a simple example:
 // We want to find comic series than Stan Lee and Jack Kirby worked on together
 // The endpoint determines what is the thing we are looking for (series)
 query("series", { // The parameter key is the type we are filtering with (creators)
-	creators:	[30, 196] // The value is the id number, or array of id numbers of the creators
+ creators:	[30, 196] // The value is the id number, or array of id numbers of the creators
 }).fetch();
 ```
 

@@ -100,7 +100,7 @@ At the root level, the result represents a resource, meaning we can treat it jus
 
 For a detailed breakdown of all the data-types returned by the Marvel API, please reference [API Response](data-types.md)
 
-## A Note on Lists, Collections, Summaries, and Resources:
+## A Note on Lists, Collections, Summaries, and Resources
 
 It’s important to distinguish between Lists, Collections, Summaries, and Resources, as these terms represent different levels of data abstraction.
 

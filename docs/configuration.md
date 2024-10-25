@@ -27,7 +27,7 @@ const query = MarvelQuery.init({
 | `autoQuery`            | `boolean`                                 | Enables/disables [AutoQuery Injection](autoquery-blocks.md).     |
 | `globalParams`         | [`GlobalParams`](#globalparams-1)           | Global parameters to be applied to all queries, or all queries of a specific type. |
 | `onResult`             | [`OnResultMap`](#onresultmap)             | A map of functions to be called when all results, or results of a specific type, are returned. |
-| `onRequest`            | ` (url: string) => void`                  | A function that is called for each request. Useful for monitoring your API usage. |
+| `onRequest`            | `(url: string) => void`                  | A function that is called for each request. Useful for monitoring your API usage. |
 | `logOptions`           | [`LogOptions`](#logoptions-1)               | Options for logging, including verbosity, max length in console, and options for saving to file. |
 | `httpClient`           | [`HTTPClient`](#httpclient-1)            | Replace the default fetch function (axios) with your own HTTP client. |
 | `validation`           | [`ValidationOptions`](#validationoptions) | Enables or disables validation at various stages of the query process, including parameter validation, API response validation, and AutoQuery injections. |
@@ -104,11 +104,11 @@ Set `verbose` to true to get extensive logging with details for debugging. Confi
 
 ```ts
 const query = MarvelQuery.init({ ... }, {
-	verbose: true,
+ verbose: true,
   saveToFile: true,
   // Truncate long messages in the console
   maxLines: 23,
-	maxLineLength: 500,
+ maxLineLength: 500,
 });
 ```
 

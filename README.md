@@ -74,7 +74,7 @@ const spiderComics = await peter.comics.query({
 ```ts
 // Adding an ID to the endpoint will query a specific resource.
 const blackCat = await query(["characters", 1009335])
-	.fetchSingle(); // Resolves to a 'Character' object (Felicia Hardy)
+ .fetchSingle(); // Resolves to a 'Character' object (Felicia Hardy)
 ```
 
 ## Example 4: Fetching Related Resources
@@ -82,7 +82,7 @@ const blackCat = await query(["characters", 1009335])
 ```ts
  // Adding a third element queries a related collection of items.
 const blackCatComics = await query(["characters", 1009335, "comics"])
-	.fetch(); // Resolves to an instance populated with comics featuring Felicia Hardy.
+ .fetch(); // Resolves to an instance populated with comics featuring Felicia Hardy.
 ```
 
 For more information and to get started, please visit the [Getting Started](docs/getting-started.md) guide or explore the [Table of Contents](table-of-contents.md).

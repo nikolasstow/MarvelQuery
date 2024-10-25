@@ -72,8 +72,8 @@ export class ParameterManager {
     customLogger = logger
   ) {
     if (
-      ParameterManager.config?.validation?.disableAll === true ||
-      ParameterManager.config?.validation?.parameters === false
+      ParameterManager.config.validation?.disableAll === true ||
+      ParameterManager.config.validation?.parameters === false
     ) {
       return undefined;
     }

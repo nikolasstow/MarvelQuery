@@ -62,7 +62,7 @@ export class AutoQuery<E extends Endpoint> {
   };
 
   /** The resource names found in the data, stored in a map with their corresponding endpoints. */
-  resourceNames: Map<Endpoint, string> = new Map();
+  resourceNames = new Map<Endpoint, string>();
 
   /** The custom logger instance used for logging actions in the query. */
   logger: CustomLogger;
@@ -179,7 +179,7 @@ export class AutoQuery<E extends Endpoint> {
 
       acc[key] = value;
       return acc;
-    }, {} as ExtendType<E>);
+    }, {});
 
     // Add result-level properties for fetching and querying
     const resultExtendingProperties: ExtendResourceProperties<
@@ -302,7 +302,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param baseEndpoint - The base endpoint associated with the resources.
    * @returns An array of extended resources.
    */
-  private extendResourceArray<V extends Array<Resource>, K>(key: K, value: V) {
+  private extendResourceArray<V extends Resource[], K>(key: K, value: V) {
     if (!value.length) {
       return value;
     }
@@ -468,8 +468,8 @@ export class AutoQuery<E extends Endpoint> {
    * @param obj - The object to check.
    * @returns True if the object has a `resourceURI`, false otherwise.
    */
-  private hasResourceURI(obj: any): obj is Resource {
-    return obj && obj.resourceURI && typeof obj.resourceURI === "string";
+  private hasResourceURI(obj: unknown): obj is Resource {
+    return obj?.resourceURI && typeof obj.resourceURI === "string";
   }
 
   /**
@@ -477,7 +477,7 @@ export class AutoQuery<E extends Endpoint> {
    * @param obj - The object to check.
    * @returns True if the object has a `collectionURI`, false otherwise.
    */
-  private hasCollectionURI(obj: any): obj is Collection {
+  private hasCollectionURI(obj: unknown): obj is Collection {
     return obj && obj.collectionURI && typeof obj.collectionURI === "string";
   }
 

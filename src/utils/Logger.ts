@@ -10,7 +10,7 @@ import { ConfigOptions } from "../models/types/config-types";
  * Adds custom methods for performance timing, verbosity control, and file-only logging.
  */
 export interface CustomLogger extends winston.Logger {
-  setConfig: any;
+  setConfig: unknown;
   /** Path to the log file used by the logger. */
   logFilePath: string;
 
@@ -29,9 +29,9 @@ export interface CustomLogger extends winston.Logger {
    * @param descriptor Method descriptor object.
    */
   measurePerformance: (
-    target: any,
+    target: unknown,
     key: string,
-    descriptor: TypedPropertyDescriptor<any>
+    descriptor: TypedPropertyDescriptor<unknown>
   ) => void;
 
   /**
@@ -80,12 +80,12 @@ export interface PerformanceTimer {
  */
 export class Logger {
   private static instance: Logger;
-  private static verboseStatus: boolean = false;
-  private static maxLines: number = 23;
-  private static maxLineLength: number = 500;
-  private static isTestEnv: boolean = false;
-  private static maxSize: string = "20m";
-  private static maxFiles: string = "14d";
+  private static verboseStatus = false;
+  private static maxLines = 23;
+  private static maxLineLength = 500;
+  private static isTestEnv = false;
+  private static maxSize = "20m";
+  private static maxFiles = "14d";
   /** Set to store recent logs to prevent duplicate messages */
   recentLogs: Set<string> = new Set<string>();
   /** The custom Winston logger instance */

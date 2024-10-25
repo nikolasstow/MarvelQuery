@@ -158,13 +158,13 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
 
   // Properties for the fetched results (will be hidden pre-fetch)
   /** The offset for the query results, used for pagination. */
-  offset: number = 0;
+  offset = 0;
   /** The limit for the number of results returned by the query. */
-  limit: number = 20;
+  limit = 20;
   /** The total number of results available for the query. */
-  total: number = 0;
+  total = 0;
   /** The number of results returned by the query. */
-  count: number = 0;
+  count = 0;
   /** Metadata included in the API response. */
   metadata: Metadata;
   /** The results of the query. */
@@ -172,7 +172,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
   /** A history of all results returned by this query instance.. */
   resultHistory: Result<E, typeof MarvelQuery.config.autoQuery>[] = [];
   /** The query is complete when all results have been fetched. */
-  isComplete: boolean = false;
+  isComplete = false;
 
   /**
    * Constructs a new instance of the MarvelQuery class.
@@ -406,7 +406,7 @@ export class MarvelQuery<E extends Endpoint, AQ extends boolean>
       this.logger.verbose(
         "Calling onResult function with the processed results."
       );
-      this.onResult(results);
+      void this.onResult(results);
     }
   }
 
@@ -498,7 +498,7 @@ export * from "./models/types/param-types";
 export * from "./models/types/config-types";
 export { Endpoint, EndpointType } from "./models/types/endpoint-types";
 
-export const TYPES: Array<EndpointType> = [
+export const TYPES: EndpointType[] = [
   "characters",
   "comics",
   "creators",
