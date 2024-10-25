@@ -1,6 +1,10 @@
 name: Code Review with CodeRabbit
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
 
 jobs:
   review:
