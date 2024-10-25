@@ -5,6 +5,7 @@
     "marvelquery": "1.0.0-rc.0"
   },
   "changesets": [
+    "blue-otters-play",
     "shiny-mangos-invite"
   ]
 }
