@@ -56,9 +56,7 @@ If showHiddenProperties is enabled in the configuration, the properties that are
 
 ## Why no fetchAll() feature?
 
-I decided not to include a fetchAll() function in this library due to the risks it could introduce. Automatically fetching all results at once could easily overwhelm the API, potentially leading to unintentional DDoS attacks, excessive rate-limiting, or overuse of resources.
-
-Instead, you can manually request all items from a query in a more controlled way. In the following example, instance refers to an instance of the MarvelQuery class, created using the query function:
+I decided not to include a fetchAll() function in this library due to the risks it could introduce. Automatically fetching all results at once could easily overwhelm the API, potentially leading to unintentional DDoS attacks, excessive rate-limiting, or overuse of resources. Instead, you can manually request all items from a query in a more controlled way:
 
 ```ts
 const instance = query("comics", { 

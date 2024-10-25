@@ -36,7 +36,7 @@ async function regularExamples() {
     .then((character) => character.id);
 
   const comics = await query("comics", {
-    characters: [spidey, ock],
+    sharedAppearances: [spidey, ock],
   }).fetch();
 }
 
