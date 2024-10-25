@@ -1,6 +1,6 @@
 # Refining Queries with IDLists
 
-In this section, we’ll explore how to refine queries using related resources from other data types. Each data type in the API offers parameters that let you filter your search by specifying resources of a different type that are related to the results you’re looking for. These parameters correspond to the strings in the [EndpointType](endpoints.md#endpointtype) union and are available for all six main data types: `characters`, `comics`, `creators`, `events`, `series`, and `stories`. When querying one type, you will typically see 4-5 parameters corresponding to the other types. For example if you query for [`Creators`](api-parameters.md#creatorparams), you will have parameters named `comics`, `series`, `events`, and `stories` to refine the query based on those types. 
+In this section, we’ll explore how to refine queries using related resources from other data types. Each data type in the API offers parameters that let you filter your search by specifying resources of a different type that are related to the results you’re looking for. These parameters correspond to the strings in the [EndpointType](endpoints.md#endpointtype) union and are available for all six main data types: `characters`, `comics`, `creators`, `events`, `series`, and `stories`. When querying one type, you will typically see 4-5 parameters corresponding to the other types. For example, if you query for [`Creators`](api-parameters.md#creatorparams), you will have parameters named `comics`, `series`, `events`, and `stories` to refine the query based on those types. 
 
 These parameters accept an [IDList](api-parameters#idlist), which can be a single ID (`number`) or an array of IDs (`number[]`). When you use this type of parameter, it filters the results to include only resources that are related to **all** the specified IDs. The type of resources being filtered corresponds to the parameter name (e.g., using the parameter with the key `"characters"` will filter the query to show only resources that feature **all** the characters listed in the value).
 
@@ -10,7 +10,7 @@ Let’s start with a simple example:
 // We want to find comic series than Stan Lee and Jack Kirby worked on together
 // The endpoint determines what is the thing we are looking for (series)
 query("series", { // The parameter key is the type we are filtering with (creators)
-	creators:	[30, 196] // The value is the id number, or array of id numbers of the creators
+  creators:	[30, 196] // The value is the id number, or array of id numbers of the creators
 }).fetch();
 ```
 
@@ -46,7 +46,13 @@ Now, let’s take things a step further and create a reusable function that simp
 async function findCrossoverComics(character1: string, character2: string) {
   // Helper function to fetch a character ID by name
   const fetchCharacterId = async (name: string) =>
-    query("characters", { name }).fetchSingle().then((character) => character.id);
+    query("characters", { name })
+      .fetchSingle()
+      .then((character) => character.id)
+      .catch((error) => {
+        console.error(`Failed to fetch ID for character: ${name}`, error);
+        throw new Error(`Character "${name}" not found`);
+      });
 
   // Query for comics featuring both characters by fetching IDs directly in the array
   return query("comics", {

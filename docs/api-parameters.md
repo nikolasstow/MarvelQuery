@@ -25,35 +25,35 @@
 | `offset`         | `number`            | Skip the specified number of resources in the result set.
 
 ## `ComicParams`
-| Property            | Type                                                    | Description                                                  |
-| ------------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
-| `format`            | [`Format`](#formats)                                    | Filter by format (e.g. comic, digital comic, trade paperback). |
-| `formatType`        | `comic` or `collection`                                 | Filter by the issue format type (comic or collection).       |
-| `noVariants`        | `boolean`                                               | Exclude variants (alternate covers, secondary printings, director's cuts, etc.) from the result set. |
-| `dateDescriptor`    | `lastWeek` `thisWeek` `nextWeek` `thisMonth`            | Return comics within a predefined date range.                |
-| `dateRange`         | `['YYYY-MM-DD', 'YYYY-MM-DD']`                          | Return comics within a predefined date range. Dates must be specified as [date1, date2] (e.g. ['2013-01-01', '2013-01-02']). |
-| `title`             | `string`                                                | Return only issues in series whose title matches the input.  |
-| `titleStartsWith`   | `string`                                                | Return only issues in series whose title starts with the input. |
-| `startYear`         | `number`                                                | Return only issues in series whose start year matches the input. |
-| `issueNumber`       | `number`                                                | Return only issues in series whose issue number matches the input. |
-| `diamondCode`       | `string`                                                | Filter by diamond code.                                      |
-| `digitalId`         | `number`                                                | Filter by digital comic id.                                  |
-| `upc`               | `string`                                                | Filter by UPC.                                               |
-| `isbn`              | `string`                                                | Filter by ISBN.                                              |
-| `ean`               | `string`                                                | Filter by EAN.                                               |
-| `issn`              | `string`                                                | Filter by ISSN.                                              |
-| `hasDigitalIssue`   | `boolean`                                               | Filter by having digital rights.                             |
-| `creators`          | [`IDList`](#idlist)                                     | Return only issues containing the specified creators (accepts id or array of ids). |
-| `characters`        | [`IDList`](#idlist)                                     | Return only comics which feature the specified characters (accepts id or array of ids). |
-| `series`            | [`IDList`](#idlist)                                     | Return only issues in the specified series (accepts id or array of ids). |
-| `events`            | [`IDList`](#idlist)                                     | Return only issues in the specified events (accepts id or array of ids). |
-| `stories`           | [`IDList`](#idlist)                                     | Return only issues in the specified stories (accepts id or array of ids). |
-| `sharedAppearances` | [`IDList`](#idlist)                                     | Return only issues in which the specified characters appear together (e.g. issues in which both Spider-Man and Gamora appear). |
-| `collaborators`     | [`IDList`](#idlist)                                     | Return only issues in which the specified creators worked together (for example in which both Brian Bendis and Stan Lee did work). |
-| `orderBy`           | `focDate` `onsaleDate` `title` `issueNumber` `modified` | Order the result set by a property or properties. Add a "-" to the value sort in descending order. Multiple values as an array are given priority in the order in which they are passed. |
-| `modifiedSince`     | [`Date`](#dates)                                        | Only return resources created or changed since the specified date. (Accepts various date formats; e.g. 'YYYY-MM-DD', JavaScript Date object). |
-| `limit`             | `number`                                                | Limit the result set to the specified number of resources.   |
-| `offset`            | `number`                                                | Skip the specified number of resources in the result set.    |
+| Property            | Type                                                    | Description
+| ------------------- | ------------------------------------------------------- | ------------------------------------------------------------
+| `format`            | [`Format`](#formats)                                    | Filter by format (e.g. comic, digital comic, trade paperback).
+| `formatType`        | `comic` or `collection`                                 | Filter by the issue format type (comic or collection).
+| `noVariants`        | `boolean`                                               | Exclude variants (alternate covers, secondary printings, director's cuts, etc.) from the result set.
+| `dateDescriptor`    | `lastWeek` `thisWeek` `nextWeek` `thisMonth`            | Return comics within a predefined date range.
+| `dateRange`         | `['YYYY-MM-DD', 'YYYY-MM-DD']`                          | Return comics within a predefined date range. Dates must be specified as [date1, date2] (e.g. ['2013-01-01', '2013-01-02']).
+| `title`             | `string`                                                | Return only issues in series whose title matches the input.
+| `titleStartsWith`   | `string`                                                | Return only issues in series whose title starts with the input.
+| `startYear`         | `number`                                                | Return only issues in series whose start year matches the input.
+| `issueNumber`       | `number`                                                | Return only issues in series whose issue number matches the input.
+| `diamondCode`       | `string`                                                | Filter by diamond code.
+| `digitalId`         | `number`                                                | Filter by digital comic id.
+| `upc`               | `string`                                                | Filter by UPC.
+| `isbn`              | `string`                                                | Filter by ISBN.
+| `ean`               | `string`                                                | Filter by EAN.
+| `issn`              | `string`                                                | Filter by ISSN.
+| `hasDigitalIssue`   | `boolean`                                               | Filter by having digital rights.
+| `creators`          | [`IDList`](#idlist)                                     | Return only issues containing the specified creators (accepts id or array of ids).
+| `characters`        | [`IDList`](#idlist)                                     | Return only comics which feature the specified characters (accepts id or array of ids).
+| `series`            | [`IDList`](#idlist)                                     | Return only issues in the specified series (accepts id or array of ids).
+| `events`            | [`IDList`](#idlist)                                     | Return only issues in the specified events (accepts id or array of ids).
+| `stories`           | [`IDList`](#idlist)                                     | Return only issues in the specified stories (accepts id or array of ids).
+| `sharedAppearances` | [`IDList`](#idlist)                                     | Return only issues in which the specified characters appear together (e.g. issues in which both Spider-Man and Gamora appear).
+| `collaborators`     | [`IDList`](#idlist)                                     | Return only issues in which the specified creators worked together (for example in which both Brian Bendis and Stan Lee did work).
+| `orderBy`           | `focDate` `onsaleDate` `title` `issueNumber` `modified` | Order the result set by a property or properties. Add a "-" to the value sort in descending order. Multiple values as an array are given priority in the order in which they are passed.
+| `modifiedSince`     | [`Date`](#dates)                                        | Only return resources created or changed since the specified date. (Accepts various date formats; e.g. 'YYYY-MM-DD', JavaScript Date object).
+| `limit`             | `number`                                                | Limit the result set to the specified number of resources.
+| `offset`            | `number`                                                | Skip the specified number of resources in the result set.
 
 ## `CreatorParams`
 

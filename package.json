@@ -14,6 +14,7 @@
     "release": "changeset publish",
     "tsdoc": "typescript-documentation"
   },
+  "private": false,
   "files": [
     "lib",
     "docs",
