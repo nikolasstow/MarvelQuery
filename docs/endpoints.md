@@ -91,4 +91,4 @@ await query(["characters", 1009627, "events"])
   .then(api => api.results); // returns Event[]
 ```
 
-[← Back](marvel-query.md) | [Table of Contents](table-of-contents.md) | [Next: **MarvelQuerying Advanced Examples →**](examples.md)
+[← Back](marvel-query.md) | [Table of Contents](table-of-contents.md) | [Next: **Refining Queries with IDLists →**](examples.md)
