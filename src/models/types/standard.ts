@@ -5,4 +5,4 @@ export {
 	MarvelEvent as Event,
 	MarvelSeries as Series,
 	MarvelStory as Story
-} from "src/models/types/data-types";
+} from "./data-types";
