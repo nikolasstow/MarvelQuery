@@ -4,7 +4,7 @@
 
 ## `Metadata`
 
-The Metadata interface represents key information included in the API response from the Marvel API. It includes the HTTP status code, a textual status description, copyright notices, attribution information that must be displayed when using the API data, and a unique etag for caching purposes.
+The `Metadata` interface represents critical information in the Marvel API response. It includes the HTTP status code, a textual status description, copyright notices, attribution information that must be displayed when using the API data, and a unique etag for caching purposes.
 
 | Property          | Type            | Description                                                  |
 | ----------------- | --------------- | ------------------------------------------------------------ |
@@ -19,7 +19,7 @@ The Metadata interface represents key information included in the API response f
 
 - **200 OK**: The request was successful, and the server returned the requested data.
 - **401 Unauthorized**: The request lacked valid authentication credentials (e.g., missing or invalid API key).
-- **403 Forbidden**: The server understood the request but refuses to authorize it, possibly due to restrictions on the user’s account.
+- **403 Forbidden**: The server understood the request but refused to authorize it, possibly due to restrictions on the user’s account.
 - **404 Not Found**: The requested resource could not be found on the server.
 - **409 Conflict**: There was a conflict with the request, such as a query parameter issue or an invalid input.
 
@@ -29,7 +29,7 @@ These codes indicate the success or failure of the request and provide insights 
 
 The API returns structured data in an array, where each element corresponds to a specific type, such as characters, comics, creators, series, stories, and events. These data types provide detailed information about the returned resources, including metadata like IDs, names, descriptions, and related resources. Each result follows a consistent format, allowing for easy access and manipulation of the data within your application.
 
-Properties and methods in **bold** are available only if [AutoQuery Injection is enabled in the configuration](configuration.md#autoquerty-boolean). If AutoQuery is disabled, the type name is prepended by '**Marvel**' (e.g., MarvelComic, MarvelCreator, as compared to Comic, Creator).
+Properties and methods in **bold** are available only if [AutoQuery Injection is enabled in the configuration](configuration.md#autoquerty-boolean). If AutoQuery is disabled, the type name is prepended by '**Marvel**' (e.g., MarvelComic, MarvelCreator, compared to Comic, Creator).
 
 ## `Comic`
 

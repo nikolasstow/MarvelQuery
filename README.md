@@ -2,7 +2,7 @@
 
 Unlock the full potential of the Marvel API with unmatched type safety and flexibility.
 
-Designed for TypeScript, this library offers a seamless, developer-friendly way to interact with the Marvel API. Whether you’re building small features or full-fledged applications, MarvelQuery ensures you work with confidence, knowing your code is reliable, maintainable, and ready to tap into the vast world of Marvel Comics.
+Designed for TypeScript, this library offers a seamless, developer-friendly way to interact with the Marvel API. Whether you’re building small features or full-fledged applications, MarvelQuery ensures you work confidently, knowing your code is reliable, maintainable, and ready to tap into the vast world of Marvel Comics.
 
 ## **Key Features:**
 
@@ -12,9 +12,9 @@ Designed for TypeScript, this library offers a seamless, developer-friendly way 
   - **AutoQuery Injection:**  Result data is injected with methods and properties at each URI, allowing you to easily fetch and query related resources and collections directly from the data structure.
   - **Catch Errors Early:** Invalid queries are identified during development, providing specific error messages to pinpoint issues quickly.
 - **Flexible Configuration:**
-  - **Global Parameters:** Set default parameters that apply to all queries or all queries of a specific type (e.g., comics, characters).
+  - **Global Parameters:** Establish default settings applicable to all queries or specific categories of queries (such as comics or characters).
   - **Override with Ease:** Override global defaults with specific values for individual queries, allowing for granular control.
-  - **Customizable Behavior:** Define callbacks for request and response handling to tailor the library's behavior to your specific needs.
+  - **Customizable Behavior:** Define callbacks for request and response handling to tailor the library's behavior to your needs.
   - **Swappable HTTP Client:** Integrate seamlessly with your preferred HTTP client (e.g., Fetch, SuperAgent) by replacing the default implementation.
 
 ## Installation
@@ -36,7 +36,7 @@ const query = MarvelQuery.init({
 })
 ```
 
-Now that you’ve set up the library, let’s look at a few quick examples. For a more in-depth explanation of how the library works and what options are available, visit the [Getting Started](docs/getting-started.md) page.
+Now that you’ve set up the library let’s look at a few quick examples. For a more in-depth explanation of how the library works and what options are available, visit the [Getting Started](docs/getting-started.md) page.
 
 ## Example 1: Fetching This Week’s Comics
 
@@ -85,4 +85,4 @@ const blackCatComics = await query(["characters", 1009335, "comics"])
 	.fetch(); // Resolves to an instance populated with comics featuring Felicia Hardy.
 ```
 
-For more information and to get started, please visit the [Getting Started](docs/getting-started.md) guide, or explore the [Table of Contents](table-of-contents.md).
+For more information and to get started, please visit the [Getting Started](docs/getting-started.md) guide or explore the [Table of Contents](table-of-contents.md).

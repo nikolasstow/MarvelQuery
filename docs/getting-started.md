@@ -2,13 +2,13 @@
 
 ## Installation
 
-This package is currently in **release candidate** phase (version 1.0.0-rc.1). All core features are complete, with only documentation finalization remaining before the stable release. To install this release candidate, use the @next tag.
+This package is currently in the **release candidate** phase (version 1.0.0-rc.1). All core features are complete, with only documentation finalization remaining before the stable release. To install this release candidate, use the @next tag.
 
 ```bash npm2yarn
 npm install marvelquery@next
 ```
 
-This library is designed to be flexible with your choice of HTTP client. By default, it uses axios for making requests, but you are free to use any client that fits your needs. If you prefer to use the default setup with axios, you will need to install it as a **peerDependency**:
+This library is designed to be flexible with your choice of HTTP client. By default, it uses Axios to make requests, but you are free to use any client that fits your needs. If you prefer to use the default setup with axios, you will need to install it as a **peerDependency**:
 
 ```shell
 npm install axios
@@ -16,7 +16,7 @@ npm install axios
 
 ## Setup
 
-To get started, initialize the library with your API keys and any desired [configuration options](configuration.md) by calling `MarvelQuery.init()`.
+To begin, initialize the library with your API keys and any desired [configuration options](configuration.md) by calling `MarvelQuery.init()`.
 
 ```ts
 const query = MarvelQuery.init({
@@ -27,7 +27,7 @@ const query = MarvelQuery.init({
   });
 ```
 
-This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments: the [endpoint](endpoints.md) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](marvelquery.md).
+This returns a function, referred to as query throughout the documentation, though you can name it as you prefer. The function accepts two arguments, the [endpoint](endpoints.md) and the [parameters](api-parameters.md), and is responsible for creating an instance of [MarvelQuery](marvelquery.md).
 
 # Creating a Query
 
@@ -45,7 +45,7 @@ The endpoint is a tuple containing 1 to 3 elements that specify the target locat
 // These elements represent data types and determine the type of data returned by the API.
 ```
 
-One of the most common queries involves targeting an entire data type while using parameters to filter the results. When you don’t have an ID for a specific resource or collection, your endpoint will simply be the data type (e.g., “comics” or “characters”). In cases where the endpoint is a single data type, you can omit the tuple brackets for simplicity:
+One of the most common queries involves targeting an entire data type while using parameters to filter the results. When you don’t have an ID for a specific resource or collection, your endpoint will be the data type (e.g., `“comics”` or `“characters”`). In cases where the endpoint is a single data type, you can omit the tuple brackets for simplicity:
 
 ```ts
 const spiders = await query("characters"); // "characters" instead of ["characters"]
@@ -69,7 +69,7 @@ When the endpoint includes a second element that’s an ID, and no third element
 const sheHulk = query(["comics", 409]);
 ```
 
-When you introduce a third element, you’re requesting related items within the specified resource. The third element indicates the type of related data, and determines the available parameters:
+When you introduce a third element, you’re requesting related items within the specified resource. The third element indicates the type of related data and determines the available parameters:
 
 ```ts
 const sheHulkCreators = query(["comics", 409, "creators"], {
@@ -89,7 +89,7 @@ Note: The type of data returned depends on your configuration and the fetch meth
 
 ### `.fetch()`
 
-The .fetch() method returns the MarvelQuery instance itself, with the results populating the .results property. Since it returns the instance, methods can be chained for further querying.
+The .fetch() method returns the MarvelQuery instance, with the results populating the .results property. Since it returns the instance, methods can be chained for further querying.
 
 ```ts
 // Fetch data using .fetch() and ensure you include "await".
@@ -114,7 +114,7 @@ while (!slottsSheHulk.isComplete) {
 
 ### `.fetchSingle()`
 
-The .fetchSingle() method returns a single result item, and you cannot call .fetch() again on it. However, with AutoQuery enabled, you can use methods injected into the result to perform further queries, such as searching for related items.
+The .fetchSingle() method returns a single result item; you cannot call .fetch() again on it. However, with AutoQuery enabled, you can use methods injected into the result to perform further queries, such as searching for related items.
 
 ```ts
 const spiderMan = await query("characters", {

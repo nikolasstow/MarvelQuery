@@ -1,0 +1,16 @@
+.changeset
+.github
+rules
+samples
+scripts
+src
+tests
+utils
+.coderabbit.yaml
+.dockerignore
+.env
+.gitignore
+Dockerfile
+jest.config.js
+tsconfig.json
+tsup.config.ts
