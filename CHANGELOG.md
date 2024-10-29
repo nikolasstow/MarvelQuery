@@ -1,5 +1,11 @@
 # MarvelQuery
 
+## 1.0.0-rc.3
+
+### Patch Changes
+
+- fa19596: Completion of Documentation
+
 ## 1.0.0-rc.2
 
 ### Patch Changes
