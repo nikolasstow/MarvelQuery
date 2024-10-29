@@ -23,8 +23,6 @@
     "node_modules",
     "tests",
     "**/tests/**/*.test.ts",
-    "src/examples.ts",
-    "src/samples.ts",
     "tsup.config.ts"
   ]
 }

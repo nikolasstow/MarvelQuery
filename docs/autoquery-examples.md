@@ -1,6 +1,6 @@
 # AutoQuery Examples
 
-Now that you’re familiar with the methods injected into the result data, let’s explore a few examples.
+Now that you know the methods injected into the result data, let’s explore a few examples.
 
 ## Example 1: Doom
 
@@ -14,7 +14,7 @@ const doom = await query("characters", {
 }).fetchSingle();
 ```
 
-Once we have **Doctor Doom’s** character data, we can access the [List](autoquery-blocks.md#list-properties) of comics via the comics property. This list contains up to 20 summaries of comics, presented in alphabetical order, from the collection of comics featuring Doom. Unfortunately, you cannot change how a [List](autoquery-blocks.md#list-properties) is sorted, but you can use the `query()` method to request the collection and sort the results by setting `orderBy` to `onsaleDate`, which represents the date when the comics went on sale.
+Once we have **Doctor Doom’s** character data, we can access the [List](autoquery-blocks.md#list-properties) of comics via the `comics` property. This list contains up to 20 comic [Summaries](autoquery-blocks.md#summary-properties), presented alphabetically, from the collection of comics featuring Doom. Unfortunately, you cannot change how a [List](autoquery-blocks.md#list-properties) is sorted, but you can use the `query()` method to request the collection and sort the results by setting `orderBy` to `onsaleDate`, which represents the date when the comics went on sale.
 
 ```ts
 const doomComics = await doom.comics
@@ -26,27 +26,23 @@ const doomComics = await doom.comics
 
 ## Example 2: Chaining with `.then()`
 
-In scenarios where you need to handle multiple asynchronous operations in sequence, .then() can provide a clean way to chain them together.
+In this example, we start by querying for the character **Morlun**, a Spider-Man villain. Using `.then()`, we destructure the result to extract Morlun’s comics list, where we then query his collection of comics for the most recent issues by ordering results by `onsaleDate`.
 
 ```ts
-query("characters", {
+const comics = await query("characters", {
   name: "Morlun",
 })
   .fetchSingle()
-  .then(({ comics }) => comics.query({ orderBy: "onsaleDate" }).fetchSingle())
-  .then((mostRecentComic) => {
-    // Once the most recent comic is fetched, we can process it
-    console.log(mostRecentComic);
-  });
+  .then(({ comics }) => 
+		comics.query({ orderBy: "onsaleDate" }).fetchSingle()
+	);
 ```
-
-In this example, we start by querying for the character Morlun, a Spider-Man villain. We’ve opted to use .then() and destructured the result to extract the comics list, where we then query the collection of Morlun comics for the most recent issues.
 
 ## Example 3: New This Month
 
 **Step 1: Query for Comics**
 
-In this example, we want to find new comic series that are launching this month. While the API doesn’t allow sorting **series** by start date (since series results only include start and end **years**), we can filter comics by more precise time periods. The `dateDescriptor` parameter works with relative time periods, meaning values like `thisMonth` are always relative to the current month, and next month the results will change accordingly. Additionally, we can use the `issueNumber` parameter to limit the results to first issues, which is usually the first issue of a series.
+In this example, we want to find new comic series that are launching this month. While the API doesn’t allow sorting **series** by start date (since series results only include start and end **years**), we can filter comics by more precise time periods. The `dateDescriptor` parameter works in relative time spans, meaning values like `lastWeek` are always relative to the current week, and next week the results will change accordingly. Additionally, we can use the `issueNumber` parameter to limit the results to the first issue, usually the first issue of a series.
 
 ```ts
 const comics = await query("comics", {
@@ -57,7 +53,7 @@ const comics = await query("comics", {
 
 **Step 2: Fetch Series Details Sequentially**
 
-After retrieving the list of comics, the next step is to gather details about the series each comic belongs to. While this requires a second query for each comic, we can take advantage of AutoQuery’s injected methods to make the process seamless. To avoid hitting API rate limits, we’ll fetch the series data one at a time.
+After retrieving this [List](autoquery-blocks.md#list-properties) of comics, the next step is to gather details about the series each comic belongs to. While this requires a second query for each comic, we can use **AutoQuery’s** injected methods to make the process seamless. We’ll fetch the series data one at a time to avoid hitting API rate limits.
 
 ```ts
 const seriesDetails: Series[] = [];

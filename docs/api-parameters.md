@@ -128,7 +128,7 @@
 
 ### Formats
 
-The `Format` type categorizes various forms of comic publications, ranging from traditional print editions like comics, magazines, and graphic novels, to modern digital formats such as digital comics and infinite comics. Available formats include:
+The `Format` type categorizes various forms of comic publications, ranging from traditional print editions like `comics`, `magazines`, and `graphic novels`, to modern digital formats such as `digital comics` and `infinite comics`. Available formats include:
 - `comic`
 - `magazine`
 - `trade paperback`
@@ -140,10 +140,10 @@ The `Format` type categorizes various forms of comic publications, ranging from 
 
 ### `IDList`
 
-The `IDList` type represents a list of Marvel API item IDs. It can be a single number or an array of numbers, which will be transformed into a comma-separated string for API compatibility. Generally, the IDs should match the type suggested by the property’s name. For example, if a property of this type is named ‘comics’, the IDs should be comic IDs. This does not apply to all uses of this type, so if unsure, please reference the documentation for the specific property.
+The `IDList` type represents a list of Marvel API item IDs. It can be a single number or an array of numbers, which will be transformed into a comma-separated string for API compatibility. Generally, the IDs should match the type suggested by the property’s name. For example, if a property of this type is named `comics`, the values should be comic IDs. This does not apply to all uses of this type, so if unsure, please reference the documentation for the specific property.
 
 - **Single ID:** A number representing a single item ID.
-- **Multiple IDs:** An array of numbers representing multiple item IDs, which will be joined into a comma-separated string.
+- **Multiple IDs:** An array of numbers representing various item IDs.
 
 ### Dates
 
@@ -163,15 +163,14 @@ The following date formats are accepted:
 
 ```ts
 /**
- * ParamsType is a utility type designed to determine the expected parameters 
- * for a given API endpoint. It uses conditional types to map an endpoint to its
- * corresponding parameters, providing type safety and clarity when constructing 
- * API requests.
+ * ParamsType is a utility type that determines the expected parameters for a given API
+ * endpoint. It uses conditional types to map an endpoint to its corresponding
+ * parameters, providing type safety and clarity when constructing API requests.
  */
 type Params<E extends Endpoint> = 
   ParameterMap[E extends Required<Endpoint> // Does the Endpoint have a third element?
     ? E[2] // If it does, the third element is the data type
-    : E extends [EndpointType, number] // Is there a second element and it's a number?
+    : E extends [EndpointType, number] // Is there a second element and is it a number?
     ? never // Then it's a resource endpoint and has no parameters
     : E[0]]; // If neither of the above, the first element is the data type
 ```

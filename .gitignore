@@ -4,3 +4,4 @@ lib
 tests/QueryBuilderTest.ts
 logs
 tests/data-backup
+samples
