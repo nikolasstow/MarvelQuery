@@ -496,6 +496,7 @@ export default MarvelQuery;
 export * from "./models/types/data-types";
 export * from "./models/types/param-types";
 export * from "./models/types/config-types";
+export * as StandardTypes from "./models/types/standard";
 export { Endpoint, EndpointType } from "./models/types/endpoint-types";
 
 export const TYPES: Array<EndpointType> = [
